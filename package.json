@@ -1,0 +1,23 @@
+{
+  "name": "envelope",
+  "version": "1.0.0",
+  "description": "Budgeting using the envelope method.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/dgrundel/envelope.git"
+  },
+  "keywords": [
+    "budget",
+    "envelope"
+  ],
+  "author": "Daniel Grundel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dgrundel/envelope/issues"
+  },
+  "homepage": "https://github.com/dgrundel/envelope#readme"
+}
