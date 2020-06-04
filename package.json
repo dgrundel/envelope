@@ -4,6 +4,7 @@
   "description": "Budgeting using the envelope method.",
   "main": "index.js",
   "scripts": {
+    "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/dgrundel/envelope/issues"
   },
-  "homepage": "https://github.com/dgrundel/envelope#readme"
+  "homepage": "https://github.com/dgrundel/envelope#readme",
+  "devDependencies": {
+    "electron": "^9.0.2"
+  }
 }
