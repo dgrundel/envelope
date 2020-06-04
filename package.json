@@ -2,9 +2,10 @@
   "name": "envelope",
   "version": "1.0.0",
   "description": "Budgeting using the envelope method.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "electron .",
+    "build": "gulp",
+    "start": "npm run build && electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,6 +23,13 @@
   },
   "homepage": "https://github.com/dgrundel/envelope#readme",
   "devDependencies": {
-    "electron": "^9.0.2"
+    "electron": "^9.0.2",
+    "gulp": "^4.0.2",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "@types/electron": "^1.6.10",
+    "@types/node": "~12"
   }
 }

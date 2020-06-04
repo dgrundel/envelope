@@ -1,0 +1,9 @@
+{
+  "files": ["src/index.ts"],
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "target": "es6"
+  }
+}
