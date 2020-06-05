@@ -31,6 +31,7 @@
   "dependencies": {
     "@types/electron": "^1.6.10",
     "@types/electron-window-state": "^2.0.34",
+    "@types/nedb": "^1.8.9",
     "@types/node": "~12",
     "electron-window-state": "^5.0.3",
     "nedb": "^1.8.0"

@@ -1,8 +1,15 @@
 import * as path from 'path';
 import { app, BrowserWindow } from 'electron';
 import * as windowState from 'electron-window-state';
+import * as Datastore from 'nedb';
 
-function createWindow () {
+const db = new Datastore({
+  filename: path.join(app.getPath('userData'), 'envelope.db'),
+  autoload: true,
+  corruptAlertThreshold: 0
+});
+
+const createWindow = () => {
   let mainWindowState = windowState({
     defaultWidth: 1100,
     defaultHeight: 1000
@@ -26,7 +33,7 @@ function createWindow () {
 
   // Open the DevTools.
   win.webContents.openDevTools();
-}
+};
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -40,7 +47,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
-})
+});
 
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
@@ -48,4 +55,4 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
-})
+});
