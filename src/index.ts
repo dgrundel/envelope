@@ -1,15 +1,25 @@
 import * as path from 'path';
 import { app, BrowserWindow } from 'electron';
+import * as windowState from 'electron-window-state';
 
 function createWindow () {
+  let mainWindowState = windowState({
+    defaultWidth: 1100,
+    defaultHeight: 1000
+  });
+
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
     webPreferences: {
       nodeIntegration: true
     }
   });
+
+  mainWindowState.manage(win);
 
   // and load the index.html of the app.
   win.loadFile(path.resolve(__dirname, 'index.html'));
