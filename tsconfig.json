@@ -1,9 +1,23 @@
 {
-  "files": ["src/main.ts"],
-  "include": ["src/**/*"],
   "compilerOptions": {
-    "noImplicitAny": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@public/*": ["public/*"],
+      "@main/*": ["src/main/*"],
+      "@models/*": ["src/models/*"],
+      "@renderer*/": ["src/renderer/*"],
+      "@utils/*": ["src/utils/*"]
+    },
     "module": "commonjs",
-    "target": "es6"
-  }
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "target": "esnext"
+  },
+  "exclude": ["node_modules"]
 }
