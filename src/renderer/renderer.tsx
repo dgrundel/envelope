@@ -1,16 +1,10 @@
-/**
- * React renderer.
- */
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-// Import the styles here to process them with webpack
-import '@public/style.css';
+import '@public/style.scss';
+import { App } from './components/App';
 
 ReactDOM.render(
-  <div className='app'>
-    <h4>Welcome to Envelope</h4>
-    <p>Hello</p>
-  </div>,
-  document.getElementById('app')
+  <App/>,
+  document.getElementById('root')
 );

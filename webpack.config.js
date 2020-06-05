@@ -35,8 +35,12 @@ const commonConfig = {
         loader: 'ts-loader',
       },
       {
-        test: /\.(scss|css)$/,
-        use: ['style-loader', 'css-loader'],
+        test: /\.s[ac]ss$/i,
+        use: [
+          'style-loader',
+          'css-loader',
+          'sass-loader'
+        ],
       },
       {
         test: /\.(jpg|png|svg|ico|icns)$/,
