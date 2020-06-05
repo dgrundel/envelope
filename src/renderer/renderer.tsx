@@ -9,7 +9,7 @@ import '@public/style.css';
 
 ReactDOM.render(
   <div className='app'>
-    <h4>Welcome to React, Electron and Typescript</h4>
+    <h4>Welcome to Envelope</h4>
     <p>Hello</p>
   </div>,
   document.getElementById('app')

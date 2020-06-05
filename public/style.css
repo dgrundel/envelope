@@ -1,3 +1,8 @@
-.app {
-  color: grey;
+html, body {
+  background-color: rgb(240, 240, 240);
+  color: #222;
+  font-family: sans-serif;
+  font-size: 15px;
+  margin: 0;
+  padding: 0;
 }

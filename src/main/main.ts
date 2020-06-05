@@ -13,7 +13,7 @@ function createWindow(): void {
         height: 600,
         width: 800,
         webPreferences: {
-            webSecurity: false,
+            nodeIntegration: true,
             devTools: process.env.NODE_ENV === 'production' ? false : true
         }
     });
