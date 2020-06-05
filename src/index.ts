@@ -29,8 +29,11 @@ const createWindow = () => {
   mainWindowState.manage(win);
 
   // and load the index.html of the app.
-  win.loadFile(path.resolve(__dirname, 'html', 'index.html'));
-
+  win.loadFile(path.resolve(__dirname, 'main', 'index.html'))
+    .then(() => {
+      win.webContents.send('initial-data', { ok: true });
+    });
+  
   // Open the DevTools.
   win.webContents.openDevTools();
 };

@@ -1,15 +1,19 @@
 var gulp = require("gulp");
+var del = require("del");
 var ts = require("gulp-typescript");
 var tsProject = ts.createProject("tsconfig.json");
+
+gulp.task('clean', () => del('dist/**', {force:true}));
 
 gulp.task('ts', () => tsProject
     .src()
     .pipe(tsProject())
     .js.pipe(gulp.dest('dist')));
 
-gulp.task('move', () => gulp
+gulp.task('copy', () => gulp
   .src([
-    './src/html/**/*.*',
+    './src/**/*.*',
+    '!./src/**/*.ts'
   ], { 
     // the base option sets the relative root for the set of files,
     // preserving the folder structure
@@ -17,4 +21,4 @@ gulp.task('move', () => gulp
   })
   .pipe(gulp.dest('dist')));
 
-gulp.task('default', gulp.series('ts', 'move'));
+gulp.task('default', gulp.series('clean', gulp.parallel('ts', 'copy')));

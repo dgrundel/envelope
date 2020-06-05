@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "gulp",
+    "clean": "rm -rf dist && mkdir dist",
     "start": "npm run build && electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,6 +24,7 @@
   },
   "homepage": "https://github.com/dgrundel/envelope#readme",
   "devDependencies": {
+    "del": "^5.1.0",
     "electron": "^9.0.2",
     "gulp": "^4.0.2",
     "gulp-typescript": "^6.0.0-alpha.1",
