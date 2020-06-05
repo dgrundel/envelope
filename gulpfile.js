@@ -9,7 +9,7 @@ gulp.task('ts', () => tsProject
 
 gulp.task('move', () => gulp
   .src([
-    './src/**/*.html',
+    './src/html/**/*.*',
   ], { 
     // the base option sets the relative root for the set of files,
     // preserving the folder structure
