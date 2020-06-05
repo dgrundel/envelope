@@ -29,7 +29,7 @@ const createWindow = () => {
   mainWindowState.manage(win);
 
   // and load the index.html of the app.
-  win.loadFile(path.resolve(__dirname, 'main', 'index.html'))
+  win.loadFile(path.resolve(__dirname, 'renderer', 'home', 'index.html'))
     .then(() => {
       win.webContents.send('initial-data', { ok: true });
     });

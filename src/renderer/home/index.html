@@ -10,13 +10,6 @@
   <body>
     <h1 id="status">Waiting</h1>
 
-    <script>
-      const status = document.getElementById('status');
-      var ipcRenderer = require('electron').ipcRenderer;
-      ipcRenderer.on('initial-data', function (event,store) {
-          console.log(event, store);
-          status.textContent = store.ok ? 'ok' : 'uh oh';
-      });
-    </script>
+    <script src="home.js"></script>
   </body>
 </html>

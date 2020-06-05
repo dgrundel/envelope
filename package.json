@@ -2,7 +2,7 @@
   "name": "envelope",
   "version": "1.0.0",
   "description": "Budgeting using the envelope method.",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
   "scripts": {
     "build": "gulp",
     "clean": "rm -rf dist && mkdir dist",

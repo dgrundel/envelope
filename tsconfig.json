@@ -1,5 +1,5 @@
 {
-  "files": ["src/ts/index.ts"],
+  "files": ["src/main.ts"],
   "include": ["src/**/*"],
   "compilerOptions": {
     "noImplicitAny": true,
