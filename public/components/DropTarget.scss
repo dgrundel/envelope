@@ -3,13 +3,20 @@
 .drop-target {
 
   .drop-target-default-content {
+    @include rounded();
     padding: 1rem;
     background-color: #3ac47d;
     color: #fff;
-    @include rounded();
   }
 
   &.drop-target-active .drop-target-default-content {
     opacity: 0.5;
+  }
+
+  .drop-target-default-icon {
+    @include big-circle-icon();
+    background-color: #ffffff;
+    color: #3ac47d;
+    margin-right: .25em;
   }
 }

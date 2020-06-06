@@ -8,3 +8,10 @@
 @mixin rounded {
   border-radius: .25rem;
 }
+
+@mixin big-circle-icon {
+  font-size: 2rem;
+  padding: .5rem;
+  border-radius: 50%;
+  vertical-align: middle;
+}

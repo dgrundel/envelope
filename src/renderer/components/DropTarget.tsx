@@ -34,7 +34,10 @@ export class DropTarget extends React.Component<DropTargetProps, DropTargetState
     }
 
     renderDefaultContent() {
-        return <p className="drop-target-default-content">Drop files here.</p>
+        return <p className="drop-target-default-content">
+            <i className="pe-7s-upload drop-target-default-icon"></i>
+            Drop files here.
+        </p>
     }
 
     dragOver(e: React.DragEvent) {
