@@ -4,14 +4,22 @@
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
+import * as windowStateKeeper from 'electron-window-state';
 
 let mainWindow: Electron.BrowserWindow | null;
 
 function createWindow(): void {
+    const mainWindowState = windowStateKeeper({
+        defaultWidth: 1000,
+        defaultHeight: 800
+    });
+
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        height: 600,
-        width: 800,
+        x: mainWindowState.x,
+        y: mainWindowState.y,
+        width: mainWindowState.width,
+        height: mainWindowState.height,
         webPreferences: {
             nodeIntegration: true,
             devTools: process.env.NODE_ENV === 'production' ? false : true
@@ -34,6 +42,8 @@ function createWindow(): void {
         // when you should delete the corresponding element.
         mainWindow = null;
     });
+
+    mainWindowState.manage(mainWindow);
 }
 
 // This method will be called when Electron has finished
