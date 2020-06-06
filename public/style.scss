@@ -1,5 +1,8 @@
 @import './reset.css';
 
+$notosans-fontface-path: './fonts';
+@import "notosans-fontface/scss/notosans-fontface-allweight.scss";
+
 @mixin shadow {
   box-shadow: 0 0.46875rem 2.1875rem rgba(4,9,20,0.03),
     0 0.9375rem 1.40625rem rgba(4,9,20,0.03),
@@ -13,7 +16,8 @@ $sidebar-width: 220px;
 html, body {
   background-color: #f1f4f6;
   color: #495057;
-  font-family: sans-serif;
+  font-family: "Noto Sans", sans-serif;
+  font-weight: 300;
   font-size: 15px;
   margin: 0;
   padding: 0;
@@ -36,6 +40,7 @@ html, body {
   background-color: #fafbfc;
   line-height: $header-height;
   padding: 0 1rem;
+  font-weight: 400;
   @include shadow();
 }
 
