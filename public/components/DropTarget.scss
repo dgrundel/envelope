@@ -1,0 +1,15 @@
+@import '../mixins.scss';
+
+.drop-target {
+
+  .drop-target-default-content {
+    padding: 1rem;
+    background-color: #3ac47d;
+    color: #fff;
+    @include rounded();
+  }
+
+  &.drop-target-active .drop-target-default-content {
+    opacity: 0.5;
+  }
+}

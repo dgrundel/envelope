@@ -1,7 +1,7 @@
 import * as React from "react";
-import * as stream from 'stream';
 import * as csv from 'neat-csv';
 import { Box } from "./Box";
+import { DropTarget } from "./DropTarget";
 
 export interface ImportProps {
 }
@@ -17,17 +17,12 @@ export class Import extends React.Component<ImportProps, ImportState> {
 
         this.state = {};
 
-        this.drop = this.drop.bind(this);
+        this.dtHandler = this.dtHandler.bind(this);
     }
 
     render() {
         return <Box heading="Import">
-            <div className="drop-target" 
-                onDragEnter={e => this.dragEnter(e)}
-                onDragOver={e => this.dragOver(e)}
-                onDrop={e => this.drop(e)}>
-                Let's do this!
-            </div>
+            <DropTarget handler={this.dtHandler}/>
 
             {this.renderRows()}
         </Box>
@@ -52,26 +47,11 @@ export class Import extends React.Component<ImportProps, ImportState> {
         }
     }
 
-    dragOver(e: React.DragEvent) {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log('drag over');
-    }
-
-    dragEnter(e: React.DragEvent) {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log('drag enter');
-    }
-
-    drop(e: React.DragEvent) {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log('dropped', e);
-
+    dtHandler(dt: DataTransfer) {
         const setState = this.setState.bind(this);
 
-        var dt = e.dataTransfer;
+        console.log(dt);
+
         var files = dt && dt.files || [];
         var length = files.length;
         for (var i = 0; i < length; i++) {

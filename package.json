@@ -28,8 +28,15 @@
     "buildVersion": "1.0.0"
   },
   "dependencies": {
+    "@types/electron": "^1.6.10",
+    "@types/electron-window-state": "^2.0.34",
+    "@types/mocha": "^5.2.7",
+    "@types/nedb": "^1.8.9",
     "@types/node": "~12",
-    "@types/react": "^16.9.13",
+    "@types/react": "^16.9.35",
+    "@types/react-dom": "^16.9.8",
+    "@types/react-router": "^5.1.7",
+    "@types/react-router-dom": "^5.1.5",
     "csv-parser": "^2.3.3",
     "electron-window-state": "^5.0.3",
     "neat-csv": "^5.2.0",
@@ -39,13 +46,6 @@
     "react-dom": "^16.13.1"
   },
   "devDependencies": {
-    "@types/electron": "^1.6.10",
-    "@types/electron-window-state": "^2.0.34",
-    "@types/mocha": "^5.2.7",
-    "@types/nedb": "^1.8.9",
-    "@types/react-dom": "^16.9.8",
-    "@types/react-router": "^5.1.7",
-    "@types/react-router-dom": "^5.1.5",
     "acorn": "^6.4.1",
     "ajv": "^6.10.2",
     "copy-pkg-json-webpack-plugin": "0.0.39",
