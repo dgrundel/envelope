@@ -1,0 +1,16 @@
+@import '../mixins.scss';
+
+.box {
+  background-color: #fff;
+  margin: 1.5rem;
+  padding: 1rem;
+  border-radius: .25rem;
+  @include shadow();
+}
+
+.box-heading {
+  font-weight: 400;
+  margin: 0 -1rem 1rem;
+  padding: 0 1rem 1rem;
+  border-bottom: .25px solid #e5e5e5;
+}

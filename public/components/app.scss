@@ -1,0 +1,27 @@
+@import '../mixins.scss';
+@import '../config.scss';
+
+#app {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  display: grid;
+  grid-template-rows: $header-height 1fr;
+  grid-template-columns: $sidebar-width 1fr;
+}
+
+#header {
+  grid-column: 1/span 2;
+  background-color: #fbfbfb;
+  line-height: $header-height;
+  padding: 0 1rem;
+  font-weight: 400;
+  @include shadow();
+}
+
+#sidebar {
+  background-image: linear-gradient(to bottom, #29c4b2, #abe04f);  
+}
