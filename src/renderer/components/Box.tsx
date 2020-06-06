@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import '@public/components/box.scss';
+import '@public/components/Box.scss';
 
 export interface BoxProps {
     heading?: string;

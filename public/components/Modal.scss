@@ -1,0 +1,53 @@
+@import '../mixins.scss';
+
+$modal-horizontal-padding: 1rem;
+$modal-vertical-padding: 1rem;
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0,0,0,0.8);
+  text-align: center;
+}
+
+.modal-content {
+  display: inline-block;
+  min-width: 30vw;
+  text-align: left;
+  margin: 3rem 1.5rem 1.5rem;
+  padding: $modal-vertical-padding $modal-horizontal-padding;
+  background-color: #fff;
+  position: relative;
+  @include rounded();
+  @include shadow();
+}
+
+.modal-heading {
+  font-weight: 400;
+  margin: 0 (-1 * $modal-horizontal-padding) $modal-vertical-padding;
+  padding: 0 $modal-horizontal-padding $modal-vertical-padding;
+  border-bottom: .25px solid #e5e5e5;
+}
+
+.modal-close-icon {
+  $icon-size: 2rem;
+  $heading-height: 3rem;
+  $spacing: ($heading-height - $icon-size) / 2;
+
+  font-size: $icon-size;
+  line-height: $icon-size;
+  position: absolute;
+  right: $spacing;
+  top: $spacing;
+  cursor: pointer;
+}
+
+.modal-footer {
+  margin: $modal-vertical-padding (-1 * $modal-horizontal-padding) 0;
+  padding: $modal-vertical-padding $modal-horizontal-padding 0;
+  border-top: .25px solid #e5e5e5;
+  text-align: right;
+}
