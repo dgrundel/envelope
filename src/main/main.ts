@@ -2,13 +2,6 @@ import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import * as windowStateKeeper from 'electron-window-state';
-import * as Datastore from 'nedb';
-
-const db = new Datastore({
-  filename: path.join(app.getPath('userData'), 'envelope.db'),
-  autoload: true,
-  corruptAlertThreshold: 0
-});
 
 function createWindow(): void {
     const mainWindowState = windowStateKeeper({
