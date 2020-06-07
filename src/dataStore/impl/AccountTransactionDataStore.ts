@@ -1,5 +1,4 @@
-import { BaseDataStoreRecord, BaseDataStore } from "../BaseDataStore";
-import { BaseDataStoreClient } from "../BaseDataStoreClient";
+import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
 
 const name = 'account-transactions';
 
@@ -10,14 +9,22 @@ export interface AccountTransaction extends BaseDataStoreRecord {
     imported: Record<string, string>;
 }
 
-export class AccountTransactionDataStore extends BaseDataStore<AccountTransaction> {
+export class AccountTransactionDataStore extends DataStore<AccountTransaction> {
     constructor() {
         super(name);
     }
 }
 
-export class AccountTransactionDataStoreClient extends BaseDataStoreClient<AccountTransaction> {
+export class AccountTransactionDataStoreClient extends DataStoreClient<AccountTransaction> {
     constructor() {
         super(name);
+    }
+
+    addTransaction(transaction: AccountTransaction) {
+        return this.insert(transaction);
+    }
+
+    getTransactions(query: any = {}) {
+        return this.find(query);
     }
 }

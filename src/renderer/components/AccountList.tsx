@@ -27,7 +27,7 @@ export class AccountList extends React.Component<AccountListProps, AccountListSt
             dataStore
         };
 
-        dataStore.find().then(accounts => {
+        dataStore.getAccounts().then(accounts => {
             this.setState({
                 bankAccounts: accounts
             });

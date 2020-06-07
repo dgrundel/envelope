@@ -1,5 +1,4 @@
-import { BaseDataStoreRecord, BaseDataStore } from "../BaseDataStore";
-import { BaseDataStoreClient } from "../BaseDataStoreClient";
+import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
 
 const name = 'bank-accounts';
 
@@ -10,7 +9,13 @@ export interface BankAccount extends BaseDataStoreRecord {
     name: string;
 }
 
-export class BankAccountDataStore extends BaseDataStore<BankAccount> {
+export class BankAccountDataStore extends DataStore<BankAccount> {
+    constructor() {
+        super(name);
+    }
+}
+
+export class BankAccountDataStoreClient extends DataStoreClient<BankAccount> {
     constructor() {
         super(name);
     }
@@ -24,11 +29,5 @@ export class BankAccountDataStore extends BaseDataStore<BankAccount> {
 
     getAccounts(query: any = {}) {
         return this.find(query);
-    }
-}
-
-export class BankAccountDataStoreClient extends BaseDataStoreClient<BankAccount> {
-    constructor() {
-        super(name);
     }
 }
