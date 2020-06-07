@@ -16,8 +16,8 @@ export interface BaseDataStoreRecord {
 };
 
 export class BaseDataStore<T extends BaseDataStoreRecord> {
-    readonly name: string;
-    readonly db: Nedb<T>;
+    private readonly name: string;
+    private readonly db: Nedb<T>;
 
     constructor(name: string) {
         if (dataStores.hasOwnProperty(name)) {

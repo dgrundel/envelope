@@ -1,5 +1,5 @@
-import { BaseDataStoreRecord, BaseDataStore } from "./BaseDataStore";
-import { DataStoreClient } from "./DataStoreClient";
+import { BaseDataStoreRecord, BaseDataStore } from "../BaseDataStore";
+import { BaseDataStoreClient } from "../BaseDataStoreClient";
 
 const name = 'bank-accounts';
 
@@ -27,4 +27,8 @@ export class BankAccountDataStore extends BaseDataStore<BankAccount> {
     }
 }
 
-export const getDataStoreClient = () => new DataStoreClient(name) as DataStoreClient<BankAccount>;
+export class BankAccountDataStoreClient extends BaseDataStoreClient<BankAccount> {
+    constructor() {
+        super(name);
+    }
+}

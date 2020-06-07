@@ -2,8 +2,8 @@ import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import * as windowStateKeeper from 'electron-window-state';
-import { BankAccountDataStore } from '@/dataStore/BankAccounts';
-import { AccountTransactionDataStore } from '@/dataStore/AccountTransactions';
+import { BankAccountDataStore } from '@/dataStore/impl/BankAccountDataStore';
+import { AccountTransactionDataStore } from '@/dataStore/impl/AccountTransactionDataStore';
 
 const bankAccounts = new BankAccountDataStore();
 const accountTransactions = new AccountTransactionDataStore();
