@@ -29,18 +29,17 @@ export class Import extends React.Component<ImportProps, ImportState> {
     }
 
     renderRows() {
-        console.log('render rows', this.state);
         if (this.state.rows && this.state.rows.length > 0) {
             const first = this.state.rows[0];
             return <table>
                 <thead>
                     <tr>
-                        {Object.keys(first).map(key => <td>{key}</td>)}
+                        {Object.keys(first).map(key => <td key={key}>{key}</td>)}
                     </tr>
                 </thead>
                 <tbody>
                     {this.state.rows.map(row => <tr>
-                        {Object.keys(row).map(key => <td title={key}>{row[key]}</td>)}
+                        {Object.keys(row).map(key => <td title={key} key={key}>{row[key]}</td>)}
                     </tr>)}
                 </tbody>
             </table>;
@@ -49,8 +48,6 @@ export class Import extends React.Component<ImportProps, ImportState> {
 
     dtHandler(dt: DataTransfer) {
         const setState = this.setState.bind(this);
-
-        console.log(dt);
 
         var files = dt && dt.files || [];
         var length = files.length;

@@ -5,6 +5,7 @@ import { Header } from "./Header";
 import '@public/components/App.scss';
 import { Import } from "./Import";
 import { Modal, ModalProps } from "./Modal";
+import { AccountList } from "./AccountList";
 
 export interface AppProps {
 }
@@ -36,6 +37,7 @@ export class App extends React.Component<AppProps, AppState> {
                     <h1>Hello, world!</h1>
                 </Box>
                 <Import/>
+                <AccountList/>
                 {this.state.modal || ''}
             </div>
         </div>;

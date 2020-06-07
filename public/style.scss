@@ -1,5 +1,6 @@
 @import './reset.css';
 @import './mixins.scss';
+@import './config.scss';
 
 $font-path: './fonts';
 
@@ -10,8 +11,8 @@ $pe-7s-font-path: $font-path;
 @import "node_modules/pe7-icon/dist/scss/pe-icon-7-stroke";
 
 html, body {
-  background-color: #f1f4f6;
-  color: #495057;
+  background-color: $color-off-white;
+  color: $color-dark-gray;
   font-family: "Noto Sans", sans-serif;
   font-weight: 300;
   font-size: 15px;
@@ -34,7 +35,7 @@ table {
 th, td {
   text-align: left;
   padding: .5rem;
-  border: .5px solid #d3d3d3;
+  border: .5px solid $color-lt-gray;
 }
 
 th {

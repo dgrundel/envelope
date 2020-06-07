@@ -1,4 +1,4 @@
-import { app, Data } from 'electron';
+import { app } from 'electron';
 import * as events from 'events';
 import * as path from 'path';
 import * as Nedb from 'nedb';
@@ -28,7 +28,7 @@ export class BaseDataStore<T extends BaseDataStoreRecord> {
         });
     }
 
-    insert(item: T) {
+    insert(item: T): Promise<T> {
         return new Promise((resolve, reject) => {
             this.db.insert(item, (err: Error, document: T) => {
                 if (err) {
@@ -40,7 +40,7 @@ export class BaseDataStore<T extends BaseDataStoreRecord> {
         });
     }
 
-    find(query: any) {
+    find(query: any = {}): Promise<T[]> {
         return new Promise((resolve, reject) => {
             this.db.find(query, (err: Error, documents: T[]) => {
                 if (err) {

@@ -37,7 +37,7 @@ export class Modal extends React.Component<ModalProps, {}> {
 
         if (buttons) {
             return <div className="modal-footer">
-                {Object.keys(buttons).map(text => <div className="btn" onClick={() => buttons[text]()}>
+                {Object.keys(buttons).map(text => <div key={text} className="btn" onClick={() => buttons[text]()}>
                     {text}
                 </div>)}
             </div>
