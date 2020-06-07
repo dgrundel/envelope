@@ -1,9 +1,15 @@
-import { app } from 'electron';
-import * as events from 'events';
+import { app, ipcMain } from 'electron';
 import * as path from 'path';
 import * as Nedb from 'nedb';
 
 const dataStores: Record<string, BaseDataStore<any>> = {};
+
+export enum DataStoreEvent {
+    Insert = 'datastore-insert',
+    Find = 'datastore-find'
+}
+
+export const buildEventName = (event: DataStoreEvent, name: string) => `${event}:${name}`;
 
 export interface BaseDataStoreRecord {
     _id?: string;
@@ -11,7 +17,6 @@ export interface BaseDataStoreRecord {
 
 export class BaseDataStore<T extends BaseDataStoreRecord> {
     readonly name: string;
-    readonly emitter: events.EventEmitter;
     readonly db: Nedb<T>;
 
     constructor(name: string) {
@@ -20,11 +25,17 @@ export class BaseDataStore<T extends BaseDataStoreRecord> {
         }
 
         this.name = name;
-        this.emitter = new events.EventEmitter();
         this.db = new Nedb({
             filename: path.join(app.getPath('userData'), `${name}.db`),
             autoload: true,
             corruptAlertThreshold: 0
+        });
+
+        ipcMain.handle(buildEventName(DataStoreEvent.Insert, this.name), async (event, item: T) => {
+            return this.insert(item);
+        });
+        ipcMain.handle(buildEventName(DataStoreEvent.Find, this.name), async (event, query?: any) => {
+            return this.find(query);
         });
     }
 

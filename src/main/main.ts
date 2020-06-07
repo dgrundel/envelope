@@ -2,6 +2,11 @@ import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import * as windowStateKeeper from 'electron-window-state';
+import { BankAccountDataStore } from '@/dataStore/BankAccounts';
+import { AccountTransactionDataStore } from '@/dataStore/AccountTransactions';
+
+const bankAccounts = new BankAccountDataStore();
+const accountTransactions = new AccountTransactionDataStore();
 
 function createWindow(): void {
     const mainWindowState = windowStateKeeper({
@@ -17,6 +22,7 @@ function createWindow(): void {
         height: mainWindowState.height,
         webPreferences: {
             nodeIntegration: true,
+            enableRemoteModule: true,
             devTools: process.env.NODE_ENV === 'production' ? false : true
         }
     });

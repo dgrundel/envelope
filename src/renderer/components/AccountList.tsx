@@ -1,6 +1,8 @@
+import { remote } from 'electron';
 import * as React from "react";
-import { BankAccount, bankAccounts } from "@/main/dataStores/BankAccounts";
 import { Box } from "./Box";
+import { BankAccount, BankAccountType, getDataStoreClient } from '@/dataStore/BankAccounts';
+import { DataStoreClient } from '@/dataStore/DataStoreClient';
 
 // import '@public/components/AccountList.scss';
 
@@ -9,6 +11,9 @@ export interface AccountListProps {
 
 export interface AccountListState {
     bankAccounts: BankAccount[];
+    dataStore: DataStoreClient<BankAccount>;
+    newAccountName?: string;
+    newAccountType?: BankAccountType;
 }
 
 export class AccountList extends React.Component<AccountListProps, AccountListState> {
@@ -16,9 +21,19 @@ export class AccountList extends React.Component<AccountListProps, AccountListSt
     constructor(props: AccountListProps) {
         super(props);
 
+        const dataStore = getDataStoreClient();
+        
         this.state = {
-            bankAccounts: []
+            bankAccounts: [],
+            dataStore
         };
+
+        dataStore.find().then(accounts => {
+            this.setState({
+                bankAccounts: accounts
+            });
+        });
+  
     }
 
     render() {

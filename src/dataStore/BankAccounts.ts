@@ -1,4 +1,7 @@
 import { BaseDataStoreRecord, BaseDataStore } from "./BaseDataStore";
+import { DataStoreClient } from "./DataStoreClient";
+
+const name = 'bank-accounts';
 
 export type BankAccountType = 'bank' | 'credit-card';
 
@@ -7,9 +10,9 @@ export interface BankAccount extends BaseDataStoreRecord {
     name: string;
 }
 
-class BankAccountDataStore extends BaseDataStore<BankAccount> {
+export class BankAccountDataStore extends BaseDataStore<BankAccount> {
     constructor() {
-        super('accounts');
+        super(name);
     }
 
     addAccount(type: BankAccountType, name: string) {
@@ -24,4 +27,4 @@ class BankAccountDataStore extends BaseDataStore<BankAccount> {
     }
 }
 
-export const bankAccounts = new BankAccountDataStore();
+export const getDataStoreClient = () => new DataStoreClient(name) as DataStoreClient<BankAccount>;
