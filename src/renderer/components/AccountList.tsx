@@ -45,7 +45,7 @@ export class AccountList extends React.Component<AccountListProps, AccountListSt
         if (this.state.bankAccounts.length > 0) {
             return <table>
                 <tbody>
-                    {this.state.bankAccounts.map(bankAccount => <tr>
+                    {this.state.bankAccounts.map(bankAccount => <tr key={bankAccount._id}>
                         <td>{bankAccount.name}</td>
                         <td>{bankAccount.type}</td>
                     </tr>)}
