@@ -58,9 +58,9 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         });
     }
 
-    protected triggerChanged() {
+    protected triggerChanged(source: DataStoreEvent) {
         BrowserWindow.getAllWindows()
-            .forEach(win => win.webContents.send(buildEventName(DataStoreEvent.Changed, this.name)));
+            .forEach(win => win.webContents.send(buildEventName(DataStoreEvent.Changed, this.name), source));
     }
 
     protected insert(item: T): Promise<T> {
@@ -69,7 +69,7 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
                 if (err) {
                     reject(err);
                 } else {
-                    this.triggerChanged();
+                    this.triggerChanged(DataStoreEvent.Insert);
                     resolve(document);
                 }
             });
@@ -94,8 +94,10 @@ export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStor
         return ipcRenderer.invoke(buildEventName(event, this.name), ...args);
     }
 
-    onChange(callback: () => void) {
-        ipcRenderer.on(buildEventName(DataStoreEvent.Changed, this.name), callback);
+    onChange(callback: (source: DataStoreEvent) => void) {
+        ipcRenderer.on(buildEventName(DataStoreEvent.Changed, this.name), (e, eventSource: DataStoreEvent) => {
+            callback(eventSource);
+        });
     }
 
     protected insert(item: T): Promise<T> {
