@@ -3,7 +3,7 @@ import { Box } from "./Box";
 
 import '@public/components/App.scss';
 import { ImportDropTarget } from "./ImportDropTarget";
-import { Modal, ModalProps } from "./Modal";
+import { Modal, ModalProps, ModalApi } from "./Modal";
 import { AccountList } from "./AccountList";
 import { Form, FormField, FormFieldValues } from "./Form";
 import { BankAccount, BankAccountDataStoreClient } from "@/dataStore/impl/BankAccountDataStore";
@@ -15,7 +15,7 @@ export interface AppState {
     modals: any[];
 }
 
-export class App extends React.Component<AppProps, AppState> {
+export class App extends React.Component<AppProps, AppState> implements ModalApi {
 
     constructor(props: AppProps) {
         super(props);
@@ -62,7 +62,7 @@ export class App extends React.Component<AppProps, AppState> {
                 <h1>Envelope</h1>
             </div>
             <div id="sidebar">
-                <ImportDropTarget queueModal={this.queueModal} dismissModal={this.dismissModal}/>
+                <ImportDropTarget modalApi={this}/>
             </div>
             <div id="main">
                 <Box>

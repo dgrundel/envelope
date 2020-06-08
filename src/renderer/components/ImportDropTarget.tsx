@@ -6,11 +6,10 @@ import '@public/components/ImportDropTarget.scss';
 import { resolve } from "dns";
 import { rejects } from "assert";
 import { Log } from "@/util/Logger";
-import { Modal } from "./Modal";
+import { Modal, ModalApi } from "./Modal";
 
 export interface ImportProps {
-    queueModal: (modal: any) => void;
-    dismissModal: () => void;
+    modalApi: ModalApi
 }
 
 export class ImportDropTarget extends React.Component<ImportProps, {}> {
@@ -31,6 +30,8 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
     }
 
     dropHandler(result: Promise<DataTransferItemList>) {
+        const modalApi = this.props.modalApi;
+
         // first filter out non-files
         // resolve with a list of files
         // reject if no files
@@ -55,11 +56,11 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
             csvFiles.forEach(csvRows => {
                 Log.info('csvRows', csvRows);
 
-                const modal = <Modal buttons={{ 'Close': this.props.dismissModal }} close={this.props.dismissModal}>
+                const modal = <Modal buttons={{ 'Close': modalApi.dismissModal }} close={modalApi.dismissModal}>
                     {csvRows.map(row => <p>{Object.keys(row).map(key => `${key} = ${row[key]}`).join(', ')}</p>)}
                 </Modal>;
 
-                this.props.queueModal(modal);
+                modalApi.queueModal(modal);
             });
         })
         // if we got an error along the way, handle it.

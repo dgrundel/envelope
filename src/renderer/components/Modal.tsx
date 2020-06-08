@@ -9,6 +9,11 @@ export interface ModalProps {
     buttons?: Record<string, () => void>;
 }
 
+export interface ModalApi {
+    queueModal: (modal: any) => void;
+    dismissModal: () => void;
+}
+
 export class Modal extends React.Component<ModalProps, {}> {
     render() {
         return <div className="modal-overlay">
