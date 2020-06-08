@@ -46,28 +46,21 @@ export class Import extends React.Component<ImportProps, ImportState> {
         }
     }
 
-    dtHandler(dt: DataTransfer) {
+    dtHandler(items: DataTransferItemList) {
         const setState = this.setState.bind(this);
 
-        console.log(dt);
-
-        var files = dt && dt.files || [];
-        var length = files.length;
-        for (var i = 0; i < length; i++) {
-            const reader = new FileReader();
-            const file = files[i];
-            reader.onload = () => {
-                const result = reader.result as string;
-                if (result) {
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].kind === 'file') {
+                const file = items[i].getAsFile();
+                file && file.text().then((result: string) => {
                     csv(result).then(rows => {
                         console.log(rows);
                         setState({
                             rows
                         });
                     });
-                }
-            };
-            reader.readAsText(file);
+                });
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ import '@public/components/DropTarget.scss';
 
 export interface DropTargetProps {
     children?: any;
-    handler: (dt: DataTransfer) => void;
+    handler: (items: DataTransferItemList) => void;
 }
 
 export interface DropTargetState {
@@ -60,9 +60,11 @@ export class DropTarget extends React.Component<DropTargetProps, DropTargetState
 
     drop(e: React.DragEvent) {
         e.stopPropagation();
-        e.preventDefault();
+        // e.preventDefault();
 
         this.setState({ active: false });
-        this.props.handler(e.dataTransfer);
+
+        const items = e.dataTransfer.items;
+        items && this.props.handler(items);
     }
 }
