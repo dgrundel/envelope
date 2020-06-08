@@ -38,8 +38,11 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
             throw new Error(`A data store already exists with the name: ${name}`);
         }
 
+        const filePath = path.join(app.getPath('userData'), `${name}.db`);
+        console.log(`Initializing '${name}' database at ${filePath}`);
+
         this.db = new Nedb({
-            filename: path.join(app.getPath('userData'), `${name}.db`),
+            filename: filePath,
             autoload: true,
             corruptAlertThreshold: 0
         });
