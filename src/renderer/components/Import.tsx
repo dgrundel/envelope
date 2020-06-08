@@ -49,6 +49,8 @@ export class Import extends React.Component<ImportProps, ImportState> {
     dtHandler(dt: DataTransfer) {
         const setState = this.setState.bind(this);
 
+        console.log(dt);
+
         var files = dt && dt.files || [];
         var length = files.length;
         for (var i = 0; i < length; i++) {

@@ -25,3 +25,8 @@
 #sidebar {
   background-image: linear-gradient(to bottom, #29c4b2, #abe04f);  
 }
+
+#main {
+  overflow-y: auto;
+  overflow-x: hidden;
+}

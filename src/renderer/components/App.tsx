@@ -22,10 +22,10 @@ export class App extends React.Component<AppProps, AppState> {
 
         this.dismissModal = this.dismissModal.bind(this);
 
+        const sampleModal = <Modal heading="Test modal" buttons={{ 'Close': this.dismissModal }} close={this.dismissModal}>Hello, modal.</Modal>;
+
         this.state = {
-            modal: <Modal heading="Test modal" 
-                buttons={{ 'Close': this.dismissModal }}
-                close={this.dismissModal}>Hello, modal.</Modal>
+            modal: undefined
         };
     }
 

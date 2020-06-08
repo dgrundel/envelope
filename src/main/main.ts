@@ -3,10 +3,10 @@ import * as path from 'path';
 import * as url from 'url';
 import * as windowStateKeeper from 'electron-window-state';
 import { BankAccountDataStore } from '@/dataStore/impl/BankAccountDataStore';
-import { AccountTransactionDataStore } from '@/dataStore/impl/AccountTransactionDataStore';
+import { BankAccountTransactionDataStore } from '@/dataStore/impl/BankAccountTransactionDataStore';
 
 const bankAccounts = new BankAccountDataStore();
-const accountTransactions = new AccountTransactionDataStore();
+const accountTransactions = new BankAccountTransactionDataStore();
 
 function createWindow(): void {
     const mainWindowState = windowStateKeeper({
@@ -22,8 +22,7 @@ function createWindow(): void {
         height: mainWindowState.height,
         webPreferences: {
             nodeIntegration: true,
-            enableRemoteModule: true,
-            devTools: process.env.NODE_ENV === 'production' ? false : true
+            enableRemoteModule: true
         }
     });
 
@@ -35,6 +34,11 @@ function createWindow(): void {
             slashes: true
         })
     );
+
+    // Open the DevTools.
+    if (process.env.NODE_ENV !== 'production') {
+      mainWindow.webContents.openDevTools();
+    }
 
     mainWindowState.manage(mainWindow);
 }

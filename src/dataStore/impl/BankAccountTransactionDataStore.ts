@@ -2,25 +2,26 @@ import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStor
 
 const name = 'account-transactions';
 
-export interface AccountTransaction extends BaseDataStoreRecord {
+export interface BankAccountTransaction extends BaseDataStoreRecord {
+    bankAccountId: string;
     date: number;
     description: string;
     amount: number;
     imported: Record<string, string>;
 }
 
-export class AccountTransactionDataStore extends DataStore<AccountTransaction> {
+export class BankAccountTransactionDataStore extends DataStore<BankAccountTransaction> {
     constructor() {
         super(name);
     }
 }
 
-export class AccountTransactionDataStoreClient extends DataStoreClient<AccountTransaction> {
+export class BankAccountTransactionDataStoreClient extends DataStoreClient<BankAccountTransaction> {
     constructor() {
         super(name);
     }
 
-    addTransaction(transaction: AccountTransaction) {
+    addTransaction(transaction: BankAccountTransaction) {
         return this.insert(transaction);
     }
 
