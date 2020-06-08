@@ -6,6 +6,8 @@ import '@public/components/App.scss';
 import { Import } from "./Import";
 import { Modal, ModalProps } from "./Modal";
 import { AccountList } from "./AccountList";
+import { Form, FormField, FormFieldValues } from "./Form";
+import { BankAccount, BankAccountDataStoreClient } from "@/dataStore/impl/BankAccountDataStore";
 
 export interface AppProps {
 }
@@ -29,6 +31,29 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     render() {
+        const formFields: Record<string, FormField> = {
+            name: {
+                label: 'Account Name',
+                type: 'text',
+                required: true
+            },
+            type: {
+                label: 'Account Type',
+                type: 'select',
+                options: [
+                    { label: 'Checking Account', value: 'checking'},
+                    { label: 'Savings Account', value: 'savings'},
+                    { label: 'Credit Card', value: 'credit-card'}
+                ]
+            }
+        };
+
+        const onSubmit = (values: FormFieldValues) => {
+            const bankAcct = (values as BankAccount);
+            const client = new BankAccountDataStoreClient();
+            client.addAccount(bankAcct).then(res => console.log(res));
+        };
+
         return <div id="app">
             <Header/>
             <div id="sidebar"></div>
@@ -38,6 +63,13 @@ export class App extends React.Component<AppProps, AppState> {
                 </Box>
                 <Import/>
                 <AccountList/>
+                <Box>
+                    <Form
+                        fields={formFields}
+                        onSubmit={onSubmit}
+                        submitLabel="Save"
+                    />
+                </Box>
                 {this.state.modal || ''}
             </div>
         </div>;

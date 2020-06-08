@@ -42,6 +42,17 @@ th {
   font-weight: 400;
 }
 
+input, 
+button, 
+textarea, 
+select, 
+option {
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
 .btn {
   cursor: pointer;
   border: .5px solid;

@@ -2,7 +2,7 @@ import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStor
 
 const name = 'bank-accounts';
 
-export type BankAccountType = 'bank' | 'credit-card';
+export type BankAccountType = 'checking' | 'savings' | 'credit-card';
 
 export interface BankAccount extends BaseDataStoreRecord {
     type: BankAccountType;
@@ -20,11 +20,8 @@ export class BankAccountDataStoreClient extends DataStoreClient<BankAccount> {
         super(name);
     }
 
-    addAccount(type: BankAccountType, name: string) {
-        return this.insert({
-            type,
-            name
-        });
+    addAccount(acct: BankAccount) {
+        return this.insert(acct);
     }
 
     getAccounts(query: any = {}) {

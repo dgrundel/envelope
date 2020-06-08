@@ -1,0 +1,16 @@
+.form-component {
+    label {
+        display: grid;
+        grid-template-columns: minmax(24ex, 1fr) 2fr;
+        margin-bottom: .25em;
+    }
+
+    .form-footer {
+        text-align: right;
+    }
+
+    .form-component-input-label {
+        display: block;
+        line-height: 2em;
+    }
+}
