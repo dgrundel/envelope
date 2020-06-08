@@ -2,7 +2,7 @@ import * as React from "react";
 import { Box } from "./Box";
 
 import '@public/components/App.scss';
-import { Import } from "./Import";
+import { ImportDropTarget } from "./ImportDropTarget";
 import { Modal, ModalProps } from "./Modal";
 import { AccountList } from "./AccountList";
 import { Form, FormField, FormFieldValues } from "./Form";
@@ -12,7 +12,7 @@ export interface AppProps {
 }
 
 export interface AppState {
-    modal?: any;
+    modals: any[];
 }
 
 export class App extends React.Component<AppProps, AppState> {
@@ -20,13 +20,17 @@ export class App extends React.Component<AppProps, AppState> {
     constructor(props: AppProps) {
         super(props);
 
-        this.dismissModal = this.dismissModal.bind(this);
-
-        const sampleModal = <Modal heading="Test modal" buttons={{ 'Close': this.dismissModal }} close={this.dismissModal}>Hello, modal.</Modal>;
-
         this.state = {
-            modal: undefined
+            modals: []
         };
+
+        this.dismissModal = this.dismissModal.bind(this);
+        this.queueModal = this.queueModal.bind(this);
+
+        // setTimeout(() => {
+        //     const sampleModal = <Modal heading="Test modal" buttons={{ 'Close': this.dismissModal }} close={this.dismissModal}>Hello, modal.</Modal>;
+        //     this.queueModal(sampleModal);
+        // }, 2000);
     }
 
     render() {
@@ -58,7 +62,7 @@ export class App extends React.Component<AppProps, AppState> {
                 <h1>Envelope</h1>
             </div>
             <div id="sidebar">
-                <Import/>
+                <ImportDropTarget queueModal={this.queueModal} dismissModal={this.dismissModal}/>
             </div>
             <div id="main">
                 <Box>
@@ -72,12 +76,31 @@ export class App extends React.Component<AppProps, AppState> {
                         submitLabel="Save"
                     />
                 </Box>
-                {this.state.modal || ''}
+                {this.showModal()}
             </div>
         </div>;
     }
 
+    queueModal(modal: any) {
+        this.setState(prev => {
+            return {
+                modals: prev.modals.concat(modal)
+            }
+        });
+    }
+
+    showModal() {
+        if (this.state.modals.length) {
+            return this.state.modals[0];
+        }
+        return null;
+    }
+
     dismissModal() {
-        this.setState({ modal: undefined });
+        this.setState(prev => {
+            return {
+                modals: prev.modals.slice(1)
+            }
+        });
     }
 }

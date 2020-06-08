@@ -2,30 +2,27 @@ import * as React from "react";
 import * as csv from 'neat-csv';
 import { DropTarget } from "./DropTarget";
 
-import '@public/components/Import.scss';
+import '@public/components/ImportDropTarget.scss';
 import { resolve } from "dns";
 import { rejects } from "assert";
 import { Log } from "@/util/Logger";
+import { Modal } from "./Modal";
 
 export interface ImportProps {
+    queueModal: (modal: any) => void;
+    dismissModal: () => void;
 }
 
-export interface ImportState {
-    rows?: any[]
-}
-
-export class Import extends React.Component<ImportProps, ImportState> {
+export class ImportDropTarget extends React.Component<ImportProps, {}> {
 
     constructor(props: ImportProps) {
         super(props);
 
-        this.state = {};
-
-        this.dtHandler = this.dtHandler.bind(this);
+        this.dropHandler = this.dropHandler.bind(this);
     }
 
     render() {
-        return <DropTarget handler={this.dtHandler}>
+        return <DropTarget handler={this.dropHandler}>
             <p className="import-drop-target-content">
                 <i className="pe-7s-upload import-drop-target-icon"></i>
                 Drop CSV files here to import transactions.
@@ -33,9 +30,7 @@ export class Import extends React.Component<ImportProps, ImportState> {
         </DropTarget>;
     }
 
-    dtHandler(result: Promise<DataTransferItemList>) {
-        const setState = this.setState.bind(this);
-
+    dropHandler(result: Promise<DataTransferItemList>) {
         // first filter out non-files
         // resolve with a list of files
         // reject if no files
@@ -59,12 +54,17 @@ export class Import extends React.Component<ImportProps, ImportState> {
         .then(csvFiles => {
             csvFiles.forEach(csvRows => {
                 Log.info('csvRows', csvRows);
+
+                const modal = <Modal buttons={{ 'Close': this.props.dismissModal }} close={this.props.dismissModal}>
+                    {csvRows.map(row => <p>{Object.keys(row).map(key => `${key} = ${row[key]}`).join(', ')}</p>)}
+                </Modal>;
+
+                this.props.queueModal(modal);
             });
         })
         // if we got an error along the way, handle it.
         .catch((reason) => {
             Log.error(reason);
-            // failed.
         });
     }
 }
