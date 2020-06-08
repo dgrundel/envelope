@@ -33,6 +33,13 @@ export class AccountList extends React.Component<AccountListProps, AccountListSt
             });
         });
   
+        dataStore.onChange(() => {
+            dataStore.getAccounts().then(accounts => {
+                this.setState({
+                    bankAccounts: accounts
+                });
+            });
+        });
     }
 
     render() {

@@ -1,11 +1,11 @@
-import { app, ipcMain } from 'electron';
+import { app, ipcMain, ipcRenderer, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as Nedb from 'nedb';
-import { ipcRenderer } from "electron";
 
 const dataStores: Record<string, DataStore<any>> = {};
 
 export enum DataStoreEvent {
+    Changed = 'datastore-changed',
     Insert = 'datastore-insert',
     Find = 'datastore-find'
 }
@@ -16,7 +16,7 @@ export interface BaseDataStoreRecord {
     _id?: string;
 };
 
-export class BaseDataStore<T extends BaseDataStoreRecord> {
+abstract class BaseDataStore<T extends BaseDataStoreRecord> {
     protected readonly name: string;
 
     constructor(name: string) {
@@ -26,6 +26,9 @@ export class BaseDataStore<T extends BaseDataStoreRecord> {
     protected buildEventName(event: DataStoreEvent, name: string) {
         return `${event}:${name}`;
     }
+
+    protected abstract insert(item: T): Promise<T>;
+    protected abstract find(query?: any): Promise<T[]>;
 }
 
 export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
@@ -55,12 +58,18 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         });
     }
 
+    protected triggerChanged() {
+        BrowserWindow.getAllWindows()
+            .forEach(win => win.webContents.send(buildEventName(DataStoreEvent.Changed, this.name)));
+    }
+
     protected insert(item: T): Promise<T> {
         return new Promise((resolve, reject) => {
             this.db.insert(item, (err: Error, document: T) => {
                 if (err) {
                     reject(err);
                 } else {
+                    this.triggerChanged();
                     resolve(document);
                 }
             });
@@ -83,6 +92,10 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
 export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
     private invoke(event: DataStoreEvent, ...args: any) {
         return ipcRenderer.invoke(buildEventName(event, this.name), ...args);
+    }
+
+    onChange(callback: () => void) {
+        ipcRenderer.on(buildEventName(DataStoreEvent.Changed, this.name), callback);
     }
 
     protected insert(item: T): Promise<T> {
