@@ -94,17 +94,17 @@ export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStor
         return ipcRenderer.invoke(buildEventName(event, this.name), ...args);
     }
 
-    onChange(callback: (source: DataStoreEvent) => void) {
-        ipcRenderer.on(buildEventName(DataStoreEvent.Changed, this.name), (e, eventSource: DataStoreEvent) => {
-            callback(eventSource);
-        });
-    }
-
     protected insert(item: T): Promise<T> {
         return this.invoke(DataStoreEvent.Insert, item);
     }
 
     protected find(query: any = {}): Promise<T[]> {
         return this.invoke(DataStoreEvent.Find, query);
+    }
+
+    onChange(callback: (source: DataStoreEvent) => void) {
+        ipcRenderer.on(buildEventName(DataStoreEvent.Changed, this.name), (e, eventSource: DataStoreEvent) => {
+            callback(eventSource);
+        });
     }
 }

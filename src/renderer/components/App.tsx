@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Box } from "./Box";
-import { Header } from "./Header";
 
 import '@public/components/App.scss';
 import { Import } from "./Import";
@@ -55,7 +54,9 @@ export class App extends React.Component<AppProps, AppState> {
         };
 
         return <div id="app">
-            <Header/>
+            <div id="header">
+                <h1>Envelope</h1>
+            </div>
             <div id="sidebar"></div>
             <div id="main">
                 <Box>
