@@ -9,9 +9,19 @@
   border-radius: .25rem;
 }
 
-@mixin big-circle-icon {
-  font-size: 2rem;
-  padding: .5rem;
+@mixin circle-icon($size) {
+  font-size: $size;
+  line-height: $size;
+  width: $size;
+  padding: ($size / 4);
   border-radius: 50%;
   vertical-align: middle;
+}
+
+@mixin big-circle-icon {
+  @include circle-icon(2rem);
+}
+
+@mixin small-circle-icon {
+  @include circle-icon(1.5rem);
 }

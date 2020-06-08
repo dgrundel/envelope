@@ -1,7 +1,11 @@
 import * as React from "react";
 import * as csv from 'neat-csv';
-import { Box } from "./Box";
 import { DropTarget } from "./DropTarget";
+
+import '@public/components/Import.scss';
+import { resolve } from "dns";
+import { rejects } from "assert";
+import { Log } from "@/util/Logger";
 
 export interface ImportProps {
 }
@@ -21,46 +25,46 @@ export class Import extends React.Component<ImportProps, ImportState> {
     }
 
     render() {
-        return <Box heading="Import">
-            <DropTarget handler={this.dtHandler}/>
-
-            {this.renderRows()}
-        </Box>
+        return <DropTarget handler={this.dtHandler}>
+            <p className="import-drop-target-content">
+                <i className="pe-7s-upload import-drop-target-icon"></i>
+                Drop CSV files here to import transactions.
+            </p>
+        </DropTarget>;
     }
 
-    renderRows() {
-        if (this.state.rows && this.state.rows.length > 0) {
-            const first = this.state.rows[0];
-            return <table>
-                <thead>
-                    <tr>
-                        {Object.keys(first).map(key => <td key={key}>{key}</td>)}
-                    </tr>
-                </thead>
-                <tbody>
-                    {this.state.rows.map(row => <tr>
-                        {Object.keys(row).map(key => <td title={key} key={key}>{row[key]}</td>)}
-                    </tr>)}
-                </tbody>
-            </table>;
-        }
-    }
-
-    dtHandler(items: DataTransferItemList) {
+    dtHandler(result: Promise<DataTransferItemList>) {
         const setState = this.setState.bind(this);
 
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].kind === 'file') {
-                const file = items[i].getAsFile();
-                file && file.text().then((result: string) => {
-                    csv(result).then(rows => {
-                        console.log(rows);
-                        setState({
-                            rows
-                        });
-                    });
-                });
+        // first filter out non-files
+        // resolve with a list of files
+        // reject if no files
+        result.then(items => new Promise((resolve, reject) => {
+            const files: File[] = [];
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].kind === 'file') {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        files.push(file);
+                    }
+                }
             }
-        }
+            files.length ? resolve(files) : reject('No files were found.');
+        }))
+        // next, get contents of all files as strings
+        .then((files: File[]) => Promise.all(files.map(file => file.text())))
+        // pass strings to CSV parser
+        .then(fileContents => Promise.all(fileContents.map(text => csv(text))))
+        // now each file is an array of CSV rows
+        .then(csvFiles => {
+            csvFiles.forEach(csvRows => {
+                Log.info('csvRows', csvRows);
+            });
+        })
+        // if we got an error along the way, handle it.
+        .catch((reason) => {
+            Log.error(reason);
+            // failed.
+        });
     }
 }

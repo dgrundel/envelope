@@ -57,12 +57,13 @@ export class App extends React.Component<AppProps, AppState> {
             <div id="header">
                 <h1>Envelope</h1>
             </div>
-            <div id="sidebar"></div>
+            <div id="sidebar">
+                <Import/>
+            </div>
             <div id="main">
                 <Box>
                     <h1>Hello, world!</h1>
                 </Box>
-                <Import/>
                 <AccountList/>
                 <Box>
                     <Form

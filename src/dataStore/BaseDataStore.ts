@@ -1,6 +1,7 @@
 import { app, ipcMain, ipcRenderer, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as Nedb from 'nedb';
+import { Log } from '@/util/Logger';
 
 const dataStores: Record<string, DataStore<any>> = {};
 
@@ -42,7 +43,7 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         }
 
         const filePath = path.join(app.getPath('userData'), `${name}.db`);
-        console.log(`Initializing '${name}' database at ${filePath}`);
+        Log.info(`Initializing '${name}' database at ${filePath}`);
 
         this.db = new Nedb({
             filename: filePath,

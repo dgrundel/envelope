@@ -115,9 +115,6 @@ export class Form extends React.Component<FormProps, FormState> {
         if (name) {
             this.setState(prev => {
                 prev.values[name] = (target as HTMLInputElement).value;
-
-                console.log('values', prev.values);
-
                 return {
                     values: prev.values
                 };

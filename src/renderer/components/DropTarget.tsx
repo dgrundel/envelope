@@ -2,10 +2,12 @@ import * as React from "react";
 import * as stream from 'stream';
 
 import '@public/components/DropTarget.scss';
+import { resolve } from "dns";
+import { rejects } from "assert";
 
 export interface DropTargetProps {
     children?: any;
-    handler: (items: DataTransferItemList) => void;
+    handler: (result: Promise<DataTransferItemList>) => void;
 }
 
 export interface DropTargetState {
@@ -64,7 +66,13 @@ export class DropTarget extends React.Component<DropTargetProps, DropTargetState
 
         this.setState({ active: false });
 
-        const items = e.dataTransfer.items;
-        items && this.props.handler(items);
+        this.props.handler(new Promise((resolve, reject) => {
+            const items = e.dataTransfer.items;
+            if (items) {
+                resolve(items);
+            } else {
+                reject();
+            }
+        }));
     }
 }

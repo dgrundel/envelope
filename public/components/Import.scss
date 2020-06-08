@@ -1,0 +1,18 @@
+@import '../mixins.scss';
+
+.import-drop-target-content {
+    @include rounded();
+    background-color: #fff;
+    padding: 1rem;
+    
+    .import-drop-target-icon {
+        @include small-circle-icon();
+        margin-right: 0.25em;
+        border: .5px solid;
+        float: left;
+    }
+}
+
+.drop-target-active .import-drop-target-content {
+    opacity: 0.5;
+}
