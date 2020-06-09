@@ -1,14 +1,10 @@
+@import '../config.scss';
+
 .form-component {
     label {
         display: grid;
         grid-template-columns: minmax(24ex, 1fr) 2fr;
         margin-bottom: .25em;
-
-        &.form-invalid-field {
-            color: #e92d2d;
-            background-color: #ffebeb;
-            font-weight: 500;
-        }
     }
 
     .form-footer {
@@ -18,5 +14,23 @@
     .form-component-input-label {
         display: block;
         line-height: 2em;
+    }
+
+    .form-invalid-field {
+        .form-component-input-label {
+            color: $color-error;
+            font-weight: 500;
+        }
+
+        .form-component-input-error {
+            color: $color-error;
+            margin: .25em 0 .5em;
+            font-style: italic;
+        }
+    }
+
+    .form-component-input-help {
+        font-size: .85em;
+        opacity: 0.8;
     }
 }

@@ -5,8 +5,14 @@ import { BankAccount, BankAccountType, BankAccountDataStoreClient } from '@/data
 
 import '@public/components/Form.scss';
 
+export interface FormFieldError {
+    message: string;
+}
+
 export type FormFieldType = 'text' | 'select';
 export type FormFieldValues = Record<string, any>;
+export type ValidationResult = Record<string, FormFieldError>;
+export type FormValidator = (values: FormFieldValues) => ValidationResult;
 
 export interface FormFieldOption {
     label: string;
@@ -21,18 +27,19 @@ export interface FormField {
     placeholder?: string;
     value?: any;
     required?: boolean;
+    helpText?: string;
 }
 
 export interface FormProps {
     fields: FormField[];
     onSubmit: (values: FormFieldValues) => void;
-    validator?: (values: FormFieldValues) => string[];
+    validator?: FormValidator;
     submitLabel?: string;
 }
 
 export interface FormState {
     values: FormFieldValues;
-    invalidFields: string[];
+    validationResult: ValidationResult;
 }
 
 export class Form extends React.Component<FormProps, FormState> {
@@ -54,7 +61,7 @@ export class Form extends React.Component<FormProps, FormState> {
                 map[name] = value;
                 return map;
             }, {}),
-            invalidFields: []
+            validationResult: {}
         };
 
         this.onChange = this.onChange.bind(this);
@@ -70,7 +77,7 @@ export class Form extends React.Component<FormProps, FormState> {
 
                 switch(field.type) {
                     case 'select':
-                        return <label key={name} className={this.invalidClass(name)}>
+                        return <label key={name} className={this.fieldClassName(name)}>
                             <span className="form-component-input-label">
                                 {field.label}
                             </span>
@@ -86,10 +93,12 @@ export class Form extends React.Component<FormProps, FormState> {
                                     {fieldOption.label}
                                 </option>)}
                             </select>
+                            <small className="form-component-input-help">{field.helpText}</small>
+                            <p className="form-component-input-error">{this.fieldErrorMessage(name)}</p>
                         </label>;
                     case 'text':
                     default:
-                        return <label key={name} className={this.invalidClass(name)}>
+                        return <label key={name} className={this.fieldClassName(name)}>
                             <span className="form-component-input-label">
                                 {field.label}
                             </span>
@@ -101,6 +110,7 @@ export class Form extends React.Component<FormProps, FormState> {
                                 required={field.required}
                                 onChange={this.onChange}
                             />
+                            <small className="form-component-input-help">{field.helpText}</small>
                         </label>;
                 }
             })}
@@ -112,9 +122,16 @@ export class Form extends React.Component<FormProps, FormState> {
         </form>;
     }
 
-    invalidClass(fieldName: string) {
-        const isInvalidField = this.state.invalidFields.findIndex(s => s === fieldName) !== -1;
+    fieldClassName(fieldName: string) {
+        const isInvalidField = this.state.validationResult.hasOwnProperty(fieldName);
         return isInvalidField ? 'form-invalid-field' : '';
+    }
+
+    fieldErrorMessage(fieldName: string) {
+        const error = this.state.validationResult[fieldName];
+        if (error) {
+            return error.message;
+        }
     }
 
     onChange(e: React.FormEvent<HTMLElement>) {
@@ -134,16 +151,16 @@ export class Form extends React.Component<FormProps, FormState> {
     onSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        let invalidFields: string[] = [];
+        let validationResult: ValidationResult = {};
         if (this.props.validator) {
-            invalidFields = this.props.validator(this.state.values);
+            validationResult = this.props.validator(this.state.values);
         }
 
         this.setState({
-            invalidFields
+            validationResult
         });
 
-        if (invalidFields.length === 0) {
+        if (Object.keys(validationResult).length === 0) {
             this.props.onSubmit(this.state.values);
         }
     }

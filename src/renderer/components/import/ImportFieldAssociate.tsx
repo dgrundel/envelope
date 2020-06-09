@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Modal, BaseModal, ModalApi, ButtonSets } from "../Modal";
 import '@public/components/import/ImportFieldAssociate.scss';
-import { FormField, FormFieldValues, Form } from "../Form";
+import { FormField, FormFieldValues, Form, ValidationResult } from "../Form";
 import { BankAccount, BankAccountDataStoreClient } from "@/dataStore/impl/BankAccountDataStore";
 import { Log } from "@/util/Logger";
 import { SpinnerModal } from "../SpinnerModal";
@@ -67,7 +67,8 @@ export class ImportFieldAssociate extends React.Component<ImportFieldAssociatePr
             name: 'description',
             label: 'Description field',
             type: 'select',
-            options: fieldOptions
+            options: fieldOptions,
+            helpText: 'Choose the field with the most descriptive information.'
         }];
 
         const onSubmit = (values: FormFieldValues) => {
@@ -77,10 +78,16 @@ export class ImportFieldAssociate extends React.Component<ImportFieldAssociatePr
         };
 
         const validator = (values: FormFieldValues) => {
-            // const bankAcct = (values as BankAccount);
-            // const client = new BankAccountDataStoreClient();
-            // client.addAccount(bankAcct).then(res => Log.debug(res));
-            return ['amount', 'date'];
+            const errors: ValidationResult = {};
+            ['bankAccountId', 'amount', 'date', 'description'].forEach(name => {
+                if (!values[name]) {
+                    errors[name] = {
+                        message: 'Please choose a field'
+                    };
+                }
+            });
+
+            return errors;
         };
 
         return <BaseModal heading={`Importing ${rows.length} Transaction(s)`} closeButtonHandler={this.props.modalApi.dismissModal}>
