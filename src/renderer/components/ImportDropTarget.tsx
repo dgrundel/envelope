@@ -4,7 +4,7 @@ import { DropTarget } from "./DropTarget";
 
 import '@public/components/ImportDropTarget.scss';
 import { Log } from "@/util/Logger";
-import { BaseModal, ModalApi } from "./Modal";
+import { BaseModal, ModalApi, ButtonSets } from "./Modal";
 
 export interface ImportProps {
     modalApi: ModalApi
@@ -54,7 +54,7 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
             csvFiles.forEach(csvRows => {
                 Log.info('csvRows', csvRows);
 
-                const modal = <BaseModal buttons={{ 'Close': modalApi.dismissModal }} close={modalApi.dismissModal}>
+                const modal = <BaseModal buttons={ButtonSets.close(modalApi)} closeButtonHandler={modalApi.dismissModal}>
                     {csvRows.map(row => <p>{Object.keys(row).map(key => `${key} = ${row[key]}`).join(', ')}</p>)}
                 </BaseModal>;
 

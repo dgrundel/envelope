@@ -9,7 +9,7 @@ export interface Modal {
 export interface ModalProps {
     heading?: string;
     children: any;
-    close?: () => void;
+    closeButtonHandler?: () => void;
     buttons?: Record<string, () => void>;
 }
 
@@ -17,6 +17,31 @@ export interface ModalApi {
     queueModal: (modal: Modal) => void;
     dismissModal: () => void;
 }
+
+export const ButtonSets = {
+    ok: (api: ModalApi, callback?: () => void) => ({
+        'OK': () => {
+            callback && callback();
+            api.dismissModal();
+        }
+    }),
+    close: (api: ModalApi, callback?: () => void) => ({
+        'Close': () => {
+            callback && callback();
+            api.dismissModal();
+        }
+    }),
+    okCancel: (api: ModalApi, okCallback?: () => void, cancelCallback?: () => void) => ({
+        'OK': () => {
+            okCallback && okCallback();
+            api.dismissModal();
+        },
+        'Cancel': () => {
+            cancelCallback && cancelCallback();
+            api.dismissModal();
+        }
+    })
+};
 
 export class BaseModal extends React.Component<ModalProps, {}> implements Modal {
     render() {
@@ -31,12 +56,12 @@ export class BaseModal extends React.Component<ModalProps, {}> implements Modal 
 
     renderHeading() {
         const heading = this.props.heading;
-        const close = this.props.close;
+        const closeButtonHandler = this.props.closeButtonHandler;
 
-        if (heading || close) {
+        if (heading || closeButtonHandler) {
             return <h2 className="modal-heading">
                 {heading || ''}
-                {close ? <i className="pe-7s-close modal-close-icon" onClick={() => close()}></i> : ''}
+                {closeButtonHandler ? <i className="pe-7s-close modal-close-icon" onClick={() => closeButtonHandler()}></i> : ''}
             </h2>;
         }
     }
