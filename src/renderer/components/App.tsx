@@ -35,22 +35,22 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
     }
 
     render() {
-        const formFields: Record<string, FormField> = {
-            name: {
-                label: 'Account Name',
-                type: 'text',
-                required: true
-            },
-            type: {
-                label: 'Account Type',
-                type: 'select',
-                options: [
-                    { label: 'Checking Account', value: 'checking'},
-                    { label: 'Savings Account', value: 'savings'},
-                    { label: 'Credit Card', value: 'credit-card'}
-                ]
-            }
-        };
+        const formFields: FormField[] = [{
+            name: 'name',
+            label: 'Account Name',
+            type: 'text',
+            required: true
+        },
+        {
+            name: 'type',
+            label: 'Account Type',
+            type: 'select',
+            options: [
+                { label: 'Checking Account', value: 'checking'},
+                { label: 'Savings Account', value: 'savings'},
+                { label: 'Credit Card', value: 'credit-card'}
+            ]
+        }];
 
         const onSubmit = (values: FormFieldValues) => {
             const bankAcct = (values as BankAccount);

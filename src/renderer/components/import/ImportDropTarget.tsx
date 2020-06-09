@@ -2,7 +2,7 @@ import * as React from "react";
 import * as csv from 'neat-csv';
 import { DropTarget } from "../DropTarget";
 
-import '@public/components/ImportDropTarget.scss';
+import '@public/components/import/ImportDropTarget.scss';
 import { Log } from "@/util/Logger";
 import { BaseModal, ModalApi, ButtonSets } from "../Modal";
 import { ImportFieldAssociate } from "./ImportFieldAssociate";

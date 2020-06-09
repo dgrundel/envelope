@@ -14,6 +14,7 @@ export interface FormFieldOption {
 }
 
 export interface FormField {
+    name: string;
     label: string;
     type: FormFieldType;
     options?: FormFieldOption[];
@@ -23,13 +24,15 @@ export interface FormField {
 }
 
 export interface FormProps {
-    fields: Record<string, FormField>;
+    fields: FormField[];
     onSubmit: (values: FormFieldValues) => void;
+    validator?: (values: FormFieldValues) => string[];
     submitLabel?: string;
 }
 
 export interface FormState {
     values: FormFieldValues;
+    invalidFields: string[];
 }
 
 export class Form extends React.Component<FormProps, FormState> {
@@ -38,8 +41,8 @@ export class Form extends React.Component<FormProps, FormState> {
         super(props);
 
         this.state = {
-            values: Object.keys(props.fields).reduce((map: Record<string, any>, name: string) => {
-                const field = props.fields[name];
+            values: props.fields.reduce((map: Record<string, any>, field: FormField) => {
+                const name = field.name;
 
                 let value = undefined;
                 if (typeof field.value !== 'undefined') {
@@ -50,7 +53,8 @@ export class Form extends React.Component<FormProps, FormState> {
 
                 map[name] = value;
                 return map;
-            }, {})
+            }, {}),
+            invalidFields: []
         };
 
         this.onChange = this.onChange.bind(this);
@@ -59,14 +63,14 @@ export class Form extends React.Component<FormProps, FormState> {
 
     render() {
         return <form className="form-component" onSubmit={this.onSubmit}>
-            {Object.keys(this.props.fields).map(name => {
-                const field = this.props.fields[name];
+            {this.props.fields.map(field => {
+                const name = field.name;
                 const value = this.state.values[name];
                 const options = field.options || [];
 
                 switch(field.type) {
                     case 'select':
-                        return <label key={name}>
+                        return <label key={name} className={this.invalidClass(name)}>
                             <span className="form-component-input-label">
                                 {field.label}
                             </span>
@@ -85,7 +89,7 @@ export class Form extends React.Component<FormProps, FormState> {
                         </label>;
                     case 'text':
                     default:
-                        return <label key={name}>
+                        return <label key={name} className={this.invalidClass(name)}>
                             <span className="form-component-input-label">
                                 {field.label}
                             </span>
@@ -108,6 +112,11 @@ export class Form extends React.Component<FormProps, FormState> {
         </form>;
     }
 
+    invalidClass(fieldName: string) {
+        const isInvalidField = this.state.invalidFields.findIndex(s => s === fieldName) !== -1;
+        return isInvalidField ? 'form-invalid-field' : '';
+    }
+
     onChange(e: React.FormEvent<HTMLElement>) {
         const target = e.target;
         const name = (target as HTMLElement).getAttribute('name');
@@ -124,6 +133,18 @@ export class Form extends React.Component<FormProps, FormState> {
 
     onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        this.props.onSubmit(this.state.values);
+
+        let invalidFields: string[] = [];
+        if (this.props.validator) {
+            invalidFields = this.props.validator(this.state.values);
+        }
+
+        this.setState({
+            invalidFields
+        });
+
+        if (invalidFields.length === 0) {
+            this.props.onSubmit(this.state.values);
+        }
     }
 }

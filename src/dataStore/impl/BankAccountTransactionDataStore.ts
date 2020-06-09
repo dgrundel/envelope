@@ -7,7 +7,7 @@ export interface BankAccountTransaction extends BaseDataStoreRecord {
     date: number;
     description: string;
     amount: number;
-    imported: Record<string, string>;
+    originalRecord: Record<string, string>;
 }
 
 export class BankAccountTransactionDataStore extends DataStore<BankAccountTransaction> {

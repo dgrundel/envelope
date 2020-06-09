@@ -3,6 +3,12 @@
         display: grid;
         grid-template-columns: minmax(24ex, 1fr) 2fr;
         margin-bottom: .25em;
+
+        &.form-invalid-field {
+            color: #e92d2d;
+            background-color: #ffebeb;
+            font-weight: 500;
+        }
     }
 
     .form-footer {
