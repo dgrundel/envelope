@@ -1,10 +1,11 @@
 import * as React from "react";
 import * as csv from 'neat-csv';
-import { DropTarget } from "./DropTarget";
+import { DropTarget } from "../DropTarget";
 
 import '@public/components/ImportDropTarget.scss';
 import { Log } from "@/util/Logger";
-import { BaseModal, ModalApi, ButtonSets } from "./Modal";
+import { BaseModal, ModalApi, ButtonSets } from "../Modal";
+import { ImportFieldAssociate } from "./ImportFieldAssociate";
 
 export interface ImportProps {
     modalApi: ModalApi
@@ -52,13 +53,9 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
         // now each file is an array of CSV rows
         .then(csvFiles => {
             csvFiles.forEach(csvRows => {
-                Log.info('csvRows', csvRows);
-
-                const modal = <BaseModal buttons={ButtonSets.close(modalApi)} closeButtonHandler={modalApi.dismissModal}>
-                    {csvRows.map(row => <p>{Object.keys(row).map(key => `${key} = ${row[key]}`).join(', ')}</p>)}
-                </BaseModal>;
-
-                modalApi.queueModal(modal);
+                Log.debug('csvRows', csvRows);
+                
+                modalApi.queueModal(<ImportFieldAssociate modalApi={modalApi} rows={csvRows}/>);
             });
         })
         // if we got an error along the way, handle it.

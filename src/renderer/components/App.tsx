@@ -2,11 +2,12 @@ import * as React from "react";
 import { Box } from "./Box";
 
 import '@public/components/App.scss';
-import { ImportDropTarget } from "./ImportDropTarget";
+import { ImportDropTarget } from "./import/ImportDropTarget";
 import { ModalApi, Modal, BaseModal, ButtonSets } from "./Modal";
 import { AccountList } from "./AccountList";
 import { Form, FormField, FormFieldValues } from "./Form";
 import { BankAccount, BankAccountDataStoreClient } from "@/dataStore/impl/BankAccountDataStore";
+import { Log } from "@/util/Logger";
 
 export interface AppProps {
 }
@@ -54,7 +55,7 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         const onSubmit = (values: FormFieldValues) => {
             const bankAcct = (values as BankAccount);
             const client = new BankAccountDataStoreClient();
-            client.addAccount(bankAcct).then(res => console.log(res));
+            client.addAccount(bankAcct).then(res => Log.debug(res));
         };
 
         return <div id="app">
