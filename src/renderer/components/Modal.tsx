@@ -2,6 +2,10 @@ import * as React from "react";
 
 import '@public/components/Modal.scss';
 
+export interface Modal {
+    // marker interface
+}
+
 export interface ModalProps {
     heading?: string;
     children: any;
@@ -10,11 +14,11 @@ export interface ModalProps {
 }
 
 export interface ModalApi {
-    queueModal: (modal: any) => void;
+    queueModal: (modal: Modal) => void;
     dismissModal: () => void;
 }
 
-export class Modal extends React.Component<ModalProps, {}> {
+export class BaseModal extends React.Component<ModalProps, {}> implements Modal {
     render() {
         return <div className="modal-overlay">
             <div className="modal-content">

@@ -3,7 +3,7 @@ import { Box } from "./Box";
 
 import '@public/components/App.scss';
 import { ImportDropTarget } from "./ImportDropTarget";
-import { Modal, ModalProps, ModalApi } from "./Modal";
+import { ModalApi, Modal } from "./Modal";
 import { AccountList } from "./AccountList";
 import { Form, FormField, FormFieldValues } from "./Form";
 import { BankAccount, BankAccountDataStoreClient } from "@/dataStore/impl/BankAccountDataStore";
@@ -12,7 +12,7 @@ export interface AppProps {
 }
 
 export interface AppState {
-    modals: any[];
+    modals: Modal[];
 }
 
 export class App extends React.Component<AppProps, AppState> implements ModalApi {
@@ -81,7 +81,7 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         </div>;
     }
 
-    queueModal(modal: any) {
+    queueModal(modal: Modal) {
         this.setState(prev => {
             return {
                 modals: prev.modals.concat(modal)

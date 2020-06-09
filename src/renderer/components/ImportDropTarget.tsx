@@ -3,10 +3,8 @@ import * as csv from 'neat-csv';
 import { DropTarget } from "./DropTarget";
 
 import '@public/components/ImportDropTarget.scss';
-import { resolve } from "dns";
-import { rejects } from "assert";
 import { Log } from "@/util/Logger";
-import { Modal, ModalApi } from "./Modal";
+import { BaseModal, ModalApi } from "./Modal";
 
 export interface ImportProps {
     modalApi: ModalApi
@@ -56,9 +54,9 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
             csvFiles.forEach(csvRows => {
                 Log.info('csvRows', csvRows);
 
-                const modal = <Modal buttons={{ 'Close': modalApi.dismissModal }} close={modalApi.dismissModal}>
+                const modal = <BaseModal buttons={{ 'Close': modalApi.dismissModal }} close={modalApi.dismissModal}>
                     {csvRows.map(row => <p>{Object.keys(row).map(key => `${key} = ${row[key]}`).join(', ')}</p>)}
-                </Modal>;
+                </BaseModal>;
 
                 modalApi.queueModal(modal);
             });
