@@ -6,11 +6,16 @@ export interface Modal {
     // marker interface
 }
 
+export interface ModalButton {
+    buttonText: any;
+    onClick: () => void;
+}
+
 export interface ModalProps {
     heading?: string;
     children: any;
     closeButtonHandler?: () => void;
-    buttons?: Record<string, () => void>;
+    buttons?: ModalButton[];
 }
 
 export interface ModalApi {
@@ -19,28 +24,39 @@ export interface ModalApi {
 }
 
 export const ButtonSets = {
-    ok: (api: ModalApi, callback?: () => void) => ({
-        'OK': () => {
-            callback && callback();
-            api.dismissModal();
+    ok: (api: ModalApi, callback?: () => void) => [
+        {
+            buttonText: 'OK',
+            onClick: () => {
+                callback && callback();
+                api.dismissModal();
+            }
         }
-    }),
-    close: (api: ModalApi, callback?: () => void) => ({
-        'Close': () => {
-            callback && callback();
-            api.dismissModal();
+    ],
+    close: (api: ModalApi, callback?: () => void) => [
+        { 
+            buttonText: 'Close', 
+            onClick: () => {
+                callback && callback();
+                api.dismissModal();
+            }
         }
-    }),
-    okCancel: (api: ModalApi, okCallback?: () => void, cancelCallback?: () => void) => ({
-        'OK': () => {
-            okCallback && okCallback();
-            api.dismissModal();
-        },
-        'Cancel': () => {
-            cancelCallback && cancelCallback();
-            api.dismissModal();
+    ],
+    okCancel: (api: ModalApi, okCallback?: () => void, cancelCallback?: () => void) => [
+        {
+            buttonText: 'OK',
+            onClick: () => {
+                okCallback && okCallback();
+                api.dismissModal();
+            }
+        },{
+            buttonText: 'Cancel',
+            onClick: () => {
+                cancelCallback && cancelCallback();
+                api.dismissModal();
+            }
         }
-    })
+    ]
 };
 
 export class BaseModal extends React.Component<ModalProps, {}> implements Modal {
@@ -71,8 +87,8 @@ export class BaseModal extends React.Component<ModalProps, {}> implements Modal 
 
         if (buttons) {
             return <div className="modal-footer">
-                {Object.keys(buttons).map(text => <div key={text} className="btn" onClick={() => buttons[text]()}>
-                    {text}
+                {buttons.map(button => <div key={button.buttonText} className="btn" onClick={() => button.onClick()}>
+                    {button.buttonText}
                 </div>)}
             </div>
         }

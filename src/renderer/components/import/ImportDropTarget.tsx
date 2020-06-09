@@ -6,6 +6,7 @@ import '@public/components/import/ImportDropTarget.scss';
 import { Log } from "@/util/Logger";
 import { BaseModal, ModalApi, ButtonSets } from "../Modal";
 import { ImportFieldAssociate } from "./ImportFieldAssociate";
+import { ImportWizard } from './ImportWizard';
 
 export interface ImportProps {
     modalApi: ModalApi
@@ -55,7 +56,9 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
             csvFiles.forEach(csvRows => {
                 Log.debug('csvRows', csvRows);
                 
-                modalApi.queueModal(<ImportFieldAssociate modalApi={modalApi} rows={csvRows}/>);
+                // const modal = <ImportFieldAssociate modalApi={modalApi} rows={csvRows} />;
+                const modal = <ImportWizard modalApi={modalApi} rows={csvRows}/>
+                modalApi.queueModal(modal);
             });
         })
         // if we got an error along the way, handle it.

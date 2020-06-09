@@ -4,6 +4,14 @@ const name = 'bank-accounts';
 
 export type BankAccountType = 'checking' | 'savings' | 'credit-card';
 
+const bankAccountTypeLabels = {
+    'checking': 'Checking',
+    'savings': 'Savings',
+    'credit-card': 'Credit Card'
+};
+
+export const getBankAccountTypeLabel = (t: BankAccountType) => bankAccountTypeLabels[t];
+
 export interface BankAccount extends BaseDataStoreRecord {
     type: BankAccountType;
     name: string;
