@@ -86,13 +86,13 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
                     bankAccountId: selected
                 });
             }),
-            () => this.renderColumnAssocPanel('date', (e: React.ChangeEvent<HTMLInputElement>) => {
+            () => this.renderColumnAssocPanel('date', k => !!k, (e: React.ChangeEvent<HTMLInputElement>) => {
                 const selected = e.target.value;
                 this.setState({
                     dateColumn: selected
                 });
             }),
-            () => this.renderColumnAssocPanel('amount', (e: React.ChangeEvent<HTMLInputElement>) => {
+            () => this.renderColumnAssocPanel('amount', (k, v) => !isNaN(parseFloat(v)), (e: React.ChangeEvent<HTMLInputElement>) => {
                 const selected = e.target.value;
                 this.setState({
                     amountColumn: selected
@@ -122,7 +122,7 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
         const bankAccounts = this.state.bankAccounts || [];
 
         if (bankAccounts.length === 0) {
-            Log.error('No bank accounts to use for import. Should pop a modal here for adding an account.');
+            Log.debug('No bank accounts to use for import. Should pop a modal here for adding an account.');
 
             return <p>No banks accounts to use for import. Please add an account first!</p>;
         }
@@ -144,21 +144,23 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
         </>;
     }
 
-    renderColumnAssocPanel(fieldLabel: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void) {
+    renderColumnAssocPanel(fieldLabel: string, filter: (k: string, v: string) => boolean, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void) {
         const first = this.state.firstRow;
         return <>
             <h3>Which one of these contains the <strong>{fieldLabel}</strong> of the transaction?</h3>
 
             <div className="import-wizard-sample-row">
-                {Object.keys(first).map(key => <label key={key}>
-                    <input 
-                        type="radio"
-                        name="field-select" 
-                        value={key}
-                        onChange={onChange}/>
-                    <span>{key}</span>
-                    <span>{first[key]}</span>
-                </label>)}
+                {Object.keys(first)
+                    .filter(key => filter(key, first[key]))
+                    .map(key => <label key={key}>
+                        <input 
+                            type="radio"
+                            name="field-select" 
+                            value={key}
+                            onChange={onChange}/>
+                        <span>{key}</span>
+                        <span>{first[key]}</span>
+                    </label>)}
             </div>
         </>;
     }
