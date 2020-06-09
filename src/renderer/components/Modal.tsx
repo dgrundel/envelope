@@ -9,6 +9,7 @@ export interface Modal {
 export interface ModalButton {
     buttonText: any;
     onClick: () => void;
+    className?: string;
 }
 
 export interface ModalProps {
@@ -87,7 +88,7 @@ export class BaseModal extends React.Component<ModalProps, {}> implements Modal 
 
         if (buttons) {
             return <div className="modal-footer">
-                {buttons.map(button => <div key={button.buttonText} className="btn" onClick={() => button.onClick()}>
+                {buttons.map(button => <div key={button.buttonText} className={`btn ${button.className || ''}`} onClick={() => button.onClick()}>
                     {button.buttonText}
                 </div>)}
             </div>

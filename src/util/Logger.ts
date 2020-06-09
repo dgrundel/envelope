@@ -15,6 +15,7 @@ export class Logger {
 
     error(...args: any[]) {
         console.error(...args);
+        console.trace();
     }
 }
 
