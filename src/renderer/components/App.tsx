@@ -3,7 +3,7 @@ import { Box } from "./Box";
 
 import '@public/components/App.scss';
 import { ImportDropTarget } from "./ImportDropTarget";
-import { ModalApi, Modal } from "./Modal";
+import { ModalApi, Modal, BaseModal, ButtonSets } from "./Modal";
 import { AccountList } from "./AccountList";
 import { Form, FormField, FormFieldValues } from "./Form";
 import { BankAccount, BankAccountDataStoreClient } from "@/dataStore/impl/BankAccountDataStore";
@@ -28,7 +28,7 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         this.queueModal = this.queueModal.bind(this);
 
         // setTimeout(() => {
-        //     const sampleModal = <Modal heading="Test modal" buttons={{ 'Close': this.dismissModal }} close={this.dismissModal}>Hello, modal.</Modal>;
+        //     const sampleModal = <BaseModal heading="Test modal" buttons={ButtonSets.ok(this)} closeButtonHandler={this.dismissModal}>Hello, modal.</BaseModal>;
         //     this.queueModal(sampleModal);
         // }, 2000);
     }
