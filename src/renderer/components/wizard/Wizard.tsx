@@ -18,6 +18,7 @@ export interface WizardProps<S> {
     initialStep?: number;
     steps: WizardStep<S>[];
     onComplete: (wizardState: S) => void;
+    heading?: string;
 }
 
 export interface WizardInternalState<S> {
@@ -64,7 +65,7 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
             className: isLastStep ? '' : 'hide'
         }];
 
-        return <BaseModal buttons={buttons}>
+        return <BaseModal heading={this.props.heading} buttons={buttons}>
             {this.state.renderer && this.state.renderer.render(this.state.wizardState, this.state.wizardApi)}
         </BaseModal>;
     }

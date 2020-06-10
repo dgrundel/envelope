@@ -229,7 +229,7 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
                 }
             };
     
-            return <NestedWizard {...props}/>
+            return <NestedWizard heading={`Importing ${this.props.rows.length} transaction(s)`} {...props}/>
         }
 
         return <SpinnerModal/>;
