@@ -1,12 +1,10 @@
 import { app, BrowserWindow } from 'electron';
+import * as windowStateKeeper from 'electron-window-state';
 import * as path from 'path';
 import * as url from 'url';
-import * as windowStateKeeper from 'electron-window-state';
-import { BankAccountDataStore } from '@/dataStore/impl/BankAccountDataStore';
-import { BankAccountTransactionDataStore } from '@/dataStore/impl/BankAccountTransactionDataStore';
+import { dataStoreManager } from './dataStores';
 
-const bankAccounts = new BankAccountDataStore();
-const accountTransactions = new BankAccountTransactionDataStore();
+const dataStores = dataStoreManager;
 
 function createWindow(): void {
     const mainWindowState = windowStateKeeper({

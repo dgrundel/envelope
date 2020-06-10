@@ -1,9 +1,5 @@
-import * as React from "react";
-import * as stream from 'stream';
-
 import '@public/components/DropTarget.scss';
-import { resolve } from "dns";
-import { rejects } from "assert";
+import * as React from "react";
 
 export interface DropTargetProps {
     children?: any;

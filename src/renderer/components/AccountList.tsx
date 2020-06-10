@@ -1,8 +1,7 @@
-import { remote } from 'electron';
+import { DataStoreChange } from '@/dataStore/BaseDataStore';
+import { BankAccount, BankAccountDataStoreClient, BankAccountType, getBankAccountTypeLabel } from '@/dataStore/impl/BankAccountDataStore';
 import * as React from "react";
 import { Box } from "./Box";
-import { BankAccount, BankAccountType, BankAccountDataStoreClient } from '@/dataStore/impl/BankAccountDataStore';
-import { DataStoreEvent, DataStoreChange } from '@/dataStore/BaseDataStore';
 
 // import '@public/components/AccountList.scss';
 
@@ -57,7 +56,7 @@ export class AccountList extends React.Component<AccountListProps, AccountListSt
                 <tbody>
                     {this.state.bankAccounts.map(bankAccount => <tr key={bankAccount._id}>
                         <td>{bankAccount.name}</td>
-                        <td>{bankAccount.type}</td>
+                        <td>{getBankAccountTypeLabel(bankAccount.type)}</td>
                     </tr>)}
                 </tbody>
             </table>;

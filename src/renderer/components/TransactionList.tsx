@@ -1,10 +1,11 @@
-import { remote } from 'electron';
+import { DataStoreChange } from '@/dataStore/BaseDataStore';
+import { BankAccount, BankAccountDataStoreClient } from '@/dataStore/impl/BankAccountDataStore';
+import { BankAccountTransaction, BankAccountTransactionDataStoreClient } from '@/dataStore/impl/BankAccountTransactionDataStore';
+import { currencyFormatter, dateFormatter } from '@/util/Formatters';
 import * as React from "react";
 import { Box } from "./Box";
-import { BankAccount, BankAccountType, BankAccountDataStoreClient } from '@/dataStore/impl/BankAccountDataStore';
-import { DataStoreEvent, DataStoreChange } from '@/dataStore/BaseDataStore';
-import { BankAccountTransactionDataStoreClient, BankAccountTransaction } from '@/dataStore/impl/BankAccountTransactionDataStore';
-import { currencyFormatter, dateFormatter } from '@/util/Formatters';
+import { DataTable } from './DataTable';
+import { Log } from '@/util/Logger';
 
 export interface TransactionListProps {
 }
@@ -72,24 +73,26 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
 
     renderList() {
         if (this.state.transactions.length > 0) {
-            return <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Bank Account</th>
-                        <th>Description</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {this.state.transactions.map(transaction => <tr key={transaction._id}>
-                        <td>{dateFormatter(transaction.year, transaction.month, transaction.day)}</td>
-                        <td>{transaction.bankAccountName}</td>
-                        <td>{transaction.description}</td>
-                        <td>{currencyFormatter(transaction.wholeAmount, transaction.fractionalAmount)}</td>
-                    </tr>)}
-                </tbody>
-            </table>;
+            return <DataTable<BankAccountTransaction>
+                rows={this.state.transactions}
+                fields={[{
+                    name: 'date',
+                    label: 'Date',
+                    formatter: (value, row) => dateFormatter(row.year, row.month, row.day)
+                },{
+                    name: 'bankAccountName',
+                    label: 'Bank Account'
+                },{
+                    name: 'description',
+                    label: 'Description'
+                },{
+                    name: 'amount',
+                    label: 'Amount',
+                    formatter: (value, row) => currencyFormatter(row.wholeAmount, row.fractionalAmount)
+                }]}
+                keyField={'_id'}
+                onSelect={(selected) => Log.debug('Table selection changed', selected)}
+            />
         }
 
         return 'No transactions yet!';

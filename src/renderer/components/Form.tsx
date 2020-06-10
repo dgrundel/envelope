@@ -1,9 +1,5 @@
-import { remote } from 'electron';
-import * as React from "react";
-import { Box } from "./Box";
-import { BankAccount, BankAccountType, BankAccountDataStoreClient } from '@/dataStore/impl/BankAccountDataStore';
-
 import '@public/components/Form.scss';
+import * as React from "react";
 
 export interface FormFieldError {
     message: string;

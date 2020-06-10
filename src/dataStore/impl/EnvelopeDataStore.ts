@@ -1,7 +1,6 @@
 import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
-import { Log } from '@/util/Logger';
 
-const name = 'envelope';
+const name = 'envelopes';
 
 export interface Envelope extends BaseDataStoreRecord {
     name: string;
@@ -11,9 +10,7 @@ export class EnvelopeDataStore extends DataStore<Envelope> {
     constructor() {
         super(name);
 
-        this.db.ensureIndex({ fieldName: 'name', unique: true }, function (err) {
-            Log.error('Error while indexing', err);
-        });
+        this.index({ fieldName: 'name', unique: true });
     }
 }
 

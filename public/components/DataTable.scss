@@ -1,0 +1,16 @@
+@import '../config.scss';
+@import '../mixins.scss';
+
+.data-table {
+    &.data-table-select-enabled {
+        th, td {
+            &:first-child {
+                padding-right: 0;
+            }
+        }
+    }
+    
+    .data-table-row-selected {
+        @include highlight();
+    }
+}

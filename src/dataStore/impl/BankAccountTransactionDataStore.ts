@@ -4,6 +4,7 @@ const name = 'account-transactions';
 
 export interface BankAccountTransaction extends BaseDataStoreRecord {
     bankAccountName: string;
+    date: Date;
     year: number;
     month: number;
     day: number;
@@ -34,6 +35,6 @@ export class BankAccountTransactionDataStoreClient extends DataStoreClient<BankA
     }
 
     getTransactions(query: any = {}) {
-        return this.find(query);
+        return this.find(query, { date: -1 });
     }
 }

@@ -1,19 +1,17 @@
-import * as React from "react";
-import * as moment from "moment";
-import { BankAccountDataStoreClient, BankAccount, getBankAccountTypeLabel } from '@/dataStore/impl/BankAccountDataStore';
-import { Modal, BaseModal, ModalApi, ModalButton } from '../Modal';
-import { SpinnerModal } from '../SpinnerModal';
-
-import '@public/components/import/ImportWizard.scss';
-import { Log } from '@/util/Logger';
-import { cpus } from 'os';
-import { Wizard, WizardProps, WizardStep, WizardApi } from '../wizard/Wizard';
-import { BankAccountTransactionDataStoreClient, BankAccountTransaction } from '@/dataStore/impl/BankAccountTransactionDataStore';
-import { stat } from 'fs';
-import { dateFormatter, currencyFormatter } from '@/util/Formatters';
+import { BankAccount, BankAccountDataStoreClient, getBankAccountTypeLabel } from '@/dataStore/impl/BankAccountDataStore';
+import { BankAccountTransaction, BankAccountTransactionDataStoreClient } from '@/dataStore/impl/BankAccountTransactionDataStore';
 import { Currency } from '@/util/Currency';
-import { ImportRowSelect } from './ImportRowSelect';
+import { currencyFormatter, dateFormatter } from '@/util/Formatters';
+import { Log } from '@/util/Logger';
+import '@public/components/import/ImportWizard.scss';
+import * as moment from "moment";
+import * as React from "react";
+import { ModalApi } from '../Modal';
 import { RowSelect } from '../RowSelect';
+import { SpinnerModal } from '../SpinnerModal';
+import { Wizard, WizardApi, WizardStep } from '../wizard/Wizard';
+import { ImportRowSelect } from './ImportRowSelect';
+
 
 export interface Row {
     [header: string]: string;
@@ -44,10 +42,11 @@ const errorMessage = (s: string) => <p className="import-wizard-error-message">{
 
 const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string, amountColumn: string, descriptionColumns: string[], bankAccountName: string): BankAccountTransaction[] => {
     return rows.map(row => {
-        const date = moment(row[dateColumn]);
-        const year = date.year();
-        const month = date.month();
-        const day = date.date();
+        const momentDate = moment(row[dateColumn]);
+        const date = momentDate.toDate();
+        const year = momentDate.year();
+        const month = momentDate.month();
+        const day = momentDate.date();
         
         const currency = Currency.parse(row[amountColumn]);
         const wholeAmount = (invert ? -1 : 1) * currency.wholeAmount;
@@ -59,6 +58,7 @@ const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string,
 
         return {
             bankAccountName,
+            date,
             year,
             month,
             day,

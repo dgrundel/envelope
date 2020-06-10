@@ -1,5 +1,4 @@
 import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
-import { Log } from '@/util/Logger';
 
 const name = 'bank-accounts';
 
@@ -22,9 +21,7 @@ export class BankAccountDataStore extends DataStore<BankAccount> {
     constructor() {
         super(name);
 
-        this.db.ensureIndex({ fieldName: 'name', unique: true }, function (err) {
-            Log.error('Error while indexing', err);
-        });
+        this.index({ fieldName: 'name', unique: true });
     }
 }
 

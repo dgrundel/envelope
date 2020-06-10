@@ -38,7 +38,7 @@ abstract class BaseDataStore<T extends BaseDataStoreRecord> {
 }
 
 export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
-    protected readonly db: Nedb<T>;
+    private readonly db: Nedb<T>;
 
     constructor(name: string) {
         super(name);
@@ -62,14 +62,18 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         ipcMain.handle(buildEventName(DataStoreEvent.InsertMany, this.name), async (event, items: T[]) => {
             return this.insertMany(items);
         });
-        ipcMain.handle(buildEventName(DataStoreEvent.Find, this.name), async (event, query?: any) => {
-            return this.find(query);
+        ipcMain.handle(buildEventName(DataStoreEvent.Find, this.name), async (event, query?: any, sort?: any) => {
+            return this.find(query, sort);
         });
     }
 
     protected triggerChanged(change: DataStoreChange) {
         BrowserWindow.getAllWindows()
             .forEach(win => win.webContents.send(buildEventName(DataStoreEvent.Changed, this.name), change));
+    }
+
+    protected index(options: Nedb.EnsureIndexOptions) {
+        this.db.ensureIndex(options, err => err && Log.error(`Error while adding index in database ${this.name}`, options, err));
     }
 
     protected insert(item: T): Promise<T> {
@@ -98,9 +102,15 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         });
     }
 
-    protected find(query: any = {}): Promise<T[]> {
+    protected find(query: any = {}, sort?: any): Promise<T[]> {
         return new Promise((resolve, reject) => {
-            this.db.find(query, (err: Error, documents: T[]) => {
+            let cursor = this.db.find(query);
+
+            if (sort) {
+                cursor = cursor.sort(sort);
+            }
+
+            cursor.exec((err: Error, documents: T[]) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -124,8 +134,8 @@ export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStor
         return this.invoke(DataStoreEvent.InsertMany, items);
     }
 
-    protected find(query: any = {}): Promise<T[]> {
-        return this.invoke(DataStoreEvent.Find, query);
+    protected find(query: any = {}, sort?: any): Promise<T[]> {
+        return this.invoke(DataStoreEvent.Find, query, sort);
     }
 
     onChange(callback: (change: DataStoreChange) => void) {
