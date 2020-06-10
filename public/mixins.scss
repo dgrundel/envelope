@@ -25,3 +25,9 @@
 @mixin small-circle-icon {
   @include circle-icon(1.5rem);
 }
+
+@mixin highlight {
+  color: $color-highlight-fg;
+  background-color: $color-highlight-bg;
+  font-weight: 400;
+}

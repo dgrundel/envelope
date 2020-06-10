@@ -34,7 +34,7 @@ table {
 
 th, td {
   text-align: left;
-  padding: .5rem;
+  padding: $table-padding;
   border: .5px solid $color-lt-gray;
 }
 

@@ -12,6 +12,7 @@ import { BankAccountTransactionDataStoreClient, BankAccountTransaction } from '@
 import { stat } from 'fs';
 import { dateFormatter, currencyFormatter } from '@/util/Formatters';
 import { Currency } from '@/util/Currency';
+import { ImportRowSelect } from './ImportRowSelect';
 
 export interface Row {
     [header: string]: string;
@@ -107,10 +108,6 @@ const accountSelectStep: WizardStep<ImportWizardState> = {
 
 const dateFieldSelectStep: WizardStep<ImportWizardState> = {
     render: (state: ImportWizardState, api: WizardApi<ImportWizardState>) => {
-        const first = state.firstRow;
-        const fields = Object.keys(first)
-            .filter(key => moment(first[key]).isValid());
-
         const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value;
             const state = api.getState();
@@ -120,17 +117,12 @@ const dateFieldSelectStep: WizardStep<ImportWizardState> = {
 
         return <div className="import-wizard-sample-row">
             <h3>Which one of these contains the <strong>date</strong> of the transaction?</h3>
-
-            {fields.map(key => <label key={key}>
-                <input 
-                    type="radio"
-                    name="field-select" 
-                    value={key}
-                    checked={key === api.getState().dateColumn}
-                    onChange={onChange}/>
-                <span>{key}</span>
-                <span>{first[key]}</span>
-            </label>)}
+            <ImportRowSelect 
+                type="radio" 
+                rows={state.rows} 
+                onChange={onChange}
+                columnFilter={(key, value) => moment(value).isValid()}
+                value={api.getState().dateColumn} />
         </div>;
     },
     validate: (state: ImportWizardState) => ({ 
