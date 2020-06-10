@@ -38,7 +38,7 @@ abstract class BaseDataStore<T extends BaseDataStoreRecord> {
 }
 
 export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
-    private readonly db: Nedb<T>;
+    protected readonly db: Nedb<T>;
 
     constructor(name: string) {
         super(name);

@@ -3,7 +3,7 @@ import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStor
 const name = 'account-transactions';
 
 export interface BankAccountTransaction extends BaseDataStoreRecord {
-    bankAccountId: string;
+    bankAccountName: string;
     year: number;
     month: number;
     day: number;
@@ -11,6 +11,7 @@ export interface BankAccountTransaction extends BaseDataStoreRecord {
     wholeAmount: number; // signed, integer
     fractionalAmount: number; // unsigned, integer, in thousandths, range 0...999
     originalRecord: Record<string, string>;
+    envelopeName?: string;
 }
 
 export class BankAccountTransactionDataStore extends DataStore<BankAccountTransaction> {

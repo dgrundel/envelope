@@ -25,7 +25,7 @@ export interface ImportWizardState {
     invertTransactions: boolean;
     bankAccounts?: BankAccount[];
 
-    bankAccountId?: string;
+    bankAccountName?: string;
     dateColumn?: string;
     amountColumn?: string;
     descriptionColumns?: string[];
@@ -42,7 +42,7 @@ class NestedWizard extends Wizard<ImportWizardState> { }
 
 const errorMessage = (s: string) => <p className="import-wizard-error-message">{s}</p>;
 
-const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string, amountColumn: string, descriptionColumns: string[], bankAccountId: string): BankAccountTransaction[] => {
+const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string, amountColumn: string, descriptionColumns: string[], bankAccountName: string): BankAccountTransaction[] => {
     return rows.map(row => {
         const date = moment(row[dateColumn]);
         const year = date.year();
@@ -58,7 +58,7 @@ const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string,
             .join(' ');
 
         return {
-            bankAccountId,
+            bankAccountName,
             year,
             month,
             day,
@@ -75,7 +75,7 @@ const accountSelectStep: WizardStep<ImportWizardState> = {
         const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value;
             const state = api.getState();
-            state.bankAccountId = value;
+            state.bankAccountName = value;
             api.updateState(state);
         };
 
@@ -87,17 +87,8 @@ const accountSelectStep: WizardStep<ImportWizardState> = {
             return <p>No banks accounts to use for import. Please add an account first!</p>;
         }
 
-        const bankAccountNames = bankAccounts.reduce((names: Record<string, string>, bankAccount: BankAccount) => {
-            const id = bankAccount._id as string;
-            names[id] = bankAccount.name;
-            
-            return names;
-        }, {});
-
         const bankAccountRow = bankAccounts.reduce((row: Row, bankAccount: BankAccount) => {
-            const id = bankAccount._id as string;
-            row[id] = getBankAccountTypeLabel(bankAccount.type);
-            
+            row[bankAccount.name] = getBankAccountTypeLabel(bankAccount.type);
             return row;
         }, {});
 
@@ -108,13 +99,12 @@ const accountSelectStep: WizardStep<ImportWizardState> = {
                 type="radio" 
                 rows={[bankAccountRow]} 
                 onChange={onChange}
-                value={api.getState().bankAccountId}
-                keyFormatter={id => bankAccountNames[id]} />
+                value={api.getState().bankAccountName} />
         </div>;
     },
     validate: (state: ImportWizardState) => ({ 
-        valid: !!state.bankAccountId,
-        message: state.bankAccountId ? null : errorMessage('Please select a bank account.')
+        valid: !!state.bankAccountName,
+        message: state.bankAccountName ? null : errorMessage('Please select a bank account.')
     })
 };
 
@@ -216,13 +206,13 @@ const descriptionFieldSelectStep: WizardStep<ImportWizardState> = {
 
 const invertDebitCreditStep: WizardStep<ImportWizardState> = {
     render: (state: ImportWizardState, api: WizardApi<ImportWizardState>) => {
-        const bankAccountId = state.bankAccountId as string;
+        const bankAccountName = state.bankAccountName as string;
         const dateColumn = state.dateColumn as string;
         const descriptionColumns = state.descriptionColumns as string[];
         const amountColumn = state.amountColumn as string;
 
-        const bankAccount = state.bankAccounts?.find(acct => acct._id === state.bankAccountId) as BankAccount;
-        const transactions: BankAccountTransaction[] = convertToTransactions(state.rows, false, dateColumn, amountColumn, descriptionColumns, bankAccountId);
+        const bankAccount = state.bankAccounts?.find(acct => acct.name === state.bankAccountName) as BankAccount;
+        const transactions: BankAccountTransaction[] = convertToTransactions(state.rows, false, dateColumn, amountColumn, descriptionColumns, bankAccountName);
 
         let transaction = transactions.find(transaction => transaction.wholeAmount > 0);
         let hasPositive = !!transaction;
@@ -312,18 +302,16 @@ const invertDebitCreditStep: WizardStep<ImportWizardState> = {
 
 const summaryStep: WizardStep<ImportWizardState> = {
     render: (state: ImportWizardState) => {
-        const bankAccountId = state.bankAccountId as string;
+        const bankAccountName = state.bankAccountName as string;
         const dateColumn = state.dateColumn as string;
         const descriptionColumns = state.descriptionColumns as string[];
         const amountColumn = state.amountColumn as string;
         const invert = state.invertTransactions;
 
-        const transactions: BankAccountTransaction[] = convertToTransactions(state.rows, invert, dateColumn, amountColumn, descriptionColumns, bankAccountId);
-
-        const accountName = state.bankAccounts?.find(acct => acct._id === state.bankAccountId)?.name;
+        const transactions: BankAccountTransaction[] = convertToTransactions(state.rows, invert, dateColumn, amountColumn, descriptionColumns, bankAccountName);
 
         return <div className="import-wizard-summary">
-            <h3>Ready to import your transactions into <strong>{accountName}</strong>.</h3>
+            <h3>Ready to import your transactions into <strong>{bankAccountName}</strong>.</h3>
 
             <table style={{minWidth: '60vw'}}>
                 <thead>
@@ -394,7 +382,7 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
     onComplete(wizardState: ImportWizardState) {
         Log.debug('done', wizardState);
 
-        // bankAccountId: string;
+        // bankAccountName: string;
         // date: number;
         // description: string;
         // amount: number;
@@ -403,13 +391,13 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
         // dismiss import modal
         this.props.modalApi.dismissModal();
 
-        const bankAccountId = wizardState.bankAccountId as string;
+        const bankAccountName = wizardState.bankAccountName as string;
         const dateColumn = wizardState.dateColumn as string;
         const descriptionColumns = wizardState.descriptionColumns as string[];
         const amountColumn = wizardState.amountColumn as string;
         const invert = wizardState.invertTransactions;
         
-        const transactions = convertToTransactions(this.props.rows, invert, dateColumn, amountColumn, descriptionColumns, bankAccountId);
+        const transactions = convertToTransactions(this.props.rows, invert, dateColumn, amountColumn, descriptionColumns, bankAccountName);
 
         // store the data
         new BankAccountTransactionDataStoreClient()

@@ -84,7 +84,7 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
                 <tbody>
                     {this.state.transactions.map(transaction => <tr key={transaction._id}>
                         <td>{dateFormatter(transaction.year, transaction.month, transaction.day)}</td>
-                        <td>{this.state.bankAccounts[transaction.bankAccountId]?.name}</td>
+                        <td>{transaction.bankAccountName}</td>
                         <td>{transaction.description}</td>
                         <td>{currencyFormatter(transaction.wholeAmount, transaction.fractionalAmount)}</td>
                     </tr>)}
