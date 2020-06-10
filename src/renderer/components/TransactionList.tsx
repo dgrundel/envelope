@@ -86,7 +86,7 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
                         <td>{dateFormatter(transaction.year, transaction.month, transaction.day)}</td>
                         <td>{this.state.bankAccounts[transaction.bankAccountId]?.name}</td>
                         <td>{transaction.description}</td>
-                        <td>{currencyFormatter(transaction.amount)}</td>
+                        <td>{currencyFormatter(transaction.wholeAmount, transaction.fractionalAmount)}</td>
                     </tr>)}
                 </tbody>
             </table>;

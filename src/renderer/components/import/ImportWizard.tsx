@@ -11,6 +11,7 @@ import { Wizard, WizardProps, WizardStep, WizardApi } from '../wizard/Wizard';
 import { BankAccountTransactionDataStoreClient, BankAccountTransaction } from '@/dataStore/impl/BankAccountTransactionDataStore';
 import { stat } from 'fs';
 import { dateFormatter, currencyFormatter } from '@/util/Formatters';
+import { Currency } from '@/util/Currency';
 
 export interface Row {
     [header: string]: string;
@@ -44,7 +45,11 @@ const convertToTransactions = (rows: Row[], dateColumn: string, amountColumn: st
         const year = date.year();
         const month = date.month();
         const day = date.date();
-        const amount = parseFloat(row[amountColumn]);
+        
+        const currency = Currency.parse(row[amountColumn]);
+        const wholeAmount = currency.wholeAmount;
+        const fractionalAmount = currency.fractionalAmount;
+
         const description = descriptionColumns
             .map(col => row[col])
             .join(' ');
@@ -54,7 +59,8 @@ const convertToTransactions = (rows: Row[], dateColumn: string, amountColumn: st
             year,
             month,
             day,
-            amount,
+            wholeAmount,
+            fractionalAmount,
             description,
             originalRecord: row
         };
@@ -137,8 +143,8 @@ const amountFieldSelectStep: WizardStep<ImportWizardState> = {
     render: (state: ImportWizardState, api: WizardApi<ImportWizardState>) => {
         const first = state.firstRow;
         const fields = Object.keys(first)
-            // only show fields that contain parseable numbers
-            .filter(key => !isNaN(parseFloat(first[key])));
+            // only show fields that contain parseable currency
+            .filter(key => Currency.parse(first[key]).isValid());
 
         const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value;
@@ -236,7 +242,7 @@ const summaryStep: WizardStep<ImportWizardState> = {
                     {transactions.map(transaction => <tr>
                         <td>{dateFormatter(transaction.year, transaction.month, transaction.day)}</td>
                         <td>{transaction.description}</td>
-                        <td>{currencyFormatter(transaction.amount)}</td>
+                        <td>{currencyFormatter(transaction.wholeAmount, transaction.fractionalAmount)}</td>
                     </tr>)}
                 </tbody>
             </table>

@@ -8,7 +8,8 @@ export interface BankAccountTransaction extends BaseDataStoreRecord {
     month: number;
     day: number;
     description: string;
-    amount: number;
+    wholeAmount: number; // signed, integer
+    fractionalAmount: number; // unsigned, integer, in thousandths, range 0...999
     originalRecord: Record<string, string>;
 }
 
