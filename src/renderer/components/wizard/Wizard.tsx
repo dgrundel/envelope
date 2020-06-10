@@ -5,6 +5,7 @@ import { Log } from '@/util/Logger';
 export interface WizardApi<S> {
     getState: () => S;
     updateState: (wizardState: S) => void;
+    nextStep: () => void;
 }
 
 export interface WizardStepValidationResult {
@@ -87,10 +88,12 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
         const updateState = (wizardState: S) => this.setState({
             wizardState
         });
+        const nextStep = () => this.next();
         
         return {
             getState: getState.bind(this),
-            updateState: updateState.bind(this)
+            updateState: updateState.bind(this),
+            nextStep: nextStep.bind(this)
         }
     }
 

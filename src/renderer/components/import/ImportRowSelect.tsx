@@ -2,6 +2,7 @@ import * as React from "react";
 
 import '@public/components/import/ImportRowSelect.scss';
 import { Row } from './ImportWizard';
+import { RowSelect } from '../RowSelect';
 
 export type ColumnFilter = (key: string, value: string) => boolean;
 export type KeyFormatter = (key: string) => string;
@@ -35,35 +36,26 @@ export class ImportRowSelect extends React.Component<ImportRowSelectProps, Impor
     }
 
     render() {
-        const name = this.props.name || 'import-row-select-input';
         const row = this.props.rows[this.state.index];
         const fields = this.props.columnFilter
             ? Object.keys(row).filter(k => (this.props.columnFilter as ColumnFilter)(k, row[k]))
             : Object.keys(row);
         const value = this.props.value;
 
-        return <div className="import-row-select">
-            <div className="import-row-select-rows">
-                {this.renderHeading()}
-
-                {fields.map(key => {
-                    const checked = Array.isArray(value) 
-                        ? value.findIndex(v => v === key) !== -1 
-                        : key === value;
-
-                    return <label key={key} className={`import-row-select-row ${checked ? 'import-row-select-selected-row' : ''}`}>
-                        <span><input 
-                            type={this.props.type}
-                            name={name}
-                            value={key}
-                            checked={checked}
-                            onChange={e => this.props.onChange(e)}/></span>
-                        <span>{this.props.keyFormatter ? this.props.keyFormatter(key) : key}</span>
-                        <span>{this.props.valueFormatter ? this.props.valueFormatter(key, row[key]) : row[key]}</span>
-                    </label>
-                })}
-            </div>
-        </div>;
+        return <RowSelect
+            type={this.props.type}
+            options={fields.map(key => ({
+                value: key,
+                label: <div className="import-row-select-row-label">
+                    <span>{this.props.keyFormatter ? this.props.keyFormatter(key) : key}</span>
+                    <span>{this.props.valueFormatter ? this.props.valueFormatter(key, row[key]) : row[key]}</span>
+                </div>
+            }))}
+            onChange={e => this.props.onChange(e)}
+            name={this.props.name}
+            value={value}
+            className="import-row-select"
+        />;
     }
 
     renderHeading() {

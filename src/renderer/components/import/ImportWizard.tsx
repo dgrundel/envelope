@@ -13,6 +13,7 @@ import { stat } from 'fs';
 import { dateFormatter, currencyFormatter } from '@/util/Formatters';
 import { Currency } from '@/util/Currency';
 import { ImportRowSelect } from './ImportRowSelect';
+import { RowSelect } from '../RowSelect';
 
 export interface Row {
     [header: string]: string;
@@ -21,6 +22,7 @@ export interface Row {
 export interface ImportWizardState {
     rows: Row[];
     firstRow: Row;
+    invertTransactions: boolean;
     bankAccounts?: BankAccount[];
 
     bankAccountId?: string;
@@ -40,7 +42,7 @@ class NestedWizard extends Wizard<ImportWizardState> { }
 
 const errorMessage = (s: string) => <p className="import-wizard-error-message">{s}</p>;
 
-const convertToTransactions = (rows: Row[], dateColumn: string, amountColumn: string, descriptionColumns: string[], bankAccountId: string): BankAccountTransaction[] => {
+const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string, amountColumn: string, descriptionColumns: string[], bankAccountId: string): BankAccountTransaction[] => {
     return rows.map(row => {
         const date = moment(row[dateColumn]);
         const year = date.year();
@@ -48,7 +50,7 @@ const convertToTransactions = (rows: Row[], dateColumn: string, amountColumn: st
         const day = date.date();
         
         const currency = Currency.parse(row[amountColumn]);
-        const wholeAmount = currency.wholeAmount;
+        const wholeAmount = (invert ? -1 : 1) * currency.wholeAmount;
         const fractionalAmount = currency.fractionalAmount;
 
         const description = descriptionColumns
@@ -212,14 +214,111 @@ const descriptionFieldSelectStep: WizardStep<ImportWizardState> = {
     }
 };
 
+const invertDebitCreditStep: WizardStep<ImportWizardState> = {
+    render: (state: ImportWizardState, api: WizardApi<ImportWizardState>) => {
+        const bankAccountId = state.bankAccountId as string;
+        const dateColumn = state.dateColumn as string;
+        const descriptionColumns = state.descriptionColumns as string[];
+        const amountColumn = state.amountColumn as string;
+
+        const bankAccount = state.bankAccounts?.find(acct => acct._id === state.bankAccountId) as BankAccount;
+        const transactions: BankAccountTransaction[] = convertToTransactions(state.rows, false, dateColumn, amountColumn, descriptionColumns, bankAccountId);
+
+        let transaction = transactions.find(transaction => transaction.wholeAmount > 0);
+        let hasPositive = !!transaction;
+        if (!hasPositive) {
+            // if we didn't find a positive transaction, grab a negative one.
+            transaction = transactions.find(transaction => transaction.wholeAmount < 0);
+        }
+
+        if (!transaction) {
+            Log.debug('No non-zero transactions present.', transactions);
+            api.nextStep();
+            return null;
+        }
+
+        const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            const state = api.getState();
+            state.invertTransactions = value === 'true';
+            api.updateState(state);
+        };
+
+        let expectedDescription;
+        let invertedDescription;
+        if (hasPositive) {
+            if (bankAccount.type === 'credit-card') {
+                // expect positive transactions on a credit card to be a payment
+                expectedDescription = 'payment or credit';
+                invertedDescription = 'purchase, fee, or other charge';
+            } else {
+                // expect positive transactions on checking/savings to be a deposit
+                expectedDescription = 'deposit or credit';
+                invertedDescription = 'purchase, bill payment, fee, or other type of debit';
+            }
+        } else {
+            // expect negative transactions on credit card/checking/savings to be a purchase or fee
+            if (bankAccount.type === 'credit-card') {
+                expectedDescription = 'purchase, fee, or other charge';
+                invertedDescription = 'payment or credit';
+            } else {
+                expectedDescription = 'purchase, bill payment, fee, or other type of debit';
+                invertedDescription = 'deposit or credit';
+            }
+        }
+
+        return <div>
+            <h3>Is this a <strong>{expectedDescription}</strong>?</h3>
+            <p>To be sure your transactions are imported correctly, we need to understand
+                how positive and negative values should be handled.</p>
+
+            <table className="offset-table">
+                <tbody>
+                    <tr>
+                        <th>Date</th>
+                        <td>{dateFormatter(transaction.year, transaction.month, transaction.day)}</td>
+                    </tr>
+                    <tr>
+                        <th>Amount</th>
+                        <td>{currencyFormatter(transaction.wholeAmount, transaction.fractionalAmount)}</td>
+                    </tr>
+                    <tr>
+                        <th>Description</th>
+                        <td>{transaction.description}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <RowSelect
+                type="radio"
+                options={[{
+                    value: 'false', // false means we leave amounts as-is.
+                    label: <>
+                        <strong>Yes</strong>, this is a {expectedDescription}.
+                    </>
+                },{
+                    value: 'true', // true means we need to invert the amounts (positive <=> negative)
+                    label: <>
+                        <strong>No</strong>, this is a {invertedDescription}.
+                    </>
+                }]}
+                onChange={onChange}
+                value={state.invertTransactions.toString()}
+            />
+        </div>;
+    },
+    validate: () => ({ valid: true })
+};
+
 const summaryStep: WizardStep<ImportWizardState> = {
     render: (state: ImportWizardState) => {
         const bankAccountId = state.bankAccountId as string;
         const dateColumn = state.dateColumn as string;
         const descriptionColumns = state.descriptionColumns as string[];
         const amountColumn = state.amountColumn as string;
+        const invert = state.invertTransactions;
 
-        const transactions: BankAccountTransaction[] = convertToTransactions(state.rows, dateColumn, amountColumn, descriptionColumns, bankAccountId);
+        const transactions: BankAccountTransaction[] = convertToTransactions(state.rows, invert, dateColumn, amountColumn, descriptionColumns, bankAccountId);
 
         const accountName = state.bankAccounts?.find(acct => acct._id === state.bankAccountId)?.name;
 
@@ -253,7 +352,8 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
 
         this.state = {
             rows: this.props.rows,
-            firstRow: this.props.rows[0]
+            firstRow: this.props.rows[0],
+            invertTransactions: false
         };
 
         new BankAccountDataStoreClient().getAccounts()
@@ -271,13 +371,15 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
                 initialState: {
                     rows: this.props.rows,
                     firstRow: this.props.rows[0],
-                    bankAccounts: this.state.bankAccounts
+                    bankAccounts: this.state.bankAccounts,
+                    invertTransactions: false
                 },
                 steps: [
                     accountSelectStep,
                     dateFieldSelectStep,
                     amountFieldSelectStep,
                     descriptionFieldSelectStep,
+                    invertDebitCreditStep,
                     summaryStep
                 ],
                 onComplete: (wizardState: ImportWizardState) => this.onComplete(wizardState)
@@ -305,8 +407,9 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
         const dateColumn = wizardState.dateColumn as string;
         const descriptionColumns = wizardState.descriptionColumns as string[];
         const amountColumn = wizardState.amountColumn as string;
+        const invert = wizardState.invertTransactions;
         
-        const transactions = convertToTransactions(this.props.rows, dateColumn, amountColumn, descriptionColumns, bankAccountId);
+        const transactions = convertToTransactions(this.props.rows, invert, dateColumn, amountColumn, descriptionColumns, bankAccountId);
 
         // store the data
         new BankAccountTransactionDataStoreClient()

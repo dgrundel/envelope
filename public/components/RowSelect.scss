@@ -1,0 +1,23 @@
+@import '../config.scss';
+@import '../mixins.scss';
+
+.row-select {
+    .row-select-row {
+        display: grid;
+        grid-template-columns: 5ex 1fr;
+        margin-bottom: 0.1rem;
+
+        .row-select-row-input {
+            padding-right: 0;
+        }
+
+        & > * {
+            @include table-cell();
+        }
+
+        &.row-select-selected-row {
+            @include highlight();
+            @include rounded();
+        }
+    }
+}

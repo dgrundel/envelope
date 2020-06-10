@@ -49,3 +49,8 @@
   padding: $table-padding;
   border: 0 none;
 }
+
+@mixin grid-split($cols) {
+  display: grid;
+  grid-template-columns: repeat($cols, 1fr);
+}

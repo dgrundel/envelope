@@ -2,24 +2,8 @@
 @import '../../mixins.scss';
 
 .import-row-select {
-    .import-row-select-rows {
-        .import-row-select-row {
-            display: grid;
-            grid-template-columns: 4rem 1fr 1fr;
-            margin-bottom: 0.1rem;
-
-            & > * {
-                @include table-cell();
-            }
-
-            &.import-row-select-selected-row {
-                @include highlight();
-                @include rounded();
-            }
-
-            &.import-row-select-heading {
-                @include table-heading-row();
-            }
-        }
+    .import-row-select-row-label {
+        @include grid-split(2);
+        column-gap: .25rem;
     }
 }

@@ -74,6 +74,13 @@ p {
   margin: .8em 0;
 }
 
+table.offset-table {
+  $horizontal-margin: 2rem;
+  margin: 2rem $horizontal-margin;
+  width: calc(100% - #{$horizontal-margin * 2});
+  border: 1px solid $color-lt-gray;
+}
+
 .hide.hide.hide {
   display: none;
 }
