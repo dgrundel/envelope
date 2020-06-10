@@ -3,24 +3,22 @@
 
 .import-row-select {
     .import-row-select-rows {
-        label {
+        .import-row-select-row {
             display: grid;
             grid-template-columns: 4rem 1fr 1fr;
             margin-bottom: 0.1rem;
 
             & > * {
-                padding: $table-padding;
+                @include table-cell();
             }
 
             &.import-row-select-selected-row {
                 @include highlight();
                 @include rounded();
             }
-        }
 
-        &.import-row-select-rows-with-formatter {
-            label {
-                grid-template-columns: 4rem 1fr 1fr 1fr;
+            &.import-row-select-heading {
+                @include table-heading-row();
             }
         }
     }

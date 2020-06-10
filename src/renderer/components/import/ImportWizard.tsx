@@ -85,19 +85,29 @@ const accountSelectStep: WizardStep<ImportWizardState> = {
             return <p>No banks accounts to use for import. Please add an account first!</p>;
         }
 
+        const bankAccountNames = bankAccounts.reduce((names: Record<string, string>, bankAccount: BankAccount) => {
+            const id = bankAccount._id as string;
+            names[id] = bankAccount.name;
+            
+            return names;
+        }, {});
+
+        const bankAccountRow = bankAccounts.reduce((row: Row, bankAccount: BankAccount) => {
+            const id = bankAccount._id as string;
+            row[id] = getBankAccountTypeLabel(bankAccount.type);
+            
+            return row;
+        }, {});
+
         return <div className="import-wizard-sample-row">
             <h3>Into which <strong>bank account</strong> should we import the transactions?</h3>
 
-            {bankAccounts.map(bankAccount => <label key={bankAccount._id}>
-                <input 
-                    type="radio"
-                    name="field-select" 
-                    value={bankAccount._id}
-                    checked={bankAccount._id === api.getState().bankAccountId}
-                    onChange={onChange}/>
-                <span>{bankAccount.name}</span>
-                <span>{getBankAccountTypeLabel(bankAccount.type)}</span>
-            </label>)}
+            <ImportRowSelect 
+                type="radio" 
+                rows={[bankAccountRow]} 
+                onChange={onChange}
+                value={api.getState().bankAccountId}
+                keyFormatter={id => bankAccountNames[id]} />
         </div>;
     },
     validate: (state: ImportWizardState) => ({ 
@@ -122,7 +132,9 @@ const dateFieldSelectStep: WizardStep<ImportWizardState> = {
                 rows={state.rows} 
                 onChange={onChange}
                 columnFilter={(key, value) => moment(value).isValid()}
-                value={api.getState().dateColumn} />
+                value={api.getState().dateColumn}
+                keyHeading="CSV Column"
+                valueHeading="Sample Value" />
         </div>;
     },
     validate: (state: ImportWizardState) => ({ 
@@ -152,7 +164,9 @@ const amountFieldSelectStep: WizardStep<ImportWizardState> = {
                 rows={state.rows} 
                 onChange={onChange}
                 columnFilter={(key, value) => Currency.parse(value).isValid()}
-                value={api.getState().amountColumn} />
+                value={api.getState().amountColumn}
+                keyHeading="CSV Column"
+                valueHeading="Sample Value" />
         </div>;
     },
     validate: (state: ImportWizardState) => ({ 
@@ -184,7 +198,9 @@ const descriptionFieldSelectStep: WizardStep<ImportWizardState> = {
                 type="checkbox" 
                 rows={state.rows} 
                 onChange={onChange}
-                value={api.getState().descriptionColumns} />
+                value={api.getState().descriptionColumns}
+                keyHeading="CSV Column"
+                valueHeading="Sample Value" />
         </div>;
     },
     validate: (state: ImportWizardState) => {
@@ -208,10 +224,9 @@ const summaryStep: WizardStep<ImportWizardState> = {
         const accountName = state.bankAccounts?.find(acct => acct._id === state.bankAccountId)?.name;
 
         return <div className="import-wizard-summary">
-            <h3>Everything look good?</h3>
+            <h3>Ready to import your transactions into <strong>{accountName}</strong>.</h3>
 
-            <p>Importing into <strong>{accountName}</strong>.</p>
-            <table>
+            <table style={{minWidth: '60vw'}}>
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -220,7 +235,7 @@ const summaryStep: WizardStep<ImportWizardState> = {
                     </tr>
                 </thead>
                 <tbody>
-                    {transactions.map(transaction => <tr>
+                    {transactions.map((transaction, i) => <tr key={`${transaction.description}${i}`}>
                         <td>{dateFormatter(transaction.year, transaction.month, transaction.day)}</td>
                         <td>{transaction.description}</td>
                         <td>{currencyFormatter(transaction.wholeAmount, transaction.fractionalAmount)}</td>

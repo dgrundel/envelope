@@ -31,3 +31,21 @@
   background-color: $color-highlight-bg;
   font-weight: 400;
 }
+
+@mixin table-heading {
+  font-weight: 400;
+  font-size: .8em;
+  text-transform: uppercase;
+}
+
+@mixin table-heading-row {
+  @include table-heading();
+  border-bottom: .5px solid $color-lt-gray;
+  vertical-align: bottom;
+}
+
+@mixin table-cell {
+  text-align: left;
+  padding: $table-padding;
+  border: 0 none;
+}
