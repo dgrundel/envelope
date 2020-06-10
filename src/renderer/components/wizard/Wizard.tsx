@@ -23,6 +23,7 @@ export interface WizardProps<S> {
     initialStep?: number;
     steps: WizardStep<S>[];
     onComplete: (wizardState: S) => void;
+    onCancel?: (wizardState: S) => void;
     heading?: string;
 }
 
@@ -58,6 +59,10 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
         const isLastStep = this.state.step === this.props.steps.length - 1;
 
         const buttons: ModalButton[] = [{
+            buttonText: 'Cancel',
+            onClick: () => this.cancel(),
+            className: isFirstStep ? '' : 'hide'
+        },{
             buttonText: 'Back',
             onClick: () => this.back(),
             className: isFirstStep ? 'hide' : ''
@@ -71,7 +76,7 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
             className: isLastStep ? '' : 'hide'
         }];
 
-        return <BaseModal heading={this.props.heading} buttons={buttons}>
+        return <BaseModal heading={this.props.heading} buttons={buttons} closeButtonHandler={() => this.cancel()}>
             {this.state.message || ''}
             {this.state.renderer && this.state.renderer.render(this.state.wizardState, this.state.wizardApi)}
         </BaseModal>;
@@ -94,7 +99,7 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
         const fromStep = this.props.steps[fromStepIndex];
 
         if (!fromStep) {
-            Log.error(`fromStep: There is no step at index ${fromStepIndex}`);
+            Log.error('fromStep: There is no step at index', fromStepIndex);
             return;
         }
         
@@ -103,16 +108,15 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
         if (validationResult.valid) {
             this.renderStep(toStepIndex);
         } else {
-            Log.debug(`Wizard step validator error.`)
+            Log.debug('Wizard step validator error.', validationResult)
         }
     }
 
     renderStep(n: number) {
-        const api = this.state.wizardApi;
         const toStep = this.props.steps[n];
 
         if (!toStep) {
-            Log.error(`toStep: There is no step at index ${n}`);
+            Log.error('toStep: There is no step at index', n);
             return;
         }
         
@@ -120,6 +124,13 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
             step: n,
             renderer: toStep 
         });
+    }
+
+    cancel() {
+        if (this.props.onCancel) {
+            this.props.onCancel(this.state.wizardState);
+        }
+        this.props.modalApi.dismissModal();
     }
 
     back() {
@@ -142,7 +153,7 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
         if (validationResult.valid) {
             this.props.onComplete(this.state.wizardState);
         } else {
-            Log.debug('Final wizard step invalid.');
+            Log.debug('Final wizard step invalid.', validationResult);
         }
     }
 }
