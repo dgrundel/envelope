@@ -4,7 +4,9 @@ const name = 'account-transactions';
 
 export interface BankAccountTransaction extends BaseDataStoreRecord {
     bankAccountId: string;
-    date: number;
+    year: number;
+    month: number;
+    day: number;
     description: string;
     amount: number;
     originalRecord: Record<string, string>;
@@ -23,6 +25,10 @@ export class BankAccountTransactionDataStoreClient extends DataStoreClient<BankA
 
     addTransaction(transaction: BankAccountTransaction) {
         return this.insert(transaction);
+    }
+
+    addTransactions(transactions: BankAccountTransaction[]) {
+        return this.insertMany(transactions);
     }
 
     getTransactions(query: any = {}) {

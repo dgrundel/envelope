@@ -65,7 +65,9 @@ export class BaseModal extends React.Component<ModalProps, {}> implements Modal 
         return <div className="modal-overlay">
             <div className="modal-content">
                 {this.renderHeading()}
-                {this.props.children}
+                <div className="modal-body">
+                    {this.props.children}
+                </div>
                 {this.renderFooter()}
             </div>
         </div>;

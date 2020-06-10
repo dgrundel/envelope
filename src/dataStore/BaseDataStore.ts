@@ -8,6 +8,7 @@ const dataStores: Record<string, DataStore<any>> = {};
 export enum DataStoreEvent {
     Changed = 'datastore-changed',
     Insert = 'datastore-insert',
+    InsertMany = 'datastore-insert-many',
     Find = 'datastore-find'
 }
 
@@ -54,6 +55,9 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         ipcMain.handle(buildEventName(DataStoreEvent.Insert, this.name), async (event, item: T) => {
             return this.insert(item);
         });
+        ipcMain.handle(buildEventName(DataStoreEvent.InsertMany, this.name), async (event, items: T[]) => {
+            return this.insertMany(items);
+        });
         ipcMain.handle(buildEventName(DataStoreEvent.Find, this.name), async (event, query?: any) => {
             return this.find(query);
         });
@@ -72,6 +76,19 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
                 } else {
                     this.triggerChanged(DataStoreEvent.Insert);
                     resolve(document);
+                }
+            });
+        });
+    }
+
+    protected insertMany(items: T[]): Promise<T[]> {
+        return new Promise((resolve, reject) => {
+            this.db.insert(items, (err: Error, documents: T[]) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    this.triggerChanged(DataStoreEvent.InsertMany);
+                    resolve(documents);
                 }
             });
         });
@@ -97,6 +114,10 @@ export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStor
 
     protected insert(item: T): Promise<T> {
         return this.invoke(DataStoreEvent.Insert, item);
+    }
+
+    protected insertMany(items: T[]): Promise<T[]> {
+        return this.invoke(DataStoreEvent.InsertMany, items);
     }
 
     protected find(query: any = {}): Promise<T[]> {
