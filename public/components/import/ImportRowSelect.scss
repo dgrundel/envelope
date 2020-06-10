@@ -6,6 +6,7 @@
         label {
             display: grid;
             grid-template-columns: 4rem 1fr 1fr;
+            margin-bottom: 0.1rem;
 
             & > * {
                 padding: $table-padding;

@@ -147,17 +147,12 @@ const amountFieldSelectStep: WizardStep<ImportWizardState> = {
 
         return <div className="import-wizard-sample-row">
             <h3>Which one of these contains the <strong>amount</strong> of the transaction?</h3>
-
-            {fields.map(key => <label key={key}>
-                <input 
-                    type="radio"
-                    name="field-select" 
-                    value={key}
-                    checked={key === api.getState().amountColumn}
-                    onChange={onChange}/>
-                <span>{key}</span>
-                <span>{first[key]}</span>
-            </label>)}
+            <ImportRowSelect 
+                type="radio" 
+                rows={state.rows} 
+                onChange={onChange}
+                columnFilter={(key, value) => Currency.parse(value).isValid()}
+                value={api.getState().amountColumn} />
         </div>;
     },
     validate: (state: ImportWizardState) => ({ 
@@ -185,17 +180,11 @@ const descriptionFieldSelectStep: WizardStep<ImportWizardState> = {
 
         return <div className="import-wizard-sample-row">
             <h3>Select any items that should be included in the <strong>description</strong> of the transaction.</h3>
-
-            {fields.map(key => <label key={key}>
-                <input 
-                    type="checkbox"
-                    name="field-select" 
-                    value={key}
-                    checked={initialValue.findIndex(s => s === key) !== -1}
-                    onChange={onChange}/>
-                <span>{key}</span>
-                <span>{first[key]}</span>
-            </label>)}
+            <ImportRowSelect 
+                type="checkbox" 
+                rows={state.rows} 
+                onChange={onChange}
+                value={api.getState().descriptionColumns} />
         </div>;
     },
     validate: (state: ImportWizardState) => {

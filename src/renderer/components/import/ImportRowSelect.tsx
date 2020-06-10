@@ -36,18 +36,21 @@ export class ImportRowSelect extends React.Component<ImportRowSelectProps, Impor
         const fields = this.props.columnFilter
             ? Object.keys(row).filter(k => (this.props.columnFilter as ColumnFilter)(k, row[k]))
             : Object.keys(row);
-        // const value = typeof this.props.value !== 'undefined' ? this.props.value : fields[0];
         const value = this.props.value;
 
         return <div className="import-row-select">
             <div className={`import-row-select-rows ${this.props.columnFormatter ? 'import-row-select-rows-with-formatter' : ''}`}>
                 {fields.map(key => {
-                    return <label key={key} className={key === value ? 'import-row-select-selected-row' : ''}>
+                    const checked = Array.isArray(value) 
+                        ? value.findIndex(v => v === key) !== -1 
+                        : key === value;
+
+                    return <label key={key} className={checked ? 'import-row-select-selected-row' : ''}>
                         <span><input 
                             type={this.props.type}
                             name={name}
                             value={key}
-                            checked={key === value}
+                            checked={checked}
                             onChange={e => this.props.onChange(e)}/></span>
                         <span>{key}</span>
                         <span>{row[key]}</span>
