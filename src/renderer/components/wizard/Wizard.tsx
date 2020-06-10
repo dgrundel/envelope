@@ -8,8 +8,8 @@ export interface WizardApi<S> {
 }
 
 export interface WizardStep<S> {
-    render: (api: WizardApi<S>) => Promise<any>;
-    validate: (api: WizardApi<S>) => Promise<void>;
+    render: (state: S, api: WizardApi<S>) => any;
+    validate: (state: S, api: WizardApi<S>) => boolean;
 }
 
 export interface WizardProps<S> {
@@ -24,7 +24,7 @@ export interface WizardInternalState<S> {
     step: number;
     wizardApi: WizardApi<S>;
     wizardState: S;
-    children?: any;
+    renderer?: WizardStep<S>;
 }
 
 export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalState<S>> implements Modal {
@@ -40,16 +40,10 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
 
         this.state = {
             step: step,
-            wizardApi: {
-                getState: (() => this.state.wizardState).bind(this),
-                updateState: ((wizardState: S) => this.setState({
-                    wizardState
-                })).bind(this)
-            },
-            wizardState: props.initialState
+            wizardApi: this.createWizardApi(),
+            wizardState: props.initialState,
+            renderer: props.steps[step]
         };
-
-        this.renderStep(step);
     }
 
     render() {
@@ -71,8 +65,20 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
         }];
 
         return <BaseModal buttons={buttons}>
-            {this.state.children || ''}
+            {this.state.renderer && this.state.renderer.render(this.state.wizardState, this.state.wizardApi)}
         </BaseModal>;
+    }
+
+    createWizardApi() {
+        const getState = () => this.state.wizardState;
+        const updateState = (wizardState: S) => this.setState({
+            wizardState
+        });
+        
+        return {
+            getState: getState.bind(this),
+            updateState: updateState.bind(this)
+        }
     }
 
     stepTransition(fromStepIndex: number, toStepIndex: number) {
@@ -84,9 +90,11 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
             return;
         }
         
-        fromStep.validate(api)
-            .then(() => this.renderStep(toStepIndex))
-            .catch(err => Log.debug(`Wizard step validator error: ${err}`));
+        if (fromStep.validate(this.state.wizardState, api)) {
+            this.renderStep(toStepIndex);
+        } else {
+            Log.debug(`Wizard step validator error.`)
+        }
     }
 
     renderStep(n: number) {
@@ -98,15 +106,10 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
             return;
         }
         
-        toStep.render(api)
-            .then(children => {
-                Log.debug('Wizard step children (lol)', children);
-                this.setState({
-                    step: n,
-                    children 
-                });
-            })
-            .catch(err => Log.error(`Wizard step render error: ${err}`));
+        this.setState({
+            step: n,
+            renderer: toStep 
+        });
     }
 
     back() {
@@ -124,9 +127,10 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
         const current = this.state.step;
         const currentStep = this.props.steps[current];
 
-        currentStep.validate(api)
-            .then(() => {
-                this.props.onComplete(this.state.wizardState);
-            });
+        if (currentStep.validate(this.state.wizardState, api)) {
+            this.props.onComplete(this.state.wizardState);
+        } else {
+            Log.debug('Final wizard step invalid.');
+        }
     }
 }

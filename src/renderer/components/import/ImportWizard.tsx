@@ -29,13 +29,8 @@ export interface ImportWizardProps {
 
 class NestedWizard extends Wizard<ImportWizardState> { }
 
-// export interface WizardStep<S> {
-//     render: (api: WizardApi<S>) => Promise<any>;
-//     validate: (api: WizardApi<S>) => Promise<boolean>;
-// }
-
 const accountSelectStep: WizardStep<ImportWizardState> = {
-    render: (api: WizardApi<ImportWizardState>) => new Promise((resolve, reject) => {
+    render: (state: ImportWizardState, api: WizardApi<ImportWizardState>) => {
         const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value;
             const state = api.getState();
@@ -43,39 +38,35 @@ const accountSelectStep: WizardStep<ImportWizardState> = {
             api.updateState(state);
         };
 
-        new BankAccountDataStoreClient().getAccounts()
-            .then(bankAccounts => {
-                if (bankAccounts.length === 0) {
-                    Log.debug('No bank accounts to use for import. Should pop a modal here for adding an account.');
-        
-                    resolve(<p>No banks accounts to use for import. Please add an account first!</p>);
-                    return;
-                }
+        const bankAccounts = state.bankAccounts || [];
 
-                resolve(<div className="import-wizard-sample-row">
-                    <h3>Into which <strong>bank account</strong> should we import the transactions?</h3>
+        if (bankAccounts.length === 0) {
+            Log.debug('No bank accounts to use for import. Should pop a modal here for adding an account.');
 
-                    {bankAccounts.map(bankAccount => <label key={bankAccount._id}>
-                        <input 
-                            type="radio"
-                            name="field-select" 
-                            value={bankAccount._id}
-                            checked={bankAccount._id === api.getState().bankAccountId}
-                            onChange={onChange}/>
-                        <span>{bankAccount.name}</span>
-                        <span>{getBankAccountTypeLabel(bankAccount.type)}</span>
-                    </label>)}
-                </div>);
-            });
-    }),
-    validate: (api: WizardApi<ImportWizardState>) => {
-        return api.getState().bankAccountId ? Promise.resolve() : Promise.reject();
-    }
+            return <p>No banks accounts to use for import. Please add an account first!</p>;
+        }
+
+        return <div className="import-wizard-sample-row">
+            <h3>Into which <strong>bank account</strong> should we import the transactions?</h3>
+
+            {bankAccounts.map(bankAccount => <label key={bankAccount._id}>
+                <input 
+                    type="radio"
+                    name="field-select" 
+                    value={bankAccount._id}
+                    checked={bankAccount._id === api.getState().bankAccountId}
+                    onChange={onChange}/>
+                <span>{bankAccount.name}</span>
+                <span>{getBankAccountTypeLabel(bankAccount.type)}</span>
+            </label>)}
+        </div>;
+    },
+    validate: (state: ImportWizardState) => !!state.bankAccountId
 };
 
 const dateFieldSelectStep: WizardStep<ImportWizardState> = {
-    render: (api: WizardApi<ImportWizardState>) => new Promise((resolve, reject) => {
-        const first = api.getState().firstRow;
+    render: (state: ImportWizardState, api: WizardApi<ImportWizardState>) => {
+        const first = state.firstRow;
         const fields = Object.keys(first);
 
         const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +76,7 @@ const dateFieldSelectStep: WizardStep<ImportWizardState> = {
             api.updateState(state);
         };
 
-        resolve(<div className="import-wizard-sample-row">
+        return <div className="import-wizard-sample-row">
             <h3>Which one of these contains the <strong>date</strong> of the transaction?</h3>
 
             {fields.map(key => <label key={key}>
@@ -98,16 +89,14 @@ const dateFieldSelectStep: WizardStep<ImportWizardState> = {
                 <span>{key}</span>
                 <span>{first[key]}</span>
             </label>)}
-        </div>);
-    }),
-    validate: (api: WizardApi<ImportWizardState>) => {
-        return api.getState().dateColumn ? Promise.resolve() : Promise.reject();
-    }
+        </div>;
+    },
+    validate: (state: ImportWizardState) => !!state.dateColumn
 };
 
 const amountFieldSelectStep: WizardStep<ImportWizardState> = {
-    render: (api: WizardApi<ImportWizardState>) => new Promise((resolve, reject) => {
-        const first = api.getState().firstRow;
+    render: (state: ImportWizardState, api: WizardApi<ImportWizardState>) => {
+        const first = state.firstRow;
         const fields = Object.keys(first)
             // only show fields that contain parseable numbers
             .filter(key => !isNaN(parseFloat(first[key])));
@@ -119,7 +108,7 @@ const amountFieldSelectStep: WizardStep<ImportWizardState> = {
             api.updateState(state);
         };
 
-        resolve(<div className="import-wizard-sample-row">
+        return <div className="import-wizard-sample-row">
             <h3>Which one of these contains the <strong>amount</strong> of the transaction?</h3>
 
             {fields.map(key => <label key={key}>
@@ -132,18 +121,16 @@ const amountFieldSelectStep: WizardStep<ImportWizardState> = {
                 <span>{key}</span>
                 <span>{first[key]}</span>
             </label>)}
-        </div>);
-    }),
-    validate: (api: WizardApi<ImportWizardState>) => {
-        return api.getState().amountColumn ? Promise.resolve() : Promise.reject();
-    }
+        </div>;
+    },
+    validate: (state: ImportWizardState) => !!state.amountColumn
 };
 
 const descriptionFieldSelectStep: WizardStep<ImportWizardState> = {
-    render: (api: WizardApi<ImportWizardState>) => new Promise((resolve, reject) => {
-        const first = api.getState().firstRow;
+    render: (state: ImportWizardState, api: WizardApi<ImportWizardState>) => {
+        const first = state.firstRow;
         const fields = Object.keys(first);
-        const initialValue = (api.getState().descriptionColumns || []);
+        const initialValue = (state.descriptionColumns || []);
 
         const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value;
@@ -156,7 +143,7 @@ const descriptionFieldSelectStep: WizardStep<ImportWizardState> = {
             api.updateState(state);
         };
 
-        resolve(<div className="import-wizard-sample-row">
+        return <div className="import-wizard-sample-row">
             <h3>Select any items that should be included in the <strong>description</strong> of the transaction.</h3>
 
             {fields.map(key => <label key={key}>
@@ -169,19 +156,17 @@ const descriptionFieldSelectStep: WizardStep<ImportWizardState> = {
                 <span>{key}</span>
                 <span>{first[key]}</span>
             </label>)}
-        </div>);
-    }),
-    validate: (api: WizardApi<ImportWizardState>) => {
-        const selected = api.getState().descriptionColumns || [];
-        return selected.length > 0 ? Promise.resolve() : Promise.reject();
+        </div>;
+    },
+    validate: (state: ImportWizardState) => {
+        const selected = state.descriptionColumns || [];
+        return selected.length > 0;
     }
 };
 
 const summaryStep: WizardStep<ImportWizardState> = {
-    render: (api: WizardApi<ImportWizardState>) => new Promise((resolve, reject) => {
-        const state = api.getState();
-
-        resolve(<div className="import-wizard-summary">
+    render: (state: ImportWizardState) => {
+        return <div className="import-wizard-summary">
             <h3>Everything look good?</h3>
             <table>
                 <tbody>
@@ -203,34 +188,50 @@ const summaryStep: WizardStep<ImportWizardState> = {
                     </tr>
                 </tbody>
             </table>
-        </div>);
-    }),
-    validate: () => Promise.resolve()
+        </div>;
+    },
+    validate: () => true
 };
 
-export class ImportWizard extends React.Component<ImportWizardProps, {}> {
+export class ImportWizard extends React.Component<ImportWizardProps, ImportWizardState> {
     constructor(props: ImportWizardProps) {
         super(props);
+
+        this.state = {
+            firstRow: this.props.rows[0]
+        };
+
+        new BankAccountDataStoreClient().getAccounts()
+            .then(bankAccounts => {
+                this.setState({
+                    bankAccounts
+                });
+            });
     }
 
     render() {
-        const props = {
-            modalApi: this.props.modalApi,
-            initialState: {
-                firstRow: this.props.rows[0]
-            },
-            steps: [
-                accountSelectStep,
-                dateFieldSelectStep,
-                amountFieldSelectStep,
-                descriptionFieldSelectStep,
-                summaryStep
-            ],
-            onComplete: (wizardState: ImportWizardState) => {
-                Log.debug('done', wizardState);
-            }
-        };
+        if (this.state.bankAccounts) {
+            const props = {
+                modalApi: this.props.modalApi,
+                initialState: {
+                    firstRow: this.props.rows[0],
+                    bankAccounts: this.state.bankAccounts
+                },
+                steps: [
+                    accountSelectStep,
+                    dateFieldSelectStep,
+                    amountFieldSelectStep,
+                    descriptionFieldSelectStep,
+                    summaryStep
+                ],
+                onComplete: (wizardState: ImportWizardState) => {
+                    Log.debug('done', wizardState);
+                }
+            };
+    
+            return <NestedWizard {...props}/>
+        }
 
-        return <NestedWizard {...props}/>
+        return <SpinnerModal/>;
     }
 }
