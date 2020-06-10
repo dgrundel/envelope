@@ -7,9 +7,14 @@ export interface WizardApi<S> {
     updateState: (wizardState: S) => void;
 }
 
+export interface WizardStepValidationResult {
+    valid: boolean;
+    message?: any;
+}
+
 export interface WizardStep<S> {
     render: (state: S, api: WizardApi<S>) => any;
-    validate: (state: S, api: WizardApi<S>) => boolean;
+    validate: (state: S, api: WizardApi<S>) => WizardStepValidationResult;
 }
 
 export interface WizardProps<S> {
@@ -26,6 +31,7 @@ export interface WizardInternalState<S> {
     wizardApi: WizardApi<S>;
     wizardState: S;
     renderer?: WizardStep<S>;
+    message?: any;
 }
 
 export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalState<S>> implements Modal {
@@ -43,7 +49,7 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
             step: step,
             wizardApi: this.createWizardApi(),
             wizardState: props.initialState,
-            renderer: props.steps[step]
+            renderer: props.steps[step],
         };
     }
 
@@ -66,6 +72,7 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
         }];
 
         return <BaseModal heading={this.props.heading} buttons={buttons}>
+            {this.state.message || ''}
             {this.state.renderer && this.state.renderer.render(this.state.wizardState, this.state.wizardApi)}
         </BaseModal>;
     }
@@ -91,7 +98,9 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
             return;
         }
         
-        if (fromStep.validate(this.state.wizardState, api)) {
+        const validationResult = fromStep.validate(this.state.wizardState, api);
+        this.setState({ message: validationResult.message });
+        if (validationResult.valid) {
             this.renderStep(toStepIndex);
         } else {
             Log.debug(`Wizard step validator error.`)
@@ -128,7 +137,9 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
         const current = this.state.step;
         const currentStep = this.props.steps[current];
 
-        if (currentStep.validate(this.state.wizardState, api)) {
+        const validationResult = currentStep.validate(this.state.wizardState, api);
+        this.setState({ message: validationResult.message });
+        if (validationResult.valid) {
             this.props.onComplete(this.state.wizardState);
         } else {
             Log.debug('Final wizard step invalid.');

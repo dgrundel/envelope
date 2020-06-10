@@ -29,6 +29,8 @@ export interface ImportWizardProps {
 
 class NestedWizard extends Wizard<ImportWizardState> { }
 
+const errorMessage = (s: string) => <p className="import-wizard-error-message">{s}</p>;
+
 const accountSelectStep: WizardStep<ImportWizardState> = {
     render: (state: ImportWizardState, api: WizardApi<ImportWizardState>) => {
         const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +63,10 @@ const accountSelectStep: WizardStep<ImportWizardState> = {
             </label>)}
         </div>;
     },
-    validate: (state: ImportWizardState) => !!state.bankAccountId
+    validate: (state: ImportWizardState) => ({ 
+        valid: !!state.bankAccountId,
+        message: state.bankAccountId ? null : errorMessage('Please select a bank account.')
+    })
 };
 
 const dateFieldSelectStep: WizardStep<ImportWizardState> = {
@@ -91,7 +96,10 @@ const dateFieldSelectStep: WizardStep<ImportWizardState> = {
             </label>)}
         </div>;
     },
-    validate: (state: ImportWizardState) => !!state.dateColumn
+    validate: (state: ImportWizardState) => ({ 
+        valid: !!state.dateColumn,
+        message: state.dateColumn ? null : errorMessage('Please select one field.')
+     })
 };
 
 const amountFieldSelectStep: WizardStep<ImportWizardState> = {
@@ -123,7 +131,10 @@ const amountFieldSelectStep: WizardStep<ImportWizardState> = {
             </label>)}
         </div>;
     },
-    validate: (state: ImportWizardState) => !!state.amountColumn
+    validate: (state: ImportWizardState) => ({ 
+        valid: !!state.amountColumn ,
+        message: state.amountColumn ? null : errorMessage('Please select one field.')
+    })
 };
 
 const descriptionFieldSelectStep: WizardStep<ImportWizardState> = {
@@ -159,8 +170,11 @@ const descriptionFieldSelectStep: WizardStep<ImportWizardState> = {
         </div>;
     },
     validate: (state: ImportWizardState) => {
-        const selected = state.descriptionColumns || [];
-        return selected.length > 0;
+        const valid = (state.descriptionColumns || []).length > 0;
+        return { 
+            valid,
+            message: valid ? null : errorMessage('Please select at least one field.')
+        };
     }
 };
 
@@ -172,7 +186,7 @@ const summaryStep: WizardStep<ImportWizardState> = {
                 <tbody>
                     <tr>
                         <th>Bank Account</th>
-                        <td>{state.bankAccountId}</td>
+                        <td>{state.bankAccounts?.find(acct => acct._id === state.bankAccountId)?.name}</td>
                     </tr>
                     <tr>
                         <th>Date</th>
@@ -190,7 +204,7 @@ const summaryStep: WizardStep<ImportWizardState> = {
             </table>
         </div>;
     },
-    validate: () => true
+    validate: () => ({ valid: true })
 };
 
 export class ImportWizard extends React.Component<ImportWizardProps, ImportWizardState> {

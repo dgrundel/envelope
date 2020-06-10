@@ -1,4 +1,5 @@
 @import '../../config.scss';
+@import '../../mixins.scss';
 
 .import-wizard-sample-row {
     margin: 1em 0;
@@ -13,4 +14,11 @@
             border-bottom: none;
         }
     }
+}
+
+.import-wizard-error-message {
+    color: $color-white;
+    padding: 1em;
+    background-color: $color-error;
+    @include rounded();
 }
