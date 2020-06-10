@@ -2,7 +2,7 @@ import { remote } from 'electron';
 import * as React from "react";
 import { Box } from "./Box";
 import { BankAccount, BankAccountType, BankAccountDataStoreClient } from '@/dataStore/impl/BankAccountDataStore';
-import { DataStoreEvent } from '@/dataStore/BaseDataStore';
+import { DataStoreEvent, DataStoreChange } from '@/dataStore/BaseDataStore';
 
 // import '@public/components/AccountList.scss';
 
@@ -28,19 +28,11 @@ export class AccountList extends React.Component<AccountListProps, AccountListSt
             dataStore
         };
 
-        dataStore.getAccounts().then(accounts => {
-            this.setState({
-                bankAccounts: accounts
-            });
-        });
+        this.refreshBankAccounts(dataStore);
   
-        dataStore.onChange((source) => {
-            if (source === DataStoreEvent.Insert) {
-                dataStore.getAccounts().then(accounts => {
-                    this.setState({
-                        bankAccounts: accounts
-                    });
-                });
+        dataStore.onChange((change) => {
+            if (change === DataStoreChange.Insert) {
+                this.refreshBankAccounts(dataStore);
             }
         });
     }
@@ -49,6 +41,14 @@ export class AccountList extends React.Component<AccountListProps, AccountListSt
         return <Box heading="Accounts">
             {this.renderList()}
         </Box>;
+    }
+
+    refreshBankAccounts(dataStore: BankAccountDataStoreClient) {
+        dataStore.getAccounts().then(accounts => {
+            this.setState({
+                bankAccounts: accounts
+            });
+        });
     }
 
     renderList() {

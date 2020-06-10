@@ -8,6 +8,7 @@ import { AccountList } from "./AccountList";
 import { Form, FormField, FormFieldValues } from "./Form";
 import { BankAccount, BankAccountDataStoreClient } from "@/dataStore/impl/BankAccountDataStore";
 import { Log } from "@/util/Logger";
+import { TransactionList } from './TransactionList';
 
 export interface AppProps {
 }
@@ -66,9 +67,6 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
                 <ImportDropTarget modalApi={this}/>
             </div>
             <div id="main">
-                <Box>
-                    <h1>Hello, world!</h1>
-                </Box>
                 <AccountList/>
                 <Box>
                     <Form
@@ -77,6 +75,7 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
                         submitLabel="Save"
                     />
                 </Box>
+                <TransactionList/>
                 {this.showModal()}
             </div>
         </div>;

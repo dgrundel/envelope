@@ -10,6 +10,7 @@ import { cpus } from 'os';
 import { Wizard, WizardProps, WizardStep, WizardApi } from '../wizard/Wizard';
 import { BankAccountTransactionDataStoreClient, BankAccountTransaction } from '@/dataStore/impl/BankAccountTransactionDataStore';
 import { stat } from 'fs';
+import { dateFormatter, currencyFormatter } from '@/util/Formatters';
 
 export interface Row {
     [header: string]: string;
@@ -227,15 +228,15 @@ const summaryStep: WizardStep<ImportWizardState> = {
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Amount</th>
                         <th>Description</th>
+                        <th>Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     {transactions.map(transaction => <tr>
-                        <td>{transaction.year}-{transaction.month + 1}-{transaction.day}</td>
-                        <td>{transaction.amount.toFixed(2)}</td>
+                        <td>{dateFormatter(transaction.year, transaction.month, transaction.day)}</td>
                         <td>{transaction.description}</td>
+                        <td>{currencyFormatter(transaction.amount)}</td>
                     </tr>)}
                 </tbody>
             </table>

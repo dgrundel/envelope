@@ -12,6 +12,10 @@ export enum DataStoreEvent {
     Find = 'datastore-find'
 }
 
+export enum DataStoreChange {
+    Insert = 'datastore-insert'
+}
+
 export const buildEventName = (event: DataStoreEvent, name: string) => `${event}:${name}`;
 
 export interface BaseDataStoreRecord {
@@ -63,9 +67,9 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         });
     }
 
-    protected triggerChanged(source: DataStoreEvent) {
+    protected triggerChanged(change: DataStoreChange) {
         BrowserWindow.getAllWindows()
-            .forEach(win => win.webContents.send(buildEventName(DataStoreEvent.Changed, this.name), source));
+            .forEach(win => win.webContents.send(buildEventName(DataStoreEvent.Changed, this.name), change));
     }
 
     protected insert(item: T): Promise<T> {
@@ -74,7 +78,7 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
                 if (err) {
                     reject(err);
                 } else {
-                    this.triggerChanged(DataStoreEvent.Insert);
+                    this.triggerChanged(DataStoreChange.Insert);
                     resolve(document);
                 }
             });
@@ -87,7 +91,7 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
                 if (err) {
                     reject(err);
                 } else {
-                    this.triggerChanged(DataStoreEvent.InsertMany);
+                    this.triggerChanged(DataStoreChange.Insert);
                     resolve(documents);
                 }
             });
@@ -124,9 +128,9 @@ export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStor
         return this.invoke(DataStoreEvent.Find, query);
     }
 
-    onChange(callback: (source: DataStoreEvent) => void) {
-        ipcRenderer.on(buildEventName(DataStoreEvent.Changed, this.name), (e, eventSource: DataStoreEvent) => {
-            callback(eventSource);
+    onChange(callback: (change: DataStoreChange) => void) {
+        ipcRenderer.on(buildEventName(DataStoreEvent.Changed, this.name), (e, change: DataStoreChange) => {
+            callback(change);
         });
     }
 }
