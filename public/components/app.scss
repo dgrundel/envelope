@@ -2,70 +2,99 @@
 @import '../config.scss';
 
 #app {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
 
-  display: grid;
-  grid-template-rows: $header-height 1fr;
-  grid-template-columns: $sidebar-width 1fr;
+    display: grid;
+    grid-template-rows: $header-height 1fr;
+    grid-template-columns: $sidebar-width 1fr;
 }
 
 #header {
-  $icon-size: 2.25rem;
-  $h-padding: 1rem;
+    $icon-size: 2.25rem;
+    $h-padding: 1rem;
 
-  position: relative;
-  grid-column: 1/span 2;
-  background-color: #fbfbfb;
-  line-height: $header-height;
-  padding: 0 $h-padding 0 ($h-padding + $icon-size);
-  font-weight: 400;
-  @include shadow();
+    position: relative;
+    grid-column: 1/span 2;
+    background-color: #fbfbfb;
+    line-height: $header-height;
+    padding: 0 $h-padding 0 ($h-padding + $icon-size);
+    font-weight: 400;
+    @include shadow();
 
-  .envelope-icon {
-    $icon-padding: 0.4rem;
-    $inner-icon-size: $icon-size - ($icon-padding * 2);
+    .envelope-icon {
+        $icon-padding: 0.4rem;
+        $inner-icon-size: $icon-size - ($icon-padding * 2);
 
-    position: absolute;
-    top: ($header-height - $icon-size) / 2;
-    left: $h-padding;
+        position: absolute;
+        top: ($header-height - $icon-size) / 2;
+        left: $h-padding;
 
-    display: inline-block;
-    width: $inner-icon-size;
-    height: $inner-icon-size;
-    padding: $icon-padding;
+        display: inline-block;
+        width: $inner-icon-size;
+        height: $inner-icon-size;
+        padding: $icon-padding;
+        
+        border-radius: 50%;
+        // background-image: linear-gradient(to bottom, #53cdbfd1, #dcfea0cc);
+        background-color: $color-lt-gray;
+        
+        svg {
+            position: absolute;
+            top: $icon-padding;
+            left: $icon-padding;
+            width: $inner-icon-size;
+            height: $inner-icon-size;
     
-    border-radius: 50%;
-    // background-image: linear-gradient(to bottom, #53cdbfd1, #dcfea0cc);
-    background-color: $color-lt-gray;
-    
-    svg {
-      position: absolute;
-      top: $icon-padding;
-      left: $icon-padding;
-      width: $inner-icon-size;
-      height: $inner-icon-size;
-  
-      * {
-        fill: $color-text;
-      }
+            * {
+                fill: $color-text;
+            }
+        }
     }
-  }
 
-  .header-text {
-    margin-left: .5rem;
-  }
+    .header-text {
+        margin-left: .5rem;
+    }
 }
 
 #sidebar {
-  background-image: linear-gradient(to bottom, #29c4b2, #abe04f);
-  padding: 1rem;
+    background-image: $sidebar-bg-image;
+    padding: 1rem;
+
+    .sidebar-nav-header {
+        font-weight: 500;
+        font-size: 0.75em;
+        text-transform: uppercase;
+        color: #fff;
+        line-height: 2.5rem;
+    }
+
+    .sidebar-nav {
+        list-style-type: none;
+        margin: 0 0 1rem 0;
+        padding: 0;
+        user-select: none;
+
+        li {
+            display: block;
+            line-height: 2rem;
+            padding: 0 .75rem;
+            margin-bottom: .25rem;
+            font-size: 0.9em;
+            color: $sidebar-text-color;
+            @include rounded();
+
+            &:hover {
+                background-color: $sidebar-nav-hover-bg-color;
+            }
+        }
+    }
 }
 
 #main {
-  overflow-y: auto;
-  overflow-x: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 }

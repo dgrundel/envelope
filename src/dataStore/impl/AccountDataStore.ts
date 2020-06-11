@@ -15,9 +15,11 @@ const accountTypeLabels = {
     'checking': 'Checking',
     'savings': 'Savings',
     'credit-card': 'Credit Card',
-    'envelope-pool': 'pool',
-    'envelope-credit-card': 'cc payment',
-    'envelope-user': 'user'
+
+    // we'll probably never show these to users
+    'envelope-pool': 'Pool Envelope',
+    'envelope-credit-card': 'Credit Card Payment Envelope',
+    'envelope-user': 'User-Defined Envelope'
 };
 
 export const getUserAccountTypes = () => [

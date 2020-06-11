@@ -67,6 +67,12 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
                 <h1 className="header-text">Envelope</h1>
             </div>
             <div id="sidebar">
+                <h4 className="sidebar-nav-header">Navigation Header</h4>
+                <ul className="sidebar-nav">
+                    <li>Accounts</li>
+                    <li>Envelopes</li>
+                    <li>Transactions</li>
+                </ul>
                 <ImportDropTarget modalApi={this}/>
             </div>
             <div id="main">
