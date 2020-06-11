@@ -1,9 +1,9 @@
 import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
 
-const name = 'account-transactions';
+const name = 'transactions';
 
-export interface BankAccountTransaction extends BaseDataStoreRecord {
-    bankAccountName: string;
+export interface Transaction extends BaseDataStoreRecord {
+    accountName: string;
     date: Date;
     year: number;
     month: number;
@@ -15,22 +15,22 @@ export interface BankAccountTransaction extends BaseDataStoreRecord {
     envelopeName?: string;
 }
 
-export class BankAccountTransactionDataStore extends DataStore<BankAccountTransaction> {
+export class TransactionDataStore extends DataStore<Transaction> {
     constructor() {
         super(name);
     }
 }
 
-export class BankAccountTransactionDataStoreClient extends DataStoreClient<BankAccountTransaction> {
+export class TransactionDataStoreClient extends DataStoreClient<Transaction> {
     constructor() {
         super(name);
     }
 
-    addTransaction(transaction: BankAccountTransaction) {
+    addTransaction(transaction: Transaction) {
         return this.insert(transaction);
     }
 
-    addTransactions(transactions: BankAccountTransaction[]) {
+    addTransactions(transactions: Transaction[]) {
         return this.insertMany(transactions);
     }
 

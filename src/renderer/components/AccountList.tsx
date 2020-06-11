@@ -1,5 +1,5 @@
 import { DataStoreChange } from '@/dataStore/BaseDataStore';
-import { BankAccount, BankAccountDataStoreClient, BankAccountType, getBankAccountTypeLabel } from '@/dataStore/impl/BankAccountDataStore';
+import { Account, AccountDataStoreClient, AccountType, getAccountTypeLabel } from '@/dataStore/impl/AccountDataStore';
 import * as React from "react";
 import { Box } from "./Box";
 
@@ -9,10 +9,10 @@ export interface AccountListProps {
 }
 
 export interface AccountListState {
-    bankAccounts: BankAccount[];
-    dataStore: BankAccountDataStoreClient;
+    accounts: Account[];
+    dataStore: AccountDataStoreClient;
     newAccountName?: string;
-    newAccountType?: BankAccountType;
+    newAccountType?: AccountType;
 }
 
 export class AccountList extends React.Component<AccountListProps, AccountListState> {
@@ -20,18 +20,18 @@ export class AccountList extends React.Component<AccountListProps, AccountListSt
     constructor(props: AccountListProps) {
         super(props);
 
-        const dataStore = new BankAccountDataStoreClient();
+        const dataStore = new AccountDataStoreClient();
         
         this.state = {
-            bankAccounts: [],
+            accounts: [],
             dataStore
         };
 
-        this.refreshBankAccounts(dataStore);
+        this.refreshAccounts(dataStore);
   
         dataStore.onChange((change) => {
             if (change === DataStoreChange.Insert) {
-                this.refreshBankAccounts(dataStore);
+                this.refreshAccounts(dataStore);
             }
         });
     }
@@ -42,21 +42,21 @@ export class AccountList extends React.Component<AccountListProps, AccountListSt
         </Box>;
     }
 
-    refreshBankAccounts(dataStore: BankAccountDataStoreClient) {
+    refreshAccounts(dataStore: AccountDataStoreClient) {
         dataStore.getAccounts().then(accounts => {
             this.setState({
-                bankAccounts: accounts
+                accounts: accounts
             });
         });
     }
 
     renderList() {
-        if (this.state.bankAccounts.length > 0) {
+        if (this.state.accounts.length > 0) {
             return <table>
                 <tbody>
-                    {this.state.bankAccounts.map(bankAccount => <tr key={bankAccount._id}>
-                        <td>{bankAccount.name}</td>
-                        <td>{getBankAccountTypeLabel(bankAccount.type)}</td>
+                    {this.state.accounts.map(account => <tr key={account._id}>
+                        <td>{account.name}</td>
+                        <td>{getAccountTypeLabel(account.type)}</td>
                     </tr>)}
                 </tbody>
             </table>;

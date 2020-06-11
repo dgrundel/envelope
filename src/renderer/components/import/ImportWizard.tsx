@@ -1,5 +1,5 @@
-import { BankAccount, BankAccountDataStoreClient, getBankAccountTypeLabel } from '@/dataStore/impl/BankAccountDataStore';
-import { BankAccountTransaction, BankAccountTransactionDataStoreClient } from '@/dataStore/impl/BankAccountTransactionDataStore';
+import { Account, AccountDataStoreClient, getAccountTypeLabel } from '@/dataStore/impl/AccountDataStore';
+import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
 import { Currency } from '@/util/Currency';
 import { currencyFormatter, dateFormatter } from '@/util/Formatters';
 import { Log } from '@/util/Logger';
@@ -21,14 +21,14 @@ export interface ImportWizardState {
     rows: Row[];
     firstRow: Row;
     invertTransactions: boolean;
-    bankAccounts?: BankAccount[];
+    accounts?: Account[];
 
-    bankAccountName?: string;
+    accountName?: string;
     dateColumn?: string;
     amountColumn?: string;
     descriptionColumns?: string[];
 
-    transactions?: BankAccountTransaction[];
+    transactions?: Transaction[];
 }
 
 export interface ImportWizardProps {
@@ -40,7 +40,7 @@ class NestedWizard extends Wizard<ImportWizardState> { }
 
 const errorMessage = (s: string) => <p className="import-wizard-error-message">{s}</p>;
 
-const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string, amountColumn: string, descriptionColumns: string[], bankAccountName: string): BankAccountTransaction[] => {
+const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string, amountColumn: string, descriptionColumns: string[], accountName: string): Transaction[] => {
     return rows.map(row => {
         const momentDate = moment(row[dateColumn]);
         const date = momentDate.toDate();
@@ -57,7 +57,7 @@ const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string,
             .join(' ');
 
         return {
-            bankAccountName,
+            accountName,
             date,
             year,
             month,
@@ -75,36 +75,36 @@ const accountSelectStep: WizardStep<ImportWizardState> = {
         const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value;
             const state = api.getState();
-            state.bankAccountName = value;
+            state.accountName = value;
             api.updateState(state);
         };
 
-        const bankAccounts = state.bankAccounts || [];
+        const accounts = state.accounts || [];
 
-        if (bankAccounts.length === 0) {
-            Log.debug('No bank accounts to use for import. Should pop a modal here for adding an account.');
+        if (accounts.length === 0) {
+            Log.debug('No accounts to use for import. Should pop a modal here for adding an account.');
 
-            return <p>No banks accounts to use for import. Please add an account first!</p>;
+            return <p>No accounts to use for import. Please add an account first!</p>;
         }
 
-        const bankAccountRow = bankAccounts.reduce((row: Row, bankAccount: BankAccount) => {
-            row[bankAccount.name] = getBankAccountTypeLabel(bankAccount.type);
+        const accountRow = accounts.reduce((row: Row, account: Account) => {
+            row[account.name] = getAccountTypeLabel(account.type);
             return row;
         }, {});
 
         return <div className="import-wizard-sample-row">
-            <h3>Into which <strong>bank account</strong> should we import the transactions?</h3>
+            <h3>Into which <strong>account</strong> should we import the transactions?</h3>
 
             <ImportRowSelect 
                 type="radio" 
-                rows={[bankAccountRow]} 
+                rows={[accountRow]} 
                 onChange={onChange}
-                value={api.getState().bankAccountName} />
+                value={api.getState().accountName} />
         </div>;
     },
     validate: (state: ImportWizardState) => ({ 
-        valid: !!state.bankAccountName,
-        message: state.bankAccountName ? null : errorMessage('Please select a bank account.')
+        valid: !!state.accountName,
+        message: state.accountName ? null : errorMessage('Please select an account.')
     })
 };
 
@@ -206,13 +206,13 @@ const descriptionFieldSelectStep: WizardStep<ImportWizardState> = {
 
 const invertDebitCreditStep: WizardStep<ImportWizardState> = {
     render: (state: ImportWizardState, api: WizardApi<ImportWizardState>) => {
-        const bankAccountName = state.bankAccountName as string;
+        const accountName = state.accountName as string;
         const dateColumn = state.dateColumn as string;
         const descriptionColumns = state.descriptionColumns as string[];
         const amountColumn = state.amountColumn as string;
 
-        const bankAccount = state.bankAccounts?.find(acct => acct.name === state.bankAccountName) as BankAccount;
-        const transactions: BankAccountTransaction[] = convertToTransactions(state.rows, false, dateColumn, amountColumn, descriptionColumns, bankAccountName);
+        const account = state.accounts?.find(acct => acct.name === state.accountName) as Account;
+        const transactions: Transaction[] = convertToTransactions(state.rows, false, dateColumn, amountColumn, descriptionColumns, accountName);
 
         let transaction = transactions.find(transaction => transaction.wholeAmount > 0);
         let hasPositive = !!transaction;
@@ -237,7 +237,7 @@ const invertDebitCreditStep: WizardStep<ImportWizardState> = {
         let expectedDescription;
         let invertedDescription;
         if (hasPositive) {
-            if (bankAccount.type === 'credit-card') {
+            if (account.type === 'credit-card') {
                 // expect positive transactions on a credit card to be a payment
                 expectedDescription = 'payment or credit';
                 invertedDescription = 'purchase, fee, or other charge';
@@ -248,7 +248,7 @@ const invertDebitCreditStep: WizardStep<ImportWizardState> = {
             }
         } else {
             // expect negative transactions on credit card/checking/savings to be a purchase or fee
-            if (bankAccount.type === 'credit-card') {
+            if (account.type === 'credit-card') {
                 expectedDescription = 'purchase, fee, or other charge';
                 invertedDescription = 'payment or credit';
             } else {
@@ -302,16 +302,16 @@ const invertDebitCreditStep: WizardStep<ImportWizardState> = {
 
 const summaryStep: WizardStep<ImportWizardState> = {
     render: (state: ImportWizardState) => {
-        const bankAccountName = state.bankAccountName as string;
+        const accountName = state.accountName as string;
         const dateColumn = state.dateColumn as string;
         const descriptionColumns = state.descriptionColumns as string[];
         const amountColumn = state.amountColumn as string;
         const invert = state.invertTransactions;
 
-        const transactions: BankAccountTransaction[] = convertToTransactions(state.rows, invert, dateColumn, amountColumn, descriptionColumns, bankAccountName);
+        const transactions: Transaction[] = convertToTransactions(state.rows, invert, dateColumn, amountColumn, descriptionColumns, accountName);
 
         return <div className="import-wizard-summary">
-            <h3>Ready to import your transactions into <strong>{bankAccountName}</strong>.</h3>
+            <h3>Ready to import your transactions into <strong>{accountName}</strong>.</h3>
 
             <table style={{minWidth: '60vw'}}>
                 <thead>
@@ -344,22 +344,22 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
             invertTransactions: false
         };
 
-        new BankAccountDataStoreClient().getAccounts()
-            .then(bankAccounts => {
+        new AccountDataStoreClient().getAccounts()
+            .then(accounts => {
                 this.setState({
-                    bankAccounts
+                    accounts
                 });
             });
     }
 
     render() {
-        if (this.state.bankAccounts) {
+        if (this.state.accounts) {
             const props = {
                 modalApi: this.props.modalApi,
                 initialState: {
                     rows: this.props.rows,
                     firstRow: this.props.rows[0],
-                    bankAccounts: this.state.bankAccounts,
+                    accounts: this.state.accounts,
                     invertTransactions: false
                 },
                 steps: [
@@ -382,7 +382,7 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
     onComplete(wizardState: ImportWizardState) {
         Log.debug('done', wizardState);
 
-        // bankAccountName: string;
+        // accountName: string;
         // date: number;
         // description: string;
         // amount: number;
@@ -391,16 +391,16 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
         // dismiss import modal
         this.props.modalApi.dismissModal();
 
-        const bankAccountName = wizardState.bankAccountName as string;
+        const accountName = wizardState.accountName as string;
         const dateColumn = wizardState.dateColumn as string;
         const descriptionColumns = wizardState.descriptionColumns as string[];
         const amountColumn = wizardState.amountColumn as string;
         const invert = wizardState.invertTransactions;
         
-        const transactions = convertToTransactions(this.props.rows, invert, dateColumn, amountColumn, descriptionColumns, bankAccountName);
+        const transactions = convertToTransactions(this.props.rows, invert, dateColumn, amountColumn, descriptionColumns, accountName);
 
         // store the data
-        new BankAccountTransactionDataStoreClient()
+        new TransactionDataStoreClient()
             .addTransactions(transactions)
             .then(value => Log.debug('Saved transactions', value));
 
