@@ -2,6 +2,7 @@ import * as React from "react";
 import { Box } from "./Box";
 
 import '@public/components/App.scss';
+
 import { ImportDropTarget } from "./import/ImportDropTarget";
 import { ModalApi, Modal, BaseModal, ButtonSets } from "./Modal";
 import { AccountList } from "./AccountList";
@@ -61,7 +62,10 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
 
         return <div id="app">
             <div id="header">
-                <h1>Envelope</h1>
+                <h1>
+                    <i className="envelope-icon"></i>
+                    Envelope
+                </h1>
             </div>
             <div id="sidebar">
                 <ImportDropTarget modalApi={this}/>

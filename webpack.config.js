@@ -35,8 +35,7 @@ const commonConfig = {
         loader: 'ts-loader',
       },
       {
-        // test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-        test: /\.(eot|svg|ttf|woff|woff2)$/,
+        test: /\.(eot|ttf|woff|woff2)$/,
         loader: 'file-loader',
         options: {
           name: '[name].[ext]',
@@ -52,12 +51,12 @@ const commonConfig = {
         ],
       },
       {
-        test: /\.(jpg|png|svg|ico|icns)$/,
+        test: /\.(jpg|svg|png|ico|icns)$/,
         loader: 'file-loader',
         options: {
           name: '[path][name].[ext]',
         },
-      },
+      }
     ],
   },
 };

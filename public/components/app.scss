@@ -31,3 +31,14 @@
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+.envelope-icon {
+  $size: 1rem;
+
+  background-image: url('../images/envelope-icon.svg');
+  display: inline-block;
+  width: $size;
+  height: $size;
+  line-height: $size;
+  background-size: cover;
+}
