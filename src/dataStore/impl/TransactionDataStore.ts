@@ -13,7 +13,6 @@ export interface Transaction extends BaseDataStoreRecord {
     fractionalAmount: number; // unsigned, integer, in thousandths, range 0...999
     
     originalRecord?: Record<string, string>;
-    envelopeName?: string;
 }
 
 export class TransactionDataStore extends DataStore<Transaction> {
