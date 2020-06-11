@@ -60,40 +60,6 @@
     }
 }
 
-#sidebar {
-    background-image: $sidebar-bg-image;
-    padding: 1rem;
-
-    .sidebar-nav-header {
-        font-weight: 500;
-        font-size: 0.75em;
-        text-transform: uppercase;
-        color: #fff;
-        line-height: 2.5rem;
-    }
-
-    .sidebar-nav {
-        list-style-type: none;
-        margin: 0 0 1rem 0;
-        padding: 0;
-        user-select: none;
-
-        li {
-            display: block;
-            line-height: 2rem;
-            padding: 0 .75rem;
-            margin-bottom: .25rem;
-            font-size: 0.9em;
-            color: $sidebar-text-color;
-            @include rounded();
-
-            &:hover {
-                background-color: $sidebar-nav-hover-bg-color;
-            }
-        }
-    }
-}
-
 #main {
     overflow-y: auto;
     overflow-x: hidden;

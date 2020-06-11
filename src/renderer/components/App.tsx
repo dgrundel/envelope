@@ -1,23 +1,29 @@
-import * as React from "react";
-import { Box } from "./Box";
-
 import '@public/components/App.scss';
-
-import { ImportDropTarget } from "./import/ImportDropTarget";
-import { ModalApi, Modal, BaseModal, ButtonSets } from "./Modal";
-import { AccountList } from "./AccountList";
-import { Form, FormField, FormFieldValues } from "./Form";
-import { Account, AccountDataStoreClient, AccountType, getAccountTypeLabel, getUserAccountTypes } from "@/dataStore/impl/AccountDataStore";
-import { Log } from "@/util/Logger";
-import { TransactionList } from './TransactionList';
+import * as React from "react";
+import { Modal, ModalApi } from "./Modal";
+import { AccountsPage } from "./pages/AccountsPage";
+import { HomePage } from './pages/HomePage';
+import { Sidebar } from './Sidebar';
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
+
+export enum AppPage {
+    Home,
+    Accounts,
+    Transactions
+}
+
+export interface PageApi {
+    setPage: (page: AppPage) => void;
+    getActivePage: () => AppPage;
+}
 
 export interface AppProps {
 }
 
 export interface AppState {
     modals: Modal[];
+    page: AppPage;
 }
 
 export class App extends React.Component<AppProps, AppState> implements ModalApi {
@@ -26,11 +32,17 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         super(props);
 
         this.state = {
-            modals: []
+            modals: [],
+            page: AppPage.Home
         };
 
+        // ModalApi
         this.dismissModal = this.dismissModal.bind(this);
         this.queueModal = this.queueModal.bind(this);
+        
+        // PageApi
+        this.setPage = this.setPage.bind(this);
+        this.getActivePage = this.getActivePage.bind(this);
 
         // setTimeout(() => {
         //     const sampleModal = <BaseModal heading="Test modal" buttons={ButtonSets.ok(this)} closeButtonHandler={this.dismissModal}>Hello, modal.</BaseModal>;
@@ -39,55 +51,35 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
     }
 
     render() {
-        const formFields: FormField[] = [{
-            name: 'name',
-            label: 'Account Name',
-            type: 'text',
-            required: true
-        },
-        {
-            name: 'type',
-            label: 'Account Type',
-            type: 'select',
-            options: getUserAccountTypes().map(accountType => ({
-                label: getAccountTypeLabel(accountType),
-                value: accountType
-            }))
-        }];
-
-        const onSubmit = (values: FormFieldValues) => {
-            const account = (values as Account);
-            const client = new AccountDataStoreClient();
-            client.addAccount(account).then(res => Log.debug(res));
-        };
-
         return <div id="app">
             <div id="header">
                 <span className="envelope-icon" dangerouslySetInnerHTML={({__html: envelopeIcon})} />
                 <h1 className="header-text">Envelope</h1>
             </div>
-            <div id="sidebar">
-                <h4 className="sidebar-nav-header">Navigation Header</h4>
-                <ul className="sidebar-nav">
-                    <li>Accounts</li>
-                    <li>Envelopes</li>
-                    <li>Transactions</li>
-                </ul>
-                <ImportDropTarget modalApi={this}/>
-            </div>
+            <Sidebar modalApi={this} pageApi={this}/>
             <div id="main">
-                <AccountList/>
-                <Box>
-                    <Form
-                        fields={formFields}
-                        onSubmit={onSubmit}
-                        submitLabel="Save"
-                    />
-                </Box>
-                <TransactionList/>
+                {this.renderPage()}
                 {this.showModal()}
             </div>
         </div>;
+    }
+
+    setPage(page: AppPage) {
+        this.setState({ page });
+    }
+
+    getActivePage() {
+        return this.state.page;
+    }
+
+    renderPage(): React.ReactNode {
+        switch(this.state.page) {
+            case AppPage.Accounts:
+                return <AccountsPage/>;
+            case AppPage.Home:
+            default:
+                return <HomePage/>;
+        }
     }
 
     queueModal(modal: Modal) {
