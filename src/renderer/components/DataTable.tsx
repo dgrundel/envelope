@@ -17,15 +17,17 @@ export interface DataTableProps<T> {
 }
 
 export interface DataTableState<T> {
+    id: string;
     selectedRows: T[];
 }
 
 export class DataTable<T> extends React.Component<DataTableProps<T>, DataTableState<T>> {
-
+    
     constructor(props: DataTableProps<T>) {
         super(props);
 
         this.state = {
+            id: DataTable.generateId(),
             selectedRows: []
         };
     }
@@ -47,35 +49,37 @@ export class DataTable<T> extends React.Component<DataTableProps<T>, DataTableSt
                 {this.props.rows.map(row => {
                     const rowMap = (row as any);
                     const key = rowMap[keyField];
+                    const inputId = `${this.state.id}-${key}`;
                     const isSelected = enableSelect && this.state.selectedRows.findIndex((r: any) => r[keyField] === key) !== -1;
 
                     return <tr key={key} className={`data-table-row ${isSelected ? 'data-table-row-selected' : ''}`}>
-                        {enableSelect ? <td><input 
+                        {enableSelect ? <td><label><input 
+                            id={inputId}
                             type="checkbox" 
                             checked={isSelected} 
-                            onClick={(e) => enableSelect && this.toggleSelect(e, row)}
-                        /></td> : null}
-                        {this.props.fields.map(field => <td key={field.name} onClick={(e) => enableSelect && this.toggleSelect(e, row)}>
-                            {field.formatter ? field.formatter(rowMap[field.name], row) : rowMap[field.name]}
-                        </td>)}
+                            onChange={(e) => enableSelect && this.toggleSelect(e, row)}
+                        /></label></td> : null}
+                        {this.props.fields.map(field => {
+                            return <td key={field.name}><label htmlFor={inputId}>
+                                {field.formatter 
+                                    ? field.formatter(rowMap[field.name], row) 
+                                    : rowMap[field.name]}
+                            </label></td>
+                        })}
                     </tr>
                 })}
             </tbody>
         </table>;
     }
 
-    toggleSelect(e: React.MouseEvent, row: T) {
+    toggleSelect(e: React.ChangeEvent<HTMLInputElement>, row: T) {
         const rowMap = (row as any);
         const keyField = this.props.keyField;
-        const index = this.state.selectedRows.findIndex((r: any) => r[keyField] === rowMap[keyField]);
+        const filteredSelection = this.state.selectedRows.filter((r: any) => r[keyField] !== rowMap[keyField]);
         
-        let newSelection: T[];
-        if (index === -1) {
-            newSelection = this.state.selectedRows.concat(row);
-        } else {
-            newSelection = this.state.selectedRows.slice();
-            newSelection.splice(index, 1);
-        }
+        const newSelection = e.target.checked
+            ? filteredSelection.concat(row)
+            : filteredSelection;
 
         if (this.props.onSelect) {
             this.props.onSelect(newSelection);
@@ -84,5 +88,17 @@ export class DataTable<T> extends React.Component<DataTableProps<T>, DataTableSt
         this.setState({
             selectedRows: newSelection
         });
+    }
+
+    static generateId(): string {
+        let id;
+        let i = 0;
+        do {
+            const rand = Math.random().toString(36).replace(/\./g, '');
+            id = `data-table-${i}-${rand}`;
+            i++;
+        } while (document.getElementById(id));
+        
+        return id;
     }
 }

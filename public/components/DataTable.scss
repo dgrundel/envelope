@@ -3,8 +3,15 @@
 
 .data-table {
     &.data-table-select-enabled {
-        th, td {
-            &:first-child {
+        td {
+            padding: 0;
+
+            label {
+                display: block;
+                padding: $table-padding;
+            }
+
+            &:first-child label {
                 padding-right: 0;
             }
         }

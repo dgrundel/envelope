@@ -31,7 +31,6 @@
 @mixin highlight {
   color: $color-highlight-fg;
   background-color: $color-highlight-bg;
-  font-weight: 400;
 }
 
 @mixin table-heading {
