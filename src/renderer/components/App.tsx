@@ -7,7 +7,7 @@ import { ImportDropTarget } from "./import/ImportDropTarget";
 import { ModalApi, Modal, BaseModal, ButtonSets } from "./Modal";
 import { AccountList } from "./AccountList";
 import { Form, FormField, FormFieldValues } from "./Form";
-import { Account, AccountDataStoreClient } from "@/dataStore/impl/AccountDataStore";
+import { Account, AccountDataStoreClient, AccountType, getAccountTypeLabel, getUserAccountTypes } from "@/dataStore/impl/AccountDataStore";
 import { Log } from "@/util/Logger";
 import { TransactionList } from './TransactionList';
 
@@ -49,11 +49,10 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
             name: 'type',
             label: 'Account Type',
             type: 'select',
-            options: [
-                { label: 'Checking Account', value: 'checking'},
-                { label: 'Savings Account', value: 'savings'},
-                { label: 'Credit Card', value: 'credit-card'}
-            ]
+            options: getUserAccountTypes().map(accountType => ({
+                label: getAccountTypeLabel(accountType),
+                value: accountType
+            }))
         }];
 
         const onSubmit = (values: FormFieldValues) => {

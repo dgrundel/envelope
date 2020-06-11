@@ -11,10 +11,6 @@ export const leftPad = (toPad: string, desiredLength: number, paddingStr: string
     return padding + toPad;
 }
 
-export const dateFormatter = (year: number, month: number, day: number) => {
-    return `${year}-${month + 1}-${day}`;
-};
-
 export const currencyFormatter = (whole: number, fractional: number) => {
     const cents = Math.ceil(fractional / 10).toFixed(0);
     const formattedCents = leftPad(cents, 2, '0');

@@ -4,14 +4,15 @@ const name = 'transactions';
 
 export interface Transaction extends BaseDataStoreRecord {
     accountName: string;
+
     date: Date;
     year: number;
     month: number;
-    day: number;
     description: string;
     wholeAmount: number; // signed, integer
     fractionalAmount: number; // unsigned, integer, in thousandths, range 0...999
-    originalRecord: Record<string, string>;
+    
+    originalRecord?: Record<string, string>;
     envelopeName?: string;
 }
 

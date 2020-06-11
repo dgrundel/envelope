@@ -2,13 +2,29 @@ import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStor
 
 const name = 'accounts';
 
-export type AccountType = 'checking' | 'savings' | 'credit-card';
+export enum AccountType {
+    Checking = 'checking' ,
+    Savings = 'savings' ,
+    CreditCard = 'credit-card',
+    EnvelopePool = 'envelope-pool',
+    EnvelopeCreditCard = 'envelope-credit-card',
+    EnvelopeUser = 'envelope-user'
+}
 
 const accountTypeLabels = {
     'checking': 'Checking',
     'savings': 'Savings',
-    'credit-card': 'Credit Card'
+    'credit-card': 'Credit Card',
+    'envelope-pool': 'pool',
+    'envelope-credit-card': 'cc payment',
+    'envelope-user': 'user'
 };
+
+export const getUserAccountTypes = () => [
+    AccountType.Checking,
+    AccountType.Savings,
+    AccountType.CreditCard
+];
 
 export const getAccountTypeLabel = (t: AccountType) => accountTypeLabels[t];
 

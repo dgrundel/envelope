@@ -1,20 +1,20 @@
 export class Logger {
     debug(...args: any[]) {
         if (process.env.NODE_ENV !== 'production') {
-            console.log(...args);
+            console.log('DEBUG', ...args);
         }
     }
 
     info(...args: any[]) {
-        console.log(...args);
+        console.log('INFO', ...args);
     }
 
     warn(...args: any[]) {
-        console.warn(...args);
+        console.warn('WARN', ...args);
     }
 
     error(...args: any[]) {
-        console.error(...args);
+        console.error('ERROR', ...args);
         console.trace();
     }
 }

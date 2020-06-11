@@ -1,11 +1,11 @@
 import { DataStoreChange } from '@/dataStore/BaseDataStore';
 import { Account, AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
-import { currencyFormatter, dateFormatter } from '@/util/Formatters';
+import { currencyFormatter } from '@/util/Formatters';
+import { Log } from '@/util/Logger';
 import * as React from "react";
 import { Box } from "./Box";
 import { DataTable } from './DataTable';
-import { Log } from '@/util/Logger';
 
 export interface TransactionListProps {
 }
@@ -78,7 +78,7 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
                 fields={[{
                     name: 'date',
                     label: 'Date',
-                    formatter: (value, row) => dateFormatter(row.year, row.month, row.day)
+                    formatter: (value, row) => row.date.toLocaleDateString()
                 },{
                     name: 'accountName',
                     label: 'Account'
