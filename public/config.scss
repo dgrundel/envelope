@@ -1,7 +1,6 @@
-$header-height: 3rem;
-$sidebar-width: 220px;
-
-$table-padding: .5rem;
+$color-lt-gray: #e5e5e5;
+$color-off-white: #f1f4f6;
+$color-dark-gray: #495057;
 
 $color-success: #3ac47d;
 $color-error: #d54343;
@@ -10,7 +9,11 @@ $color-white: #fff;
 $color-highlight-fg: #3f6ad8;
 $color-highlight-bg: #e0f3ff;
 
-$color-lt-gray: #e5e5e5;
-$color-off-white: #f1f4f6;
-$color-dark-gray: #495057;
+$color-text: $color-dark-gray;
+$color-body-bg: $color-off-white;
 // $color-table-border: #d3d3d3;
+
+$header-height: 3rem;
+$sidebar-width: 220px;
+
+$table-padding: .5rem;

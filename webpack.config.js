@@ -35,7 +35,15 @@ const commonConfig = {
         loader: 'ts-loader',
       },
       {
-        test: /\.(eot|ttf|woff|woff2)$/,
+        test: /\.svg/,
+        use: {
+          loader: 'svg-inline-loader',
+          options: {}
+        }
+      },
+      {
+        test: /\.(eot|svg|ttf|woff|woff2)$/,
+        include: srcPaths('public/fonts'),
         loader: 'file-loader',
         options: {
           name: '[name].[ext]',
@@ -51,12 +59,12 @@ const commonConfig = {
         ],
       },
       {
-        test: /\.(jpg|svg|png|ico|icns)$/,
+        test: /\.(jpg|png|ico|icns)$/,
         loader: 'file-loader',
         options: {
           name: '[path][name].[ext]',
         },
-      }
+      },
     ],
   },
 };

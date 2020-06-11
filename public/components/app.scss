@@ -14,12 +14,50 @@
 }
 
 #header {
+  $icon-size: 2.25rem;
+  $h-padding: 1rem;
+
+  position: relative;
   grid-column: 1/span 2;
   background-color: #fbfbfb;
   line-height: $header-height;
-  padding: 0 1rem;
+  padding: 0 $h-padding 0 ($h-padding + $icon-size);
   font-weight: 400;
   @include shadow();
+
+  .envelope-icon {
+    $icon-padding: 0.4rem;
+    $inner-icon-size: $icon-size - ($icon-padding * 2);
+
+    position: absolute;
+    top: ($header-height - $icon-size) / 2;
+    left: $h-padding;
+
+    display: inline-block;
+    width: $inner-icon-size;
+    height: $inner-icon-size;
+    padding: $icon-padding;
+    
+    border-radius: 50%;
+    // background-image: linear-gradient(to bottom, #53cdbfd1, #dcfea0cc);
+    background-color: $color-lt-gray;
+    
+    svg {
+      position: absolute;
+      top: $icon-padding;
+      left: $icon-padding;
+      width: $inner-icon-size;
+      height: $inner-icon-size;
+  
+      * {
+        fill: $color-text;
+      }
+    }
+  }
+
+  .header-text {
+    margin-left: .5rem;
+  }
 }
 
 #sidebar {
@@ -30,15 +68,4 @@
 #main {
   overflow-y: auto;
   overflow-x: hidden;
-}
-
-.envelope-icon {
-  $size: 1rem;
-
-  background-image: url('../images/envelope-icon.svg');
-  display: inline-block;
-  width: $size;
-  height: $size;
-  line-height: $size;
-  background-size: cover;
 }

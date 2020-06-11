@@ -11,6 +11,8 @@ import { Account, AccountDataStoreClient } from "@/dataStore/impl/AccountDataSto
 import { Log } from "@/util/Logger";
 import { TransactionList } from './TransactionList';
 
+const envelopeIcon = require('@public/images/envelope-icon.svg');
+
 export interface AppProps {
 }
 
@@ -62,10 +64,8 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
 
         return <div id="app">
             <div id="header">
-                <h1>
-                    <i className="envelope-icon"></i>
-                    Envelope
-                </h1>
+                <span className="envelope-icon" dangerouslySetInnerHTML={({__html: envelopeIcon})} />
+                <h1 className="header-text">Envelope</h1>
             </div>
             <div id="sidebar">
                 <ImportDropTarget modalApi={this}/>
