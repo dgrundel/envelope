@@ -4,6 +4,7 @@ import { Log } from '@/util/Logger';
 import * as React from "react";
 import { Box } from "../Box";
 import { Form, FormField, FormFieldValues } from '../Form';
+import { EventListener } from '../EventListener';
 
 // import '@public/components/AccountsPage.scss';
 
@@ -17,7 +18,7 @@ export interface AccountsPageState {
     newAccountType?: AccountType;
 }
 
-export class AccountsPage extends React.Component<AccountsPageProps, AccountsPageState> {
+export class AccountsPage extends EventListener<AccountsPageProps, AccountsPageState> {
 
     constructor(props: AccountsPageProps) {
         super(props);
@@ -31,11 +32,11 @@ export class AccountsPage extends React.Component<AccountsPageProps, AccountsPag
 
         this.refreshAccounts(dataStore);
   
-        dataStore.onChange((change) => {
+        this.addListener(() => dataStore.onChange((change) => {
             if (change === DataStoreChange.Insert) {
                 this.refreshAccounts(dataStore);
             }
-        });
+        }));
     }
 
     render() {

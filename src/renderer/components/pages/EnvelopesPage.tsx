@@ -4,6 +4,7 @@ import { Account, AccountDataStoreClient, AccountType } from '@/dataStore/impl/A
 import { DataTable } from '../DataTable';
 import { Form, FormField, FormFieldValues } from '../Form';
 import { Log } from '@/util/Logger';
+import { EventListener } from '../EventListener';
 
 
 export interface EnvelopesPageProps {
@@ -15,7 +16,7 @@ export interface EnvelopesPageState {
     creditCardEnvelopes: Account[];
 }
 
-export class EnvelopesPage extends React.Component<EnvelopesPageProps, EnvelopesPageState> {
+export class EnvelopesPage extends EventListener<EnvelopesPageProps, EnvelopesPageState> {
     
     constructor(props: EnvelopesPageProps) {
         super(props);
@@ -27,9 +28,9 @@ export class EnvelopesPage extends React.Component<EnvelopesPageProps, Envelopes
         };
 
         this.updateEnvelopes();
-        this.state.dataStore.onChange(() => {
+        this.addListener(() => this.state.dataStore.onChange(() => {
             this.updateEnvelopes();
-        });
+        }));
     }
     
     private updateEnvelopes() {

@@ -6,6 +6,7 @@ import { Log } from '@/util/Logger';
 import * as React from "react";
 import { Box } from "./Box";
 import { DataTable } from './DataTable';
+import { EventListener } from './EventListener';
 
 export interface TransactionListProps {
 }
@@ -15,7 +16,7 @@ export interface TransactionListState {
     accounts: Record<string, Account>;
 }
 
-export class TransactionList extends React.Component<TransactionListProps, TransactionListState> {
+export class TransactionList extends EventListener<TransactionListProps, TransactionListState> {
 
     constructor(props: TransactionListProps) {
         super(props);
@@ -31,17 +32,18 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
         this.refreshTransactions(transactionDataStore);
         this.refreshAccounts(accountDataStore);
   
-        transactionDataStore.onChange((change) => {
+        
+        this.addListener(() => transactionDataStore.onChange((change) => {
             if (change === DataStoreChange.Insert) {
                 this.refreshTransactions(transactionDataStore);
             }
-        });
+        }));
 
-        accountDataStore.onChange((change) => {
+        this.addListener(() => accountDataStore.onChange((change) => {
             if (change === DataStoreChange.Insert) {
                 this.refreshAccounts(accountDataStore);
             }
-        })
+        }));
     }
 
     render() {

@@ -140,8 +140,15 @@ export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStor
     }
 
     onChange(callback: (change: DataStoreChange) => void) {
-        ipcRenderer.on(buildEventName(DataStoreEvent.Changed, this.name), (e, change: DataStoreChange) => {
+        const channel = buildEventName(DataStoreEvent.Changed, this.name);
+        const handler = (e: Electron.IpcRendererEvent, change: DataStoreChange): void => {
             callback(change);
-        });
+        };
+
+        // add listener
+        ipcRenderer.on(channel, handler);
+
+        // return a removal function
+        return () => ipcRenderer.removeListener(channel, handler);
     }
 }
