@@ -55,3 +55,39 @@
   display: grid;
   grid-template-columns: repeat($cols, 1fr);
 }
+
+@keyframes wiggle {
+  0% { transform: rotate(0deg); }
+  80% { transform: rotate(0deg); }
+  85% { transform: rotate(10deg); }
+  95% { transform: rotate(-10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@mixin wiggle {
+  animation: wiggle 2s infinite;
+}
+
+@keyframes shake {
+  50%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  55%, 85% {
+    transform: translate3d(2px, 0, 0);
+  }
+  60%, 70%, 80% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  65%, 75% {
+    transform: translate3d(4px, 0, 0);
+  }
+  45%, 95% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@mixin shake {
+  animation: shake 1.64s cubic-bezier(.36,.07,.19,.97) 2 both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}

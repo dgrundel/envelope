@@ -1,14 +1,7 @@
 @import './reset.css';
 @import './mixins.scss';
 @import './config.scss';
-
-$font-path: './fonts';
-
-$notosans-fontface-path: $font-path;
-@import "notosans-fontface/scss/notosans-fontface-allweight.scss";
-
-$pe-7s-font-path: $font-path;
-@import "node_modules/pe7-icon/dist/scss/pe-icon-7-stroke";
+@import './fonts.scss';
 
 html, body {
   background-color: $color-body-bg;

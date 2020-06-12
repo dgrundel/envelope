@@ -18,14 +18,17 @@ export class Sidebar extends React.Component<SidebarProps, {}> {
                 {this.renderNavLink(AppPage.Dashboard, 'Dashboard')}
                 {this.renderNavLink(AppPage.Accounts, 'Accounts')}
                 {this.renderNavLink(AppPage.Envelopes, 'Envelopes')}
-                {this.renderNavLink(AppPage.Transactions, 'Transactions')}
+                {this.renderNavLink(AppPage.Transactions, <>
+                    Transactions
+                    <i className="material-icons">notification_important</i>
+                </>)}
             </ul>
             <ImportDropTarget modalApi={this.props.modalApi}/>
         </div>;
     }
 
 
-    renderNavLink(page: AppPage, label: string) {
+    renderNavLink(page: AppPage, label: any) {
         const pageApi = this.props.pageApi;
 
         return <li className={pageApi.getActivePage() === page ? 'sidebar-nav-link-active' : ''} onClick={() => pageApi.setPage(page)}>{label}</li>;
