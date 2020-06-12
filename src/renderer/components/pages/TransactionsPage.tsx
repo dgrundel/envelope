@@ -4,21 +4,21 @@ import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/Transa
 import { currencyFormatter } from '@/util/Formatters';
 import { Log } from '@/util/Logger';
 import * as React from "react";
-import { Box } from "./Box";
-import { DataTable } from './DataTable';
-import { EventListener } from './EventListener';
+import { Box } from "../Box";
+import { DataTable } from '../DataTable';
+import { EventListener } from '../EventListener';
 
-export interface TransactionListProps {
+export interface TransactionsPageProps {
 }
 
-export interface TransactionListState {
+export interface TransactionsPageState {
     transactions: Transaction[];
     accounts: Record<string, Account>;
 }
 
-export class TransactionList extends EventListener<TransactionListProps, TransactionListState> {
+export class TransactionsPage extends EventListener<TransactionsPageProps, TransactionsPageState> {
 
-    constructor(props: TransactionListProps) {
+    constructor(props: TransactionsPageProps) {
         super(props);
 
         const transactionDataStore = new TransactionDataStoreClient();

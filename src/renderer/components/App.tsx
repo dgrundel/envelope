@@ -2,14 +2,15 @@ import '@public/components/App.scss';
 import * as React from "react";
 import { Modal, ModalApi } from "./Modal";
 import { AccountsPage } from "./pages/AccountsPage";
-import { HomePage } from './pages/HomePage';
+import { DashboardPage } from './pages/DashboardPage';
 import { Sidebar } from './Sidebar';
 import { EnvelopesPage } from './pages/EnvelopesPage';
+import { TransactionsPage } from './pages/TransactionsPage';
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
 
 export enum AppPage {
-    Home,
+    Dashboard,
     Accounts,
     Envelopes,
     Transactions
@@ -35,7 +36,7 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
 
         this.state = {
             modals: [],
-            page: AppPage.Home
+            page: AppPage.Dashboard
         };
 
         // ModalApi
@@ -80,9 +81,11 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
                 return <AccountsPage/>;
             case AppPage.Envelopes:
                 return <EnvelopesPage/>;
-            case AppPage.Home:
+            case AppPage.Transactions:
+                return <TransactionsPage/>;
+            case AppPage.Dashboard:
             default:
-                return <HomePage/>;
+                return <DashboardPage/>;
         }
     }
 

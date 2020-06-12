@@ -15,10 +15,10 @@ export class Sidebar extends React.Component<SidebarProps, {}> {
         return <div id="sidebar">
             <h4 className="sidebar-nav-header">Navigation Header</h4>
             <ul className="sidebar-nav">
-                {this.renderNavLink(AppPage.Home, 'Home')}
+                {this.renderNavLink(AppPage.Dashboard, 'Dashboard')}
                 {this.renderNavLink(AppPage.Accounts, 'Accounts')}
                 {this.renderNavLink(AppPage.Envelopes, 'Envelopes')}
-                <li>Transactions</li>
+                {this.renderNavLink(AppPage.Transactions, 'Transactions')}
             </ul>
             <ImportDropTarget modalApi={this.props.modalApi}/>
         </div>;
