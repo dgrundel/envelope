@@ -344,7 +344,7 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
             invertTransactions: false
         };
 
-        new AccountDataStoreClient().getAccounts()
+        new AccountDataStoreClient().getUserAccounts()
             .then(accounts => {
                 this.setState({
                     accounts

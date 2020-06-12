@@ -59,7 +59,7 @@ export class TransactionList extends React.Component<TransactionListProps, Trans
     }
 
     refreshAccounts(accountDataStore: AccountDataStoreClient) {
-        accountDataStore.getAccounts().then(accounts => {
+        accountDataStore.getUserAccounts().then(accounts => {
             this.setState({
                 accounts: accounts.reduce((map: Record<string, Account>, item: Account) => {
                     if (item._id) {

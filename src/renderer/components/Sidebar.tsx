@@ -17,7 +17,7 @@ export class Sidebar extends React.Component<SidebarProps, {}> {
             <ul className="sidebar-nav">
                 {this.renderNavLink(AppPage.Home, 'Home')}
                 {this.renderNavLink(AppPage.Accounts, 'Accounts')}
-                <li>Envelopes</li>
+                {this.renderNavLink(AppPage.Envelopes, 'Envelopes')}
                 <li>Transactions</li>
             </ul>
             <ImportDropTarget modalApi={this.props.modalApi}/>

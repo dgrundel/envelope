@@ -33,6 +33,7 @@ export const getAccountTypeLabel = (t: AccountType) => accountTypeLabels[t];
 export interface Account extends BaseDataStoreRecord {
     type: AccountType;
     name: string;
+    linkedAccounts?: string[];
 }
 
 export class AccountDataStore extends DataStore<Account> {
@@ -52,7 +53,18 @@ export class AccountDataStoreClient extends DataStoreClient<Account> {
         return this.insert(acct);
     }
 
-    getAccounts(query: any = {}) {
+    getUserAccounts() {
+        const query = { type: { $in: getUserAccountTypes() } };
+        return this.find(query);
+    }
+
+    getCreditCardEnvelopes() {
+        const query = { type: AccountType.EnvelopeCreditCard };
+        return this.find(query);
+    }
+
+    getUserEnvelopes() {
+        const query = { type: AccountType.EnvelopeUser };
         return this.find(query);
     }
 }

@@ -58,7 +58,17 @@ export class AccountsPage extends React.Component<AccountsPageProps, AccountsPag
         const onSubmit = (values: FormFieldValues) => {
             const account = (values as Account);
             const client = new AccountDataStoreClient();
-            client.addAccount(account).then(res => Log.debug(res));
+            client.addAccount(account).then(created => {
+                Log.debug(created);
+
+                if (created.type === AccountType.CreditCard) {
+                    client.addAccount({
+                        name: `${created.name} Payment`,
+                        type: AccountType.EnvelopeCreditCard,
+                        linkedAccounts: [created._id as string]
+                    }).then(res2 => Log.debug(res2));
+                }
+            });
         };
 
 
@@ -77,7 +87,7 @@ export class AccountsPage extends React.Component<AccountsPageProps, AccountsPag
     }
 
     refreshAccounts(dataStore: AccountDataStoreClient) {
-        dataStore.getAccounts().then(accounts => {
+        dataStore.getUserAccounts().then(accounts => {
             this.setState({
                 accounts: accounts
             });

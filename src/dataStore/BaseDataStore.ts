@@ -13,7 +13,8 @@ export enum DataStoreEvent {
 }
 
 export enum DataStoreChange {
-    Insert = 'datastore-insert'
+    Insert = 'datastore-insert',
+    Update = 'datastore-update'
 }
 
 export const buildEventName = (event: DataStoreEvent, name: string) => `${event}:${name}`;

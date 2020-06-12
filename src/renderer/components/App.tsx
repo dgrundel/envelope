@@ -4,12 +4,14 @@ import { Modal, ModalApi } from "./Modal";
 import { AccountsPage } from "./pages/AccountsPage";
 import { HomePage } from './pages/HomePage';
 import { Sidebar } from './Sidebar';
+import { EnvelopesPage } from './pages/EnvelopesPage';
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
 
 export enum AppPage {
     Home,
     Accounts,
+    Envelopes,
     Transactions
 }
 
@@ -76,6 +78,8 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         switch(this.state.page) {
             case AppPage.Accounts:
                 return <AccountsPage/>;
+            case AppPage.Envelopes:
+                return <EnvelopesPage/>;
             case AppPage.Home:
             default:
                 return <HomePage/>;
