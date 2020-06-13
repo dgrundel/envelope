@@ -1,7 +1,6 @@
 import { Account, AccountDataStoreClient, getAccountTypeLabel } from '@/dataStore/impl/AccountDataStore';
 import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
 import { Currency } from '@/util/Currency';
-import { currencyFormatter } from '@/util/Formatters';
 import { Log } from '@/util/Logger';
 import '@public/components/import/ImportWizard.scss';
 import * as moment from "moment";
@@ -270,7 +269,7 @@ const invertDebitCreditStep: WizardStep<ImportWizardState> = {
                     </tr>
                     <tr>
                         <th>Amount</th>
-                        <td>{currencyFormatter(transaction.wholeAmount, transaction.fractionalAmount)}</td>
+                        <td>{new Currency(transaction.wholeAmount, transaction.fractionalAmount).toFormattedString()}</td>
                     </tr>
                     <tr>
                         <th>Description</th>
@@ -325,7 +324,7 @@ const summaryStep: WizardStep<ImportWizardState> = {
                     {transactions.map((transaction, i) => <tr key={`${transaction.description}${i}`}>
                         <td>{transaction.date.toLocaleDateString()}</td>
                         <td>{transaction.description}</td>
-                        <td>{currencyFormatter(transaction.wholeAmount, transaction.fractionalAmount)}</td>
+                        <td>{new Currency(transaction.wholeAmount, transaction.fractionalAmount).toFormattedString()}</td>
                     </tr>)}
                 </tbody>
             </table>

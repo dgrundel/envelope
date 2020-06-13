@@ -1,12 +1,12 @@
 import { DataStoreChange } from '@/dataStore/BaseDataStore';
 import { Account, AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
-import { currencyFormatter } from '@/util/Formatters';
 import { Log } from '@/util/Logger';
 import * as React from "react";
 import { Box } from "../Box";
 import { DataTable } from '../DataTable';
 import { EventListener } from '../EventListener';
+import { Currency } from '@/util/Currency';
 
 export interface TransactionsPageProps {
 }
@@ -90,7 +90,7 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
                 },{
                     name: 'amount',
                     label: 'Amount',
-                    formatter: (value, row) => currencyFormatter(row.wholeAmount, row.fractionalAmount)
+                    formatter: (value, row) => new Currency(row.wholeAmount, row.fractionalAmount).toFormattedString()
                 }]}
                 keyField={'_id'}
                 onSelect={(selected) => Log.debug('Table selection changed', selected)}

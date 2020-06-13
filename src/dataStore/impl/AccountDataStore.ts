@@ -33,6 +33,8 @@ export const getAccountTypeLabel = (t: AccountType) => accountTypeLabels[t];
 export interface Account extends BaseDataStoreRecord {
     type: AccountType;
     name: string;
+    balanceWholeAmount?: number; // signed, integer
+    balancefractionalAmount?: number; // unsigned, integer, in thousandths, range 0...999
     linkedAccounts?: string[];
 }
 

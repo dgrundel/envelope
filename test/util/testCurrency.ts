@@ -201,5 +201,28 @@ describe('Currency', function() {
             assert.equal(sum.fractionalAmount, 500);
         });
     });
+
+    describe('toFormattedString()', function() {
+        it('should pad cents < 10 (100 thou)', function() {
+            // cents are represented in thousands, so 30 == 3c.
+            const formatted = new Currency(12, 30).toFormattedString();
+            
+            assert.equal(formatted, '$12.03');
+        });
+
+        it('should not pad cents > 10 (100 thou)', function() {
+            // cents are represented in thousands, so 900 == 90c.
+            const formatted = new Currency(12, 900).toFormattedString();
+            
+            assert.equal(formatted, '$12.90');
+        });
+
+        it('should put the negative sign "-" before the currency symbol', function() {
+            // cents are represented in thousands, so 900 == 90c.
+            const formatted = new Currency(-12, 900).toFormattedString();
+            
+            assert.equal(formatted, '-$12.90');
+        });
+    });
 });
   

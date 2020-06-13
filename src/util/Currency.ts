@@ -1,6 +1,8 @@
-import { currencyFormatter } from './Formatters';
+import { leftPad } from './Formatters';
 
-const precision = 1000; // thousandths
+const DECIMAL_SEPARATOR = '.';
+const PRECISION = 1000; // thousandths
+const CENTS_PRECISION = 100;
 
 export class Currency {
     wholeAmount: number; // signed, integer
@@ -30,7 +32,17 @@ export class Currency {
     }
 
     toPrecisionInt() {
-        return (this.isNegative() ? -1 : 1) * (Math.abs(this.wholeAmount * precision) + Math.abs(this.fractionalAmount));
+        return (this.isNegative() ? -1 : 1) * (Math.abs(this.wholeAmount * PRECISION) + Math.abs(this.fractionalAmount));
+    }
+
+    toFormattedString() {
+        const centsDivisor = PRECISION / CENTS_PRECISION;
+        const cents = Math.round(Math.abs(this.fractionalAmount) / centsDivisor).toFixed(0);
+        const formattedCents = leftPad(cents, 2, '0');
+        const formattedWhole = Math.abs(this.wholeAmount);
+        const sign = this.isNegative() ? '-' : '';
+
+        return `${sign}$${formattedWhole}${DECIMAL_SEPARATOR}${formattedCents}`;
     }
 
     toString() {
@@ -39,8 +51,8 @@ export class Currency {
 
     static fromPrecisionInt(n: number): Currency {
         const sign = n < 0 ? -1 : 1;
-        const whole = Math.floor(Math.abs(n / precision)) * sign;
-        const frac = n % precision;
+        const whole = Math.floor(Math.abs(n / PRECISION)) * sign;
+        const frac = n % PRECISION;
         
         return new Currency(whole, frac);
     }
@@ -53,7 +65,7 @@ export class Currency {
             .replace(/^[^0-9-]+/, '');
 
         const amount = parseFloat(stripped);
-        const precisionInt = Math.round(amount * precision);
+        const precisionInt = Math.round(amount * PRECISION);
         
         return Currency.fromPrecisionInt(precisionInt);
     }
