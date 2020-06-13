@@ -43,7 +43,8 @@ export class Currency {
         const sign = this.isNegative() ? NEGATIVE_SYMBOL : '';
 
         const whole = Math.abs(this.wholeAmount).toFixed(0).split('');
-        for (let i = whole.length % 3; i < whole.length; i += 4) {
+
+        for (let i = whole.length % 3 || 3; i < whole.length; i += 4) {
             whole.splice(i, 0, THOUSANDS_SEPARATOR);
         }
         const formattedWhole = whole.join('');

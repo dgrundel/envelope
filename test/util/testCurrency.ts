@@ -230,6 +230,20 @@ describe('Currency', function() {
             
             assert.equal(formatted, '$1,200,000.00');
         });
+
+        it('should NOT insert a leading thousands separator', function() {
+            const tests: Record<string, number> = {
+                '$100.00': 100,
+                '$100,000.00': 100000,
+                '$100,000,000.00': 100000000,
+            };
+
+            Object.keys(tests).forEach(expected => {
+                const whole = tests[expected];
+                const formatted = new Currency(whole, 0).toFormattedString();
+                assert.equal(formatted, expected);
+            });
+        });
     });
 });
   
