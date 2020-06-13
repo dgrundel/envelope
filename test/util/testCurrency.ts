@@ -50,5 +50,156 @@ describe('Currency', function() {
             assert.equal(parsed.fractionalAmount, 0);
         });
     });
+
+    describe('fromPrecisionInt()', function() {
+        it('should correctly convert positive values', function() {
+            const currency = Currency.fromPrecisionInt(12000);
+            assert.equal(currency.wholeAmount, 12);
+            assert.equal(currency.fractionalAmount, 0);
+        });
+
+        it('should correctly convert negative values', function() {
+            const currency = Currency.fromPrecisionInt(-12000);
+            assert.equal(currency.wholeAmount, -12);
+            assert.equal(currency.fractionalAmount, 0);
+        });
+
+        it('should correctly convert small values', function() {
+            const currency = Currency.fromPrecisionInt(-1);
+            assert.equal(currency.wholeAmount, 0);
+            assert.equal(currency.fractionalAmount, -1);
+        });
+    });
+
+    describe('toPrecisionInt()', function() {
+        it('should correctly convert positive values', function() {
+            const currency = new Currency(3, 500);
+            assert.equal(currency.toPrecisionInt(), 3500);
+        });
+
+        it('should correctly convert negative values w/ negative whole', function() {
+            const currency = new Currency(-3, 500);
+            assert.equal(currency.toPrecisionInt(), -3500);
+        });
+
+        it('should correctly convert negative values w/ negative frac', function() {
+            const currency = new Currency(3, -500);
+            assert.equal(currency.toPrecisionInt(), -3500);
+        });
+
+        it('should correctly convert negative values w/ both negative', function() {
+            const currency = new Currency(-3, -500);
+            assert.equal(currency.toPrecisionInt(), -3500);
+        });
+
+        it('should correctly convert small values', function() {
+            const currency = new Currency(0, 50);
+            assert.equal(currency.toPrecisionInt(), 50);
+        });
+    });
+
+    describe('isNegative()', function() {
+        it('should return true for negative whole', function() {
+            const currency = new Currency(-3, 500);
+            assert.equal(currency.isNegative(), true);
+        });
+
+        it('should return true for negative fraction', function() {
+            const currency = new Currency(3, -500);
+            assert.equal(currency.isNegative(), true);
+        });
+
+        it('should return true for negative whole and fraction', function() {
+            const currency = new Currency(-3, -500);
+            assert.equal(currency.isNegative(), true);
+        });
+
+        it('should return false for positive whole and fraction', function() {
+            const currency = new Currency(3, 500);
+            assert.equal(currency.isNegative(), false);
+        });
+    });
+
+    describe('add()', function () {
+        it('should correctly add two positives', function () {
+            const a = new Currency(3, 500);
+            const b = new Currency(1, 250);
+            const sum = a.add(b);
+            assert.equal(sum.wholeAmount, 4);
+            assert.equal(sum.fractionalAmount, 750);
+        });
+
+        it('should correctly add two small positives', function () {
+            const a = new Currency(0, 100);
+            const b = new Currency(0, 150);
+            const sum = a.add(b);
+            assert.equal(sum.wholeAmount, 0);
+            assert.equal(sum.fractionalAmount, 250);
+        });
+
+        it('should correctly add two negatives', function () {
+            const a = new Currency(-3, -500);
+            const b = new Currency(-1, -250);
+            const sum = a.add(b);
+            assert.equal(sum.wholeAmount, -4);
+            assert.equal(sum.fractionalAmount, -750);
+        });
+
+        it('should correctly add two small negatives', function () {
+            const a = new Currency(0, -500);
+            const b = new Currency(0, -250);
+            const sum = a.add(b);
+            assert.equal(sum.wholeAmount, 0);
+            assert.equal(sum.fractionalAmount, -750);
+        });
+
+        it('should correctly add one pos, one negative', function () {
+            const a = new Currency(3, 500);
+            const b = new Currency(-1, -250);
+            const sum = a.add(b);
+            assert.equal(sum.wholeAmount, 2);
+            assert.equal(sum.fractionalAmount, 250);
+        });
+
+        it('should correctly add one small pos, one small negative', function () {
+            const a = new Currency(0, 500);
+            const b = new Currency(0, -250);
+            const sum = a.add(b);
+            assert.equal(sum.wholeAmount, 0);
+            assert.equal(sum.fractionalAmount, 250);
+        });
+
+        it('should correctly add one pos, one small negative', function () {
+            const a = new Currency(1, 500);
+            const b = new Currency(0, -250);
+            const sum = a.add(b);
+            assert.equal(sum.wholeAmount, 1);
+            assert.equal(sum.fractionalAmount, 250);
+        });
+
+        it('should correctly add one pos, one negative with negative result', function () {
+            const a = new Currency(1, 500);
+            const b = new Currency(-2, -750);
+            const sum = a.add(b);
+            assert.equal(sum.wholeAmount, -1);
+            assert.equal(sum.fractionalAmount, -250);
+        });
+
+        it('should correctly add one small pos, one small negative with negative result', function () {
+            const a = new Currency(0, 500);
+            const b = new Currency(0, -750);
+            const sum = a.add(b);
+            assert.equal(sum.wholeAmount, 0);
+            assert.equal(sum.fractionalAmount, -250);
+        });
+
+        it('should correctly roll fractional into whole', function () {
+            const a = new Currency(2, 750);
+            const b = new Currency(3, 750);
+            const sum = a.add(b);
+            assert.equal(sum.wholeAmount, 6);
+            assert.equal(sum.fractionalAmount, 500);
+        });
+    });
 });
   
