@@ -51,9 +51,11 @@ export class EnvelopesPage extends EventListener<EnvelopesPageProps, EnvelopesPa
         }];
 
         const onSubmit = (values: FormFieldValues) => {
-            const account = {
+            const account: Account = {
                 name: values.name,
-                type: AccountType.EnvelopeUser
+                type: AccountType.EnvelopeUser,
+                balanceWholeAmount: 0,
+                balancefractionalAmount: 0
             };
             
             this.state.dataStore.addAccount(account)

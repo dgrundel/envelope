@@ -10,7 +10,7 @@ export interface Transaction extends BaseDataStoreRecord {
     month: number;
     description: string;
     wholeAmount: number; // signed, integer
-    fractionalAmount: number; // unsigned, integer, in thousandths, range 0...999
+    fractionalAmount: number; // signed, integer, in thousandths, range 0...999
     
     originalRecord?: Record<string, string>;
 }

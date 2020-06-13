@@ -33,8 +33,8 @@ export const getAccountTypeLabel = (t: AccountType) => accountTypeLabels[t];
 export interface Account extends BaseDataStoreRecord {
     type: AccountType;
     name: string;
-    balanceWholeAmount?: number; // signed, integer
-    balancefractionalAmount?: number; // unsigned, integer, in thousandths, range 0...999
+    balanceWholeAmount: number; // signed, integer
+    balancefractionalAmount: number; // signed, integer, in thousandths, range 0...999
     linkedAccounts?: string[];
 }
 
@@ -58,6 +58,8 @@ export class AccountDataStoreClient extends DataStoreClient<Account> {
                     return this.addAccount({
                         name: `${created.name} Payment`,
                         type: AccountType.EnvelopeCreditCard,
+                        balanceWholeAmount: 0,
+                        balancefractionalAmount: 0,
                         linkedAccounts: [created._id as string]
                     }).then(associated => Promise.resolve([created].concat(associated)));
                 } else {

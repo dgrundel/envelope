@@ -223,6 +223,13 @@ describe('Currency', function() {
             
             assert.equal(formatted, '-$12.90');
         });
+
+        it('should insert a , to separate thousands', function() {
+            // cents are represented in thousands, so 900 == 90c.
+            const formatted = new Currency(1200000, 0).toFormattedString();
+            
+            assert.equal(formatted, '$1,200,000.00');
+        });
     });
 });
   

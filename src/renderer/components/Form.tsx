@@ -89,8 +89,8 @@ export class Form extends React.Component<FormProps, FormState> {
                                     {fieldOption.label}
                                 </option>)}
                             </select>
-                            <small className="form-component-input-help">{field.helpText}</small>
-                            <p className="form-component-input-error">{this.fieldErrorMessage(name)}</p>
+                            {field.helpText && <small className="form-component-input-help">{field.helpText}</small>}
+                            {this.fieldErrorMessage(name)}
                         </label>;
                     case 'text':
                     default:
@@ -106,7 +106,8 @@ export class Form extends React.Component<FormProps, FormState> {
                                 required={field.required}
                                 onChange={this.onChange}
                             />
-                            <small className="form-component-input-help">{field.helpText}</small>
+                            {field.helpText && <small className="form-component-input-help">{field.helpText}</small>}
+                            {this.fieldErrorMessage(name)}
                         </label>;
                 }
             })}
@@ -126,7 +127,7 @@ export class Form extends React.Component<FormProps, FormState> {
     fieldErrorMessage(fieldName: string) {
         const error = this.state.validationResult[fieldName];
         if (error) {
-            return error.message;
+            return <p className="form-component-input-error">{error.message}</p>;
         }
     }
 

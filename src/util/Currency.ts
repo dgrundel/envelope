@@ -1,8 +1,12 @@
 import { leftPad } from './Formatters';
+import { Log } from './Logger';
 
-const DECIMAL_SEPARATOR = '.';
 const PRECISION = 1000; // thousandths
 const CENTS_PRECISION = 100;
+
+const NEGATIVE_SYMBOL = '-';
+const THOUSANDS_SEPARATOR = ',';
+const DECIMAL_SEPARATOR = '.';
 
 export class Currency {
     wholeAmount: number; // signed, integer
@@ -36,11 +40,17 @@ export class Currency {
     }
 
     toFormattedString() {
+        const sign = this.isNegative() ? NEGATIVE_SYMBOL : '';
+
+        const whole = Math.abs(this.wholeAmount).toFixed(0).split('');
+        for (let i = whole.length % 3; i < whole.length; i += 4) {
+            whole.splice(i, 0, THOUSANDS_SEPARATOR);
+        }
+        const formattedWhole = whole.join('');
+
         const centsDivisor = PRECISION / CENTS_PRECISION;
         const cents = Math.round(Math.abs(this.fractionalAmount) / centsDivisor).toFixed(0);
-        const formattedCents = leftPad(cents, 2, '0');
-        const formattedWhole = Math.abs(this.wholeAmount);
-        const sign = this.isNegative() ? '-' : '';
+        const formattedCents = leftPad(cents, 2, '0');        
 
         return `${sign}$${formattedWhole}${DECIMAL_SEPARATOR}${formattedCents}`;
     }
@@ -66,7 +76,6 @@ export class Currency {
 
         const amount = parseFloat(stripped);
         const precisionInt = Math.round(amount * PRECISION);
-        
         return Currency.fromPrecisionInt(precisionInt);
     }
 }

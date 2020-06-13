@@ -5,6 +5,7 @@ import * as React from "react";
 import { Box } from "../Box";
 import { Form, FormField, FormFieldValues } from '../Form';
 import { EventListener } from '../EventListener';
+import { Currency } from '@/util/Currency';
 
 // import '@public/components/AccountsPage.scss';
 
@@ -54,10 +55,21 @@ export class AccountsPage extends EventListener<AccountsPageProps, AccountsPageS
                 label: getAccountTypeLabel(accountType),
                 value: accountType
             }))
+        },{
+            name: 'balance',
+            label: 'Current Balance',
+            type: 'text',
+            required: true
         }];
 
         const onSubmit = (values: FormFieldValues) => {
-            const account = (values as Account);
+            const balance = Currency.parse(values.balance);
+            const account: Account = {
+                name: values.name,
+                type: values.type,
+                balanceWholeAmount: balance.isValid() ? balance.wholeAmount : 0,
+                balancefractionalAmount: balance.isValid() ? balance.fractionalAmount : 0
+            };
             const client = new AccountDataStoreClient();
             client.addAccount(account).then(created => Log.debug(created));
         };
@@ -88,10 +100,18 @@ export class AccountsPage extends EventListener<AccountsPageProps, AccountsPageS
     renderList() {
         if (this.state.accounts.length > 0) {
             return <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {this.state.accounts.map(account => <tr key={account._id}>
                         <td>{account.name}</td>
                         <td>{getAccountTypeLabel(account.type)}</td>
+                        <td>{new Currency(account.balanceWholeAmount, account.balancefractionalAmount).toFormattedString()}</td>
                     </tr>)}
                 </tbody>
             </table>;
