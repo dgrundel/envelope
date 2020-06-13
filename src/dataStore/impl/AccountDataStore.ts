@@ -1,4 +1,5 @@
 import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
+import { Currency } from '@/util/Currency';
 
 const name = 'accounts';
 
@@ -29,6 +30,8 @@ export const getUserAccountTypes = () => [
 ];
 
 export const getAccountTypeLabel = (t: AccountType) => accountTypeLabels[t];
+
+export const getAccountBalance = (a: Account) => new Currency(a.balanceWholeAmount, a.balancefractionalAmount);
 
 export interface Account extends BaseDataStoreRecord {
     type: AccountType;
@@ -66,6 +69,17 @@ export class AccountDataStoreClient extends DataStoreClient<Account> {
                     return Promise.resolve([created]);
                 }
             });
+    }
+
+    updateAccountBalance(accountName: string, balance: Currency) {
+        const query = { name: accountName };
+        const update = {
+            $set: {
+                balanceWholeAmount: balance.wholeAmount,
+                balancefractionalAmount: balance.fractionalAmount
+            }
+        };
+        return this.update(query, update);
     }
 
     getUserAccounts() {

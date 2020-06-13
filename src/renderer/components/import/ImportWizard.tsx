@@ -1,5 +1,5 @@
 import { Account, AccountDataStoreClient, getAccountTypeLabel } from '@/dataStore/impl/AccountDataStore';
-import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
+import { Transaction, TransactionDataStoreClient, getTransactionAmount } from '@/dataStore/impl/TransactionDataStore';
 import { Currency } from '@/util/Currency';
 import { Log } from '@/util/Logger';
 import '@public/components/import/ImportWizard.scss';
@@ -401,7 +401,17 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
         // store the data
         new TransactionDataStoreClient()
             .addTransactions(transactions)
-            .then(value => Log.debug('Saved transactions', value));
+            .then(inserted => {
+                // calculate sum of all transactions to update account balance
+                const sum = inserted.reduce((sum: Currency, transaction) => sum.add(getTransactionAmount(transaction)), new Currency(0, 0));
+
+                // TODO: Move all data store clients into a unified class, so we can do this work there.
+                new AccountDataStoreClient()
+                    .updateAccountBalance(accountName, sum)
+                    .then(updated => Log.debug('Updated account balance:', updated, accountName, sum.toString()));
+
+                Log.debug('Saved transactions', inserted);
+            });
 
         // pop a success modal?
     }

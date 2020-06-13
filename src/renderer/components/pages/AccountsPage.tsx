@@ -34,9 +34,7 @@ export class AccountsPage extends EventListener<AccountsPageProps, AccountsPageS
         this.refreshAccounts(dataStore);
   
         this.addListener(() => dataStore.onChange((change) => {
-            if (change === DataStoreChange.Insert) {
-                this.refreshAccounts(dataStore);
-            }
+            this.refreshAccounts(dataStore);
         }));
     }
 

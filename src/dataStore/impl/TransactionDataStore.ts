@@ -1,6 +1,9 @@
 import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
+import { Currency } from '@/util/Currency';
 
 const name = 'transactions';
+
+export const getTransactionAmount = (t: Transaction) => new Currency(t.wholeAmount, t.fractionalAmount);
 
 export interface Transaction extends BaseDataStoreRecord {
     accountName: string;

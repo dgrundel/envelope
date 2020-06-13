@@ -9,6 +9,7 @@ export enum DataStoreEvent {
     Changed = 'datastore-changed',
     Insert = 'datastore-insert',
     InsertMany = 'datastore-insert-many',
+    Update = 'datastore-update',
     Find = 'datastore-find'
 }
 
@@ -63,6 +64,9 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         ipcMain.handle(buildEventName(DataStoreEvent.InsertMany, this.name), async (event, items: T[]) => {
             return this.insertMany(items);
         });
+        ipcMain.handle(buildEventName(DataStoreEvent.Update, this.name), async (event, query: any, update: any, options: Nedb.UpdateOptions) => {
+            return this.update(query, update, options);
+        });
         ipcMain.handle(buildEventName(DataStoreEvent.Find, this.name), async (event, query?: any, sort?: any) => {
             return this.find(query, sort);
         });
@@ -103,6 +107,19 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         });
     }
 
+    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<number> {
+        return new Promise((resolve, reject) => {
+            this.db.update(query, update, options, (err: Error, numUpdated: number) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    this.triggerChanged(DataStoreChange.Update);
+                    resolve(numUpdated);
+                }
+            });
+        });
+    }
+
     protected find(query: any = {}, sort?: any): Promise<T[]> {
         return new Promise((resolve, reject) => {
             let cursor = this.db.find(query);
@@ -133,6 +150,10 @@ export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStor
 
     protected insertMany(items: T[]): Promise<T[]> {
         return this.invoke(DataStoreEvent.InsertMany, items);
+    }
+
+    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<number> {
+        return this.invoke(DataStoreEvent.Update, query, update, options);
     }
 
     protected find(query: any = {}, sort?: any): Promise<T[]> {
