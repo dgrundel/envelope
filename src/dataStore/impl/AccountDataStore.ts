@@ -49,8 +49,19 @@ export class AccountDataStoreClient extends DataStoreClient<Account> {
         super(name);
     }
 
-    addAccount(acct: Account) {
-        return this.insert(acct);
+    addAccount(acct: Account): Promise<Account[]> {
+        return this.insert(acct)
+            .then(created => {
+                if (created.type === AccountType.CreditCard) {
+                    return this.addAccount({
+                        name: `${created.name} Payment`,
+                        type: AccountType.EnvelopeCreditCard,
+                        linkedAccounts: [created._id as string]
+                    }).then(associated => Promise.resolve([created].concat(associated)));
+                } else {
+                    return Promise.resolve([created]);
+                }
+            });
     }
 
     getUserAccounts() {
