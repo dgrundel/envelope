@@ -1,4 +1,4 @@
-import { Account, AccountDataStoreClient, getAccountTypeLabel } from '@/dataStore/impl/AccountDataStore';
+import { Account, AccountDataStoreClient, getAccountTypeLabel, AccountType, getAccountBalance } from '@/dataStore/impl/AccountDataStore';
 import { Transaction, TransactionDataStoreClient, getTransactionAmount } from '@/dataStore/impl/TransactionDataStore';
 import { Currency } from '@/util/Currency';
 import { Log } from '@/util/Logger';
@@ -49,7 +49,7 @@ const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string,
         
         const currency = Currency.parse(row[amountColumn]);
         const wholeAmount = (invert ? -1 : 1) * currency.wholeAmount;
-        const fractionalAmount = currency.fractionalAmount;
+        const fractionalAmount = (invert ? -1 : 1) * currency.fractionalAmount;
 
         const description = descriptionColumns
             .map(col => row[col])
@@ -236,10 +236,10 @@ const invertDebitCreditStep: WizardStep<ImportWizardState> = {
         let expectedDescription;
         let invertedDescription;
         if (hasPositive) {
-            if (account.type === 'credit-card') {
+            if (account.type === AccountType.CreditCard) {
                 // expect positive transactions on a credit card to be a payment
-                expectedDescription = 'payment or credit';
-                invertedDescription = 'purchase, fee, or other charge';
+                expectedDescription = 'purchase, fee, or other charge';
+                invertedDescription = 'payment or credit';
             } else {
                 // expect positive transactions on checking/savings to be a deposit
                 expectedDescription = 'deposit or credit';
@@ -247,9 +247,9 @@ const invertDebitCreditStep: WizardStep<ImportWizardState> = {
             }
         } else {
             // expect negative transactions on credit card/checking/savings to be a purchase or fee
-            if (account.type === 'credit-card') {
-                expectedDescription = 'purchase, fee, or other charge';
-                invertedDescription = 'payment or credit';
+            if (account.type === AccountType.CreditCard) {
+                expectedDescription = 'payment or credit';
+                invertedDescription = 'purchase, fee, or other charge';
             } else {
                 expectedDescription = 'purchase, bill payment, fee, or other type of debit';
                 invertedDescription = 'deposit or credit';
@@ -405,10 +405,15 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
                 // calculate sum of all transactions to update account balance
                 const sum = inserted.reduce((sum: Currency, transaction) => sum.add(getTransactionAmount(transaction)), new Currency(0, 0));
 
+                const accountDataStore = new AccountDataStoreClient();
                 // TODO: Move all data store clients into a unified class, so we can do this work there.
-                new AccountDataStoreClient()
-                    .updateAccountBalance(accountName, sum)
-                    .then(updated => Log.debug('Updated account balance:', updated, accountName, sum.toString()));
+                accountDataStore
+                    .getAccount(accountName)
+                    .then(account => {
+                        const balance = sum.add(getAccountBalance(account));
+                        accountDataStore.updateAccountBalance(accountName, balance)
+                            .then(updated => Log.debug('Updated account balance:', updated, accountName, balance.toString()));
+                    });
 
                 Log.debug('Saved transactions', inserted);
             });

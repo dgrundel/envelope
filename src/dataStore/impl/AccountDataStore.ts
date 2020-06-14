@@ -82,6 +82,12 @@ export class AccountDataStoreClient extends DataStoreClient<Account> {
         return this.update(query, update);
     }
 
+    getAccount(name: string): Promise<Account> {
+        const query = { name };
+        return this.find(query)
+            .then(accounts => Promise.resolve(accounts[0]));
+    }
+
     getUserAccounts() {
         const query = { type: { $in: getUserAccountTypes() } };
         return this.find(query);
