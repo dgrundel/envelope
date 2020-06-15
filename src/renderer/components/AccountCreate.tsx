@@ -80,6 +80,8 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
                 .then(created => {
                     Log.debug(created);
                 });
+        } else {
+            this.setState(prev => this.validate(prev, {}));
         }
     }
 
