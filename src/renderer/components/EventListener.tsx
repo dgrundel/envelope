@@ -1,6 +1,5 @@
-import * as React from "react";
-import { DataStoreClient, DataStoreChange } from '@/dataStore/BaseDataStore';
 import { Log } from '@/util/Logger';
+import * as React from "react";
 
 export type ListenerAdder =  () => ListenerRemover;
 export type ListenerRemover = () => void;
