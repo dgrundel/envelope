@@ -1,11 +1,9 @@
-import { DataStoreChange } from '@/dataStore/BaseDataStore';
-import { Account, AccountDataStoreClient, AccountType, getAccountTypeLabel, getUserAccountTypes } from '@/dataStore/impl/AccountDataStore';
-import { Log } from '@/util/Logger';
-import * as React from "react";
-import { Box } from "../Box";
-import { Form, FormField, FormFieldValues } from '../Form';
-import { EventListener } from '../EventListener';
+import { Account, AccountDataStoreClient, AccountType, getAccountTypeLabel } from '@/dataStore/impl/AccountDataStore';
 import { Currency } from '@/util/Currency';
+import * as React from "react";
+import { AccountCreate } from '../AccountCreate';
+import { Box } from "../Box";
+import { EventListener } from '../EventListener';
 
 // import '@public/components/AccountsPage.scss';
 
@@ -39,50 +37,12 @@ export class AccountsPage extends EventListener<AccountsPageProps, AccountsPageS
     }
 
     render() {
-        const formFields: FormField[] = [{
-            name: 'name',
-            label: 'Account Name',
-            type: 'text',
-            required: true
-        },
-        {
-            name: 'type',
-            label: 'Account Type',
-            type: 'select',
-            options: getUserAccountTypes().map(accountType => ({
-                label: getAccountTypeLabel(accountType),
-                value: accountType
-            }))
-        },{
-            name: 'balance',
-            label: 'Current Balance',
-            type: 'text',
-            required: true
-        }];
-
-        const onSubmit = (values: FormFieldValues) => {
-            const balance = Currency.parse(values.balance);
-            const account: Account = {
-                name: values.name,
-                type: values.type,
-                balanceWholeAmount: balance.isValid() ? balance.wholeAmount : 0,
-                balancefractionalAmount: balance.isValid() ? balance.fractionalAmount : 0
-            };
-            const client = new AccountDataStoreClient();
-            client.addAccount(account).then(created => Log.debug(created));
-        };
-
-
         return <>
             <Box heading="Accounts">
                 {this.renderList()}
             </Box>
             <Box>
-                <Form
-                    fields={formFields}
-                    onSubmit={onSubmit}
-                    submitLabel="Save"
-                />
+                <AccountCreate/>
             </Box>
         </>;
     }

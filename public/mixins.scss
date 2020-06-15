@@ -56,6 +56,12 @@
   grid-template-columns: repeat($cols, 1fr);
 }
 
+@mixin grid-fill() {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-columns: 1fr;
+}
+
 @keyframes wiggle {
   0% { transform: rotate(0deg); }
   80% { transform: rotate(0deg); }
