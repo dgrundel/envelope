@@ -48,11 +48,13 @@ export class CommonValidators {
     static currency(): FieldValidator {
         return (value?: FieldValue) => {
             if (typeof value === 'string') {
-                if (value.trim().length > 0 && !Currency.parse(value).isValid()) {
-                    return `Hmm, this doesn't look like a number.`
+                if (value.trim().length === 0 || Currency.parse(value).isValid()) {
+                    return true;
                 }
+            } else if (typeof value === 'undefined') {
+                return true;
             }
-            return true;
+            return `Hmm, this doesn't look like a number.`
         };
     }
     
