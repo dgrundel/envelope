@@ -1,11 +1,10 @@
+import { Account, AccountDataStoreClient, AccountType } from '@/dataStore/impl/AccountDataStore';
+import { Log } from '@/util/Logger';
 import * as React from "react";
 import { Box } from '../Box';
-import { Account, AccountDataStoreClient, AccountType } from '@/dataStore/impl/AccountDataStore';
 import { DataTable } from '../DataTable';
-import { Form, FormField, FormFieldValues } from '../Form';
-import { Log } from '@/util/Logger';
+import { EnvelopeCreate } from '../EnvelopeCreate';
 import { EventListener } from '../EventListener';
-
 
 export interface EnvelopesPageProps {
 }
@@ -43,32 +42,9 @@ export class EnvelopesPage extends EventListener<EnvelopesPageProps, EnvelopesPa
     }
 
     render() {
-        const formFields: FormField[] = [{
-            name: 'name',
-            label: 'Name',
-            type: 'text',
-            required: true
-        }];
-
-        const onSubmit = (values: FormFieldValues) => {
-            const account: Account = {
-                name: values.name,
-                type: AccountType.EnvelopeUser,
-                balanceWholeAmount: 0,
-                balancefractionalAmount: 0
-            };
-            
-            this.state.dataStore.addAccount(account)
-                .then(res => Log.debug(res));
-        };
-        
         return <>
             <Box heading="Create an Envelope">
-                <Form
-                    fields={formFields}
-                    onSubmit={onSubmit}
-                    submitLabel="Save"
-                />
+                <EnvelopeCreate/>
             </Box>
             <Box heading="My Credit Card Payments">
                 <DataTable<Account>

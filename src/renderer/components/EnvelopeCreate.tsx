@@ -6,11 +6,11 @@ import { Log } from "@/util/Logger";
 import { Currency } from "@/util/Currency";
 import { FormValidator, CommonValidators, FieldValue } from './forms/FormValidator';
 
-export interface AccountCreateProps {
+export interface EnvelopeCreateProps {
 
 }
 
-export interface AccountCreateState {
+export interface EnvelopeCreateState {
     values: Record<string, any>;
     errors: Record<string, string>;
 }
@@ -18,18 +18,12 @@ export interface AccountCreateState {
 const fieldValidators = [{
     name: 'name',
     validator: CommonValidators.required('Name')
-}, {
-    name: 'type',
-    validator: CommonValidators.accountType()
-}, {
-    name: 'balance',
-    validator: CommonValidators.currency()
 }];
 
-export class AccountCreate extends React.Component<AccountCreateProps, AccountCreateState> {
+export class EnvelopeCreate extends React.Component<EnvelopeCreateProps, EnvelopeCreateState> {
     private readonly validator: FormValidator;
 
-    constructor(props: AccountCreateProps) {
+    constructor(props: EnvelopeCreateProps) {
         super(props);
 
         this.validator = new FormValidator(fieldValidators, this.onFieldChange.bind(this));
@@ -47,24 +41,6 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
                 value={this.state.values.name || ''}
                 error={this.state.errors.name}
                 onChange={(e) => this.validator.setValue('name', e.target.value)}
-            />
-            <RadioSelectField
-                name="type"
-                label="Account Type"
-                value={this.state.values.type}
-                error={this.state.errors.type}
-                options={getUserAccountTypes().map(value => ({
-                    value,
-                    label: getAccountTypeLabel(value)
-                }))}
-                onChange={(e) => this.validator.setValue('type', e.target.value)}
-            />
-            <TextField
-                name="balance"
-                label="Current Balance"
-                value={this.state.values.balance || ''}
-                error={this.state.errors.balance}
-                onChange={(e) => this.validator.setValue('balance', e.target.value)}
             />
             <div>
                 <button className="btn" type="submit">
@@ -89,17 +65,16 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
         if (this.validator.allValid()) {
             const values = this.validator.values();
 
-            const balance = Currency.parse((values.balance as string || '').trim());
             const account: Account = {
                 name: (values.name as string || '').trim(),
-                type: values.type as AccountType,
-                balanceWholeAmount: balance.isValid() ? balance.wholeAmount : 0,
-                balancefractionalAmount: balance.isValid() ? balance.fractionalAmount : 0
+                type: AccountType.EnvelopeUser,
+                balanceWholeAmount: 0,
+                balancefractionalAmount: 0
             };
             const client = new AccountDataStoreClient();
             client.addAccount(account)
-                .then(created => Log.debug('Created account', created))
-                .catch(reason => Log.error('Error during add account', reason));
+                .then(created => Log.debug('Created envelope account', created))
+                .catch(reason => Log.error('Error during add envelope account', reason));
         } else {
             const errors = this.validator.errors();
             this.setState({
