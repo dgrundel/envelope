@@ -29,12 +29,11 @@ interface IPCResult {
     data: any;
 }
 
-const getSerializableError = (err: Error) => {
-    const serializable = JSON.parse(JSON.stringify(err));
-    // since message is in the prototype, we have to explicitly copy it
-    serializable.message = err.message;
-    return serializable;
-}
+const getSerializableError = (err: Error) => Object.getOwnPropertyNames(err)
+    .reduce((serializable: any, prop: string) => {
+        serializable[prop] = (err as any)[prop]
+        return serializable;
+    }, {});
 
 abstract class BaseDataStore<T extends BaseDataStoreRecord> {
     protected readonly name: string;

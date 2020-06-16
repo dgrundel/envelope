@@ -74,7 +74,14 @@ export class EnvelopeCreate extends React.Component<EnvelopeCreateProps, Envelop
             const client = new AccountDataStoreClient();
             client.addAccount(account)
                 .then(created => Log.debug('Created envelope account', created))
-                .catch(reason => Log.error('Error during add envelope account', reason));
+                .catch(reason => {
+                    Log.error('Error during add envelope account', reason);
+                    // errorType: "uniqueViolated"
+                    // key: "test"
+                    // message: "Can't insert key test, it violates the unique constraint"
+
+                    // TODO: show error to user.
+                });
         } else {
             const errors = this.validator.errors();
             this.setState({
