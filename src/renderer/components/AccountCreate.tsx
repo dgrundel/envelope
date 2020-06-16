@@ -11,13 +11,8 @@ export interface AccountCreateProps {
 }
 
 export interface AccountCreateState {
-    valid: boolean;
-    name?: string;
-    nameError?: any;
-    type?: AccountType;
-    typeError?: any;
-    balance?: string;
-    balanceError?: any;
+    values: Record<string, any>;
+    errors: Record<string, string>;
 }
 
 const fieldValidators = [{
@@ -39,7 +34,8 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
 
         this.validator = new FormValidator(fieldValidators, this.onFieldChange.bind(this));
         this.state = {
-            valid: false
+            values: {},
+            errors: {}
         };
     }
 
@@ -48,15 +44,15 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
             <TextField
                 name="name"
                 label="Account Name"
-                value={this.state.name || ''}
-                error={this.state.nameError}
+                value={this.state.values.name || ''}
+                error={this.state.errors.name}
                 onChange={(e) => this.validator.setValue('name', e.target.value.trim())}
             />
             <RadioSelectField
                 name="type"
                 label="Account Type"
-                value={this.state.type}
-                error={this.state.typeError}
+                value={this.state.values.type}
+                error={this.state.errors.type}
                 options={getUserAccountTypes().map(value => ({
                     value,
                     label: getAccountTypeLabel(value)
@@ -66,8 +62,8 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
             <TextField
                 name="balance"
                 label="Current Balance"
-                value={this.state.balance || ''}
-                error={this.state.balanceError}
+                value={this.state.values.balance || ''}
+                error={this.state.errors.balance}
                 onChange={(e) => this.validator.setValue('balance', e.target.value.trim())}
             />
             <div>
@@ -79,38 +75,35 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
     }
 
     onFieldChange(fieldName: string, fieldValue: FieldValue) {
+        const values = this.validator.values();
         const errors = this.validator.errors();
-        const newState = {
-            nameError: errors.name,
-            typeError: errors.type,
-            balanceError: errors.balance
-        };
-        (newState as any)[fieldName] = fieldValue;
-        this.setState(newState);
+        this.setState({
+            values,
+            errors
+        });
     }
 
     onSubmit(e: React.FormEvent<HTMLFormElement>): void {
         e.preventDefault();
         
         if (this.validator.allValid()) {
-            const balance = Currency.parse(this.state.balance || '');
+            const values = this.validator.values();
+
+            const balance = Currency.parse(values.balance as string || '');
             const account: Account = {
-                name: this.state.name as string,
-                type: this.state.type as AccountType,
+                name: values.name as string,
+                type: values.type as AccountType,
                 balanceWholeAmount: balance.isValid() ? balance.wholeAmount : 0,
                 balancefractionalAmount: balance.isValid() ? balance.fractionalAmount : 0
             };
             const client = new AccountDataStoreClient();
             client.addAccount(account)
-                .then(created => {
-                    Log.debug(created);
-                });
+                .then(created => Log.debug('Created account', created))
+                .catch(reason => Log.error('Error during add account', reason));
         } else {
             const errors = this.validator.errors();
             this.setState({
-                nameError: errors.name,
-                typeError: errors.type,
-                balanceError: errors.balance
+                errors
             });
         }
     }
