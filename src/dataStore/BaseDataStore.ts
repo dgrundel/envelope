@@ -24,6 +24,18 @@ export interface BaseDataStoreRecord {
     _id?: string;
 };
 
+interface IPCResult {
+    success: boolean;
+    data: any;
+}
+
+const getSerializableError = (err: Error) => {
+    const serializable = JSON.parse(JSON.stringify(err));
+    // since message is in the prototype, we have to explicitly copy it
+    serializable.message = err.message;
+    return serializable;
+}
+
 abstract class BaseDataStore<T extends BaseDataStoreRecord> {
     protected readonly name: string;
 
@@ -58,18 +70,33 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
             corruptAlertThreshold: 0
         });
 
-        ipcMain.handle(buildEventName(DataStoreEvent.Insert, this.name), async (event, item: T) => {
+        this.handle(DataStoreEvent.Insert, (event, item: T) => {
             return this.insert(item);
         });
-        ipcMain.handle(buildEventName(DataStoreEvent.InsertMany, this.name), async (event, items: T[]) => {
+        this.handle(DataStoreEvent.InsertMany, (event, items: T[]) => {
             return this.insertMany(items);
         });
-        ipcMain.handle(buildEventName(DataStoreEvent.Update, this.name), async (event, query: any, update: any, options: Nedb.UpdateOptions) => {
+        this.handle(DataStoreEvent.Update, (event, query: any, update: any, options: Nedb.UpdateOptions) => {
             return this.update(query, update, options);
         });
-        ipcMain.handle(buildEventName(DataStoreEvent.Find, this.name), async (event, query?: any, sort?: any) => {
+        this.handle(DataStoreEvent.Find, (event, query?: any, sort?: any) => {
             return this.find(query, sort);
         });
+    }
+
+    private handle(event: DataStoreEvent, callback: (...args: any) => Promise<any>) {
+        const channel = buildEventName(event, this.name);
+        ipcMain.handle(channel, (...args: any) => new Promise((resolve) => {
+            callback(...args)
+                .then(result => resolve({
+                    success: true,
+                    data: result
+                }))
+                .catch(reason => resolve({
+                    success: false,
+                    data: getSerializableError(reason)
+                }));
+        }));
     }
 
     protected triggerChanged(change: DataStoreChange) {
@@ -141,7 +168,8 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
 
 export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
     private invoke(event: DataStoreEvent, ...args: any) {
-        return ipcRenderer.invoke(buildEventName(event, this.name), ...args);
+        return ipcRenderer.invoke(buildEventName(event, this.name), ...args)
+            .then((result: IPCResult) => result.success ? Promise.resolve(result.data) : Promise.reject(result.data));
     }
 
     protected insert(item: T): Promise<T> {
