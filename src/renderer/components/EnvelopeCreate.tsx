@@ -5,13 +5,14 @@ import { getUserAccountTypes, getAccountTypeLabel, AccountType, Account, Account
 import { Log } from "@/util/Logger";
 import { Currency } from "@/util/Currency";
 import { FormValidator, CommonValidators, FieldValue } from './forms/FormValidator';
-import { FormContainer } from './forms/FormContainer';
 
 export interface EnvelopeCreateProps {
 
 }
 
 export interface EnvelopeCreateState {
+    values: Record<string, any>;
+    errors: Record<string, string>;
 }
 
 const fieldValidators = [{
@@ -25,24 +26,41 @@ export class EnvelopeCreate extends React.Component<EnvelopeCreateProps, Envelop
     constructor(props: EnvelopeCreateProps) {
         super(props);
 
-        this.validator = new FormValidator(fieldValidators);
+        this.validator = new FormValidator(fieldValidators, this.onFieldChange.bind(this));
         this.state = {
+            values: {},
+            errors: {}
         };
     }
 
     render() {
-        return <FormContainer validator={this.validator} onSubmit={() => this.onSubmit()}>
+        return <form onSubmit={e => this.onSubmit(e)}>
             <TextField
                 name="name"
                 label="Account Name"
-                value={this.validator.getInputValue('name') as string}
-                error={this.validator.getError('name') as string}
+                value={this.state.values.name || ''}
+                error={this.state.errors.name}
                 onChange={(e) => this.validator.setValue('name', e.target.value)}
             />
-        </FormContainer>
+            <div>
+                <button className="btn" type="submit">
+                    Save
+                </button>
+            </div>
+        </form>;
     }
 
-    onSubmit() {
+    onFieldChange(fieldName: string, fieldValue: FieldValue) {
+        const values = this.validator.values();
+        const errors = this.validator.errors();
+        this.setState({
+            values,
+            errors
+        });
+    }
+
+    onSubmit(e: React.FormEvent<HTMLFormElement>): void {
+        e.preventDefault();
         
         if (this.validator.allValid()) {
             const values = this.validator.values();
