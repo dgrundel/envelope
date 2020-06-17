@@ -22,6 +22,8 @@ interface FieldRecord extends ValidatedField {
 
 type FieldMap = Record<string, FieldRecord>;
 
+const DEFAULT_JOINER = (s: string[]) => s.join(',');
+
 export class CommonValidators {
     static chain(...validators: FieldValidator[]): FieldValidator {
         return (value?: FieldValue) => {
@@ -63,7 +65,7 @@ export class CommonValidators {
 export class FormValidator {
     private readonly touched: Record<string, boolean>;
     private readonly fields: FieldMap;
-    private readonly changeHandler?: ChangeHandler;
+    private changeHandler?: ChangeHandler;
 
     constructor(fields: ValidatedField[], changeHandler?: ChangeHandler) {
         this.touched = {};
@@ -77,6 +79,12 @@ export class FormValidator {
         this.changeHandler = changeHandler;
     }
 
+    setChangeHandler(changeHandler?: ChangeHandler) {
+        if (!this.changeHandler) {
+            this.changeHandler = changeHandler;
+        }
+    }
+
     setValue(fieldName: string, fieldValue: FieldValue) {
         const field = this.fields[fieldName];
         if (field) {
@@ -87,6 +95,25 @@ export class FormValidator {
                 this.changeHandler(fieldName, fieldValue);
             }
         }
+    }
+
+    getValue(fieldName: string): FieldValue {
+        const field = this.fields[fieldName];
+        return field ? field.value : undefined;
+    }
+
+    getInputValue(fieldName: string, joiner?: (s: string[]) => string): string {
+        const value = this.getValue(fieldName);
+        if (Array.isArray(value)) {
+            return (joiner || DEFAULT_JOINER)(value);
+        } else {
+            return value || '';
+        }
+    }
+
+    getError(fieldName: string) {
+        const field = this.fields[fieldName];
+        return field ? field.error : undefined;
     }
 
     allValid(touch: boolean = true): boolean {
