@@ -36,6 +36,13 @@ const getSerializableError = (err: Error) => Object.getOwnPropertyNames(err)
         return serializable;
     }, {});
 
+export const recordsToMap = <T extends BaseDataStoreRecord>(records: T[]): Record<string, T> => {
+    return records.reduce((map: Record<string, T>, record: T) => {
+        map[record._id as string] = record;
+        return map;
+    }, {});
+};
+
 abstract class BaseDataStore<T extends BaseDataStoreRecord> {
     protected readonly name: string;
 

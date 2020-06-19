@@ -1,4 +1,4 @@
-import { DataStoreChange } from '@/dataStore/BaseDataStore';
+import { DataStoreChange, recordsToMap } from '@/dataStore/BaseDataStore';
 import { Account, AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
 import { Log } from '@/util/Logger';
@@ -7,12 +7,14 @@ import { Box } from "../Box";
 import { DataTable } from '../DataTable';
 import { EventListener } from '../EventListener';
 import { Currency } from '@/util/Currency';
+import { link } from 'fs';
 
 export interface TransactionsPageProps {
 }
 
 export interface TransactionsPageState {
     transactions: Transaction[];
+    linkedTransactions: Record<string, Transaction>;
     accounts: Record<string, Account>;
 }
 
@@ -26,6 +28,7 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
         
         this.state = {
             transactions: [],
+            linkedTransactions: {},
             accounts: {}
         };
 
@@ -57,18 +60,24 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
             this.setState({
                 transactions
             });
+
+            const linkedIds = transactions.reduce((ids: string[], transaction) => {
+                return ids.concat(transaction.linkedTransactions || []);
+            }, []);
+
+            transactionDataStore.getTransactionsById(linkedIds)
+                .then(linkedTransactions => {
+                    this.setState({
+                        linkedTransactions: recordsToMap(linkedTransactions)
+                    });
+                });
         });
     }
 
     refreshAccounts(accountDataStore: AccountDataStoreClient) {
         accountDataStore.getUserAccounts().then(accounts => {
             this.setState({
-                accounts: accounts.reduce((map: Record<string, Account>, item: Account) => {
-                    if (item._id) {
-                        map[item._id] = item;
-                    }
-                    return map;
-                }, {})
+                accounts: recordsToMap(accounts)
             });
         })
     }
@@ -91,6 +100,10 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
                     name: 'amount',
                     label: 'Amount',
                     formatter: (value, row) => new Currency(row.wholeAmount, row.fractionalAmount).toFormattedString()
+                },{
+                    name: 'linkedTransactions',
+                    label: '',
+                    formatter: this.linkedTransactionsFormatter.bind(this)
                 }]}
                 keyField={'_id'}
                 onSelect={(selected) => Log.debug('Table selection changed', selected)}
@@ -98,5 +111,14 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
         }
 
         return 'No transactions yet!';
+    }
+
+    private linkedTransactionsFormatter(value: string, row: Transaction) {
+        const linked = row.linkedTransactions;
+        if (linked && linked.length) {
+            return <i className="material-icons transaction-list-icon-linked">check_circle_outline</i>;
+        } else {
+            return <i className="material-icons transaction-list-icon-unlinked">error_outline</i>;
+        }
     }
 }

@@ -1,7 +1,7 @@
 import * as React from "react";
 import '@public/components/DataTable.scss';
 
-export type ValueFormatter<T> = (value: any, row: T) => string;
+export type ValueFormatter<T> = (value: any, row: T) => any;
 
 export interface DataTableField<T> {
     name: string;
@@ -41,7 +41,7 @@ export class DataTable<T> extends React.Component<DataTableProps<T>, DataTableSt
                 <tr>
                     {enableSelect ? <td></td> : null}
                     {this.props.fields.map(field => <th key={field.name}>
-                        {field.label || field.name}
+                        {typeof field.label === 'undefined' ? field.name : field.label}
                     </th>)}
                 </tr>
             </thead>
