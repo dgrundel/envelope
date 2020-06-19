@@ -31,8 +31,28 @@ export class Currency {
     }
 
     sub(other: Currency) {
-        const oNeg = new Currency(other.wholeAmount * -1, other.fractionalAmount);
-        return this.add(oNeg);
+        const diff = this.toPrecisionInt() - other.toPrecisionInt();
+        return Currency.fromPrecisionInt(diff);
+    }
+
+    gt(other: Currency) {
+        return this.toPrecisionInt() > other.toPrecisionInt();
+    }
+
+    gte(other: Currency) {
+        return this.toPrecisionInt() >= other.toPrecisionInt();
+    }
+
+    lt(other: Currency) {
+        return this.toPrecisionInt() < other.toPrecisionInt();
+    }
+
+    lte(other: Currency) {
+        return this.toPrecisionInt() <= other.toPrecisionInt();
+    }
+
+    eq(other: Currency) {
+        return this.toPrecisionInt() === other.toPrecisionInt();
     }
 
     toPrecisionInt() {
