@@ -1,6 +1,7 @@
-import * as React from "react";
-import { BaseModal, ModalApi, ModalButton, Modal } from '../Modal';
+import { getAppContext } from '@/renderer/AppContext';
 import { Log } from '@/util/Logger';
+import * as React from "react";
+import { BaseModal, Modal, ModalButton } from '../Modal';
 
 export interface WizardApi<S> {
     getState: () => S;
@@ -19,7 +20,6 @@ export interface WizardStep<S> {
 }
 
 export interface WizardProps<S> {
-    modalApi: ModalApi;
     initialState: S;
     initialStep?: number;
     steps: WizardStep<S>[];
@@ -133,7 +133,7 @@ export class Wizard<S> extends React.Component<WizardProps<S>, WizardInternalSta
         if (this.props.onCancel) {
             this.props.onCancel(this.state.wizardState);
         }
-        this.props.modalApi.dismissModal();
+        getAppContext().modalApi.dismissModal();
     }
 
     back() {

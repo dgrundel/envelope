@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import '@public/components/Modal.scss';
+import { getAppContext } from '../AppContext';
 
 export interface Modal {
     // marker interface
@@ -25,36 +26,36 @@ export interface ModalApi {
 }
 
 export const ButtonSets = {
-    ok: (api: ModalApi, callback?: () => void) => [
+    ok: (callback?: () => void) => [
         {
             buttonText: 'OK',
             onClick: () => {
                 callback && callback();
-                api.dismissModal();
+                getAppContext().modalApi.dismissModal();
             }
         }
     ],
-    close: (api: ModalApi, callback?: () => void) => [
+    close: (callback?: () => void) => [
         { 
             buttonText: 'Close', 
             onClick: () => {
                 callback && callback();
-                api.dismissModal();
+                getAppContext().modalApi.dismissModal();
             }
         }
     ],
-    okCancel: (api: ModalApi, okCallback?: () => void, cancelCallback?: () => void) => [
+    okCancel: (okCallback?: () => void, cancelCallback?: () => void) => [
         {
             buttonText: 'OK',
             onClick: () => {
                 okCallback && okCallback();
-                api.dismissModal();
+                getAppContext().modalApi.dismissModal();
             }
         },{
             buttonText: 'Cancel',
             onClick: () => {
                 cancelCallback && cancelCallback();
-                api.dismissModal();
+                getAppContext().modalApi.dismissModal();
             }
         }
     ]

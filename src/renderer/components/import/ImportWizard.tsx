@@ -1,11 +1,11 @@
-import { Account, AccountDataStoreClient, getAccountTypeLabel, AccountType, getAccountBalance } from '@/dataStore/impl/AccountDataStore';
-import { Transaction, TransactionDataStoreClient, getTransactionAmount } from '@/dataStore/impl/TransactionDataStore';
+import { Account, AccountDataStoreClient, AccountType, getAccountBalance, getAccountTypeLabel } from '@/dataStore/impl/AccountDataStore';
+import { getTransactionAmount, Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
+import { getAppContext } from '@/renderer/AppContext';
 import { Currency } from '@/util/Currency';
 import { Log } from '@/util/Logger';
 import '@public/components/import/ImportWizard.scss';
 import * as moment from "moment";
 import * as React from "react";
-import { ModalApi } from '../Modal';
 import { RowSelect } from '../RowSelect';
 import { SpinnerModal } from '../SpinnerModal';
 import { Wizard, WizardApi, WizardStep } from '../wizard/Wizard';
@@ -31,7 +31,6 @@ export interface ImportWizardState {
 }
 
 export interface ImportWizardProps {
-    modalApi: ModalApi;
     rows: Row[];
 }
 
@@ -354,7 +353,6 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
     render() {
         if (this.state.accounts) {
             const props = {
-                modalApi: this.props.modalApi,
                 initialState: {
                     rows: this.props.rows,
                     firstRow: this.props.rows[0],
@@ -388,7 +386,7 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
         // originalRecord: Record<string, string>;
         
         // dismiss import modal
-        this.props.modalApi.dismissModal();
+        getAppContext().modalApi.dismissModal();
 
         const accountName = wizardState.accountName as string;
         const dateColumn = wizardState.dateColumn as string;

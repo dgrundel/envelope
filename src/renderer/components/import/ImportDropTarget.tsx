@@ -1,12 +1,11 @@
-import * as React from "react";
-import * as csv from 'neat-csv';
-import { DropTarget } from "../DropTarget";
-
-import '@public/components/import/ImportDropTarget.scss';
-import { Log } from "@/util/Logger";
-import { ModalApi } from "../Modal";
-import { ImportWizard } from './ImportWizard';
 import { getAppContext } from '@/renderer/AppContext';
+import { Log } from "@/util/Logger";
+import '@public/components/import/ImportDropTarget.scss';
+import * as csv from 'neat-csv';
+import * as React from "react";
+import { DropTarget } from "../DropTarget";
+import { ImportWizard } from './ImportWizard';
+
 
 export interface ImportProps {
 }
@@ -29,8 +28,6 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
     }
 
     dropHandler(result: Promise<DataTransferItemList>) {
-        const modalApi = getAppContext().modalApi;
-
         // first filter out non-files
         // resolve with a list of files
         // reject if no files
@@ -54,8 +51,8 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
         .then(csvFiles => {
             csvFiles.forEach(csvRows => {
                 Log.debug('csvRows', csvRows);
-                const modal = <ImportWizard modalApi={modalApi} rows={csvRows}/>
-                modalApi.queueModal(modal);
+                const modal = <ImportWizard rows={csvRows}/>
+                getAppContext().modalApi.queueModal(modal);
             });
         })
         // if we got an error along the way, handle it.

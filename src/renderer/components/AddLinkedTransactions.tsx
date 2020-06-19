@@ -1,18 +1,17 @@
-import * as React from "react";
-
-import { DataTable } from './DataTable';
+import { Account, AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { Transaction } from '@/dataStore/impl/TransactionDataStore';
 import { Currency } from '@/util/Currency';
-import { TextField } from './forms/TextField';
-import { FormValidator, CommonValidators, FieldValue } from './forms/FormValidator';
+import * as React from "react";
+import { getAppContext } from '../AppContext';
+import { DataTable } from './DataTable';
 import { EventListener } from './EventListener';
-import { AccountDataStoreClient, Account } from '@/dataStore/impl/AccountDataStore';
-import { DataStoreChange } from '@/dataStore/BaseDataStore';
+import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
 import { SelectField } from './forms/SelectField';
-import { Modal, ModalApi, BaseModal, ModalButton } from './Modal';
+import { TextField } from './forms/TextField';
+import { BaseModal, Modal, ModalButton } from './Modal';
+
 
 export interface AddLinkedTransactionsProps {
-    modalApi: ModalApi;
     transaction: Transaction;
     existingLinks?: Transaction[];
 }
@@ -53,15 +52,15 @@ export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsPr
     }
 
     render() {
-        const modalApi = this.props.modalApi;
+        const dismissModal = getAppContext().modalApi.dismissModal;
         const transaction = this.props.transaction;
 
         const buttons: ModalButton[] = [{
             buttonText: 'Close',
-            onClick: () => modalApi.dismissModal()
+            onClick: () => dismissModal()
         }];
 
-        return <BaseModal heading="Add Linked Transactions" buttons={buttons} closeButtonHandler={() => modalApi.dismissModal()}>
+        return <BaseModal heading="Add Linked Transactions" buttons={buttons} closeButtonHandler={() => dismissModal()}>
             <div className="add-linked-transactions">
 
                 <div className="add-linked-transactions-transaction">

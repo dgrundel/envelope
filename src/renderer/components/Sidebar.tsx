@@ -1,10 +1,9 @@
-import * as React from "react";
-
 import '@public/components/Sidebar.scss';
-import { ImportDropTarget } from './import/ImportDropTarget';
-import { AppPage, PageApi } from './App';
-import { ModalApi } from './Modal';
+import * as React from "react";
 import { getAppContext } from '../AppContext';
+import { AppPage } from './App';
+import { ImportDropTarget } from './import/ImportDropTarget';
+
 
 export interface SidebarProps {
 }
