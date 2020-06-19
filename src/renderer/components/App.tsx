@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { Sidebar } from './Sidebar';
 import { EnvelopesPage } from './pages/EnvelopesPage';
 import { TransactionsPage } from './pages/TransactionsPage';
+import { initAppContext } from '../AppContext';
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
 
@@ -29,7 +30,7 @@ export interface AppState {
     page: AppPage;
 }
 
-export class App extends React.Component<AppProps, AppState> implements ModalApi {
+export class App extends React.Component<AppProps, AppState> implements ModalApi, PageApi {
 
     constructor(props: AppProps) {
         super(props);
@@ -47,6 +48,8 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         this.setPage = this.setPage.bind(this);
         this.getActivePage = this.getActivePage.bind(this);
 
+        initAppContext(this);
+
         // setTimeout(() => {
         //     const sampleModal = <BaseModal heading="Test modal" buttons={ButtonSets.ok(this)} closeButtonHandler={this.dismissModal}>Hello, modal.</BaseModal>;
         //     this.queueModal(sampleModal);
@@ -59,7 +62,7 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
                 <span className="envelope-icon" dangerouslySetInnerHTML={({__html: envelopeIcon})} />
                 <h1 className="header-text">Envelope</h1>
             </div>
-            <Sidebar modalApi={this} pageApi={this}/>
+            <Sidebar/>
             <div id="main">
                 {this.renderPage()}
                 {this.showModal()}

@@ -1,7 +1,8 @@
 import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
 import { Currency } from '@/util/Currency';
 
-const name = 'accounts';
+const NAME = 'accounts';
+const DEFAULT_SORT = { name: 1 };
 
 export enum AccountType {
     Checking = 'checking' ,
@@ -43,7 +44,7 @@ export interface Account extends BaseDataStoreRecord {
 
 export class AccountDataStore extends DataStore<Account> {
     constructor() {
-        super(name);
+        super(NAME);
 
         this.index({ fieldName: 'name', unique: true });
     }
@@ -51,7 +52,7 @@ export class AccountDataStore extends DataStore<Account> {
 
 export class AccountDataStoreClient extends DataStoreClient<Account> {
     constructor() {
-        super(name);
+        super(NAME);
     }
 
     addAccount(acct: Account): Promise<Account[]> {
@@ -90,16 +91,16 @@ export class AccountDataStoreClient extends DataStoreClient<Account> {
 
     getUserAccounts() {
         const query = { type: { $in: getUserAccountTypes() } };
-        return this.find(query);
+        return this.find(query, DEFAULT_SORT);
     }
 
     getCreditCardEnvelopes() {
         const query = { type: AccountType.EnvelopeCreditCard };
-        return this.find(query);
+        return this.find(query, DEFAULT_SORT);
     }
 
     getUserEnvelopes() {
         const query = { type: AccountType.EnvelopeUser };
-        return this.find(query);
+        return this.find(query, DEFAULT_SORT);
     }
 }

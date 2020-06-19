@@ -1,7 +1,8 @@
 import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
 import { Currency } from '@/util/Currency';
 
-const name = 'transactions';
+const NAME = 'transactions';
+const DEFAULT_SORT = { date: -1 };
 
 export const getTransactionAmount = (t: Transaction) => new Currency(t.wholeAmount, t.fractionalAmount);
 
@@ -22,13 +23,13 @@ export interface Transaction extends BaseDataStoreRecord {
 
 export class TransactionDataStore extends DataStore<Transaction> {
     constructor() {
-        super(name);
+        super(NAME);
     }
 }
 
 export class TransactionDataStoreClient extends DataStoreClient<Transaction> {
     constructor() {
-        super(name);
+        super(NAME);
     }
 
     addTransaction(transaction: Transaction) {
@@ -40,7 +41,7 @@ export class TransactionDataStoreClient extends DataStoreClient<Transaction> {
     }
 
     getTransactions(query: any = {}) {
-        return this.find(query, { date: -1 });
+        return this.find(query, DEFAULT_SORT);
     }
 
     getTransactionById(id: string) {
@@ -48,14 +49,16 @@ export class TransactionDataStoreClient extends DataStoreClient<Transaction> {
     }
 
     getTransactionsById(ids: string[]) {
-        return this.find({
+        const query = {
             _id: { $in: ids }
-        });
+        };
+        return this.find(query, DEFAULT_SORT);
     }
 
     getImportedTransactions() {
-        return this.getTransactions({
+        const query = {
             originalRecord: { $exists: true }
-        });
+        };
+        return this.getTransactions(query);
     }
 }

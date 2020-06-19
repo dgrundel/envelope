@@ -6,9 +6,9 @@ import '@public/components/import/ImportDropTarget.scss';
 import { Log } from "@/util/Logger";
 import { ModalApi } from "../Modal";
 import { ImportWizard } from './ImportWizard';
+import { getAppContext } from '@/renderer/AppContext';
 
 export interface ImportProps {
-    modalApi: ModalApi
 }
 
 export class ImportDropTarget extends React.Component<ImportProps, {}> {
@@ -29,7 +29,7 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
     }
 
     dropHandler(result: Promise<DataTransferItemList>) {
-        const modalApi = this.props.modalApi;
+        const modalApi = getAppContext().modalApi;
 
         // first filter out non-files
         // resolve with a list of files

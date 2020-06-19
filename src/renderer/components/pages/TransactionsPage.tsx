@@ -7,7 +7,6 @@ import { Box } from "../Box";
 import { DataTable } from '../DataTable';
 import { EventListener } from '../EventListener';
 import { Currency } from '@/util/Currency';
-import { link } from 'fs';
 
 export interface TransactionsPageProps {
 }

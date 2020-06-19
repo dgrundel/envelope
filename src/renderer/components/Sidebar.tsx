@@ -4,10 +4,9 @@ import '@public/components/Sidebar.scss';
 import { ImportDropTarget } from './import/ImportDropTarget';
 import { AppPage, PageApi } from './App';
 import { ModalApi } from './Modal';
+import { getAppContext } from '../AppContext';
 
 export interface SidebarProps {
-    modalApi: ModalApi;
-    pageApi: PageApi;
 }
 
 export class Sidebar extends React.Component<SidebarProps, {}> {
@@ -23,13 +22,13 @@ export class Sidebar extends React.Component<SidebarProps, {}> {
                     <i className="material-icons">notification_important</i>
                 </>)}
             </ul>
-            <ImportDropTarget modalApi={this.props.modalApi}/>
+            <ImportDropTarget/>
         </div>;
     }
 
 
     renderNavLink(page: AppPage, label: any) {
-        const pageApi = this.props.pageApi;
+        const pageApi = getAppContext().pageApi;
 
         return <li className={pageApi.getActivePage() === page ? 'sidebar-nav-link-active' : ''} onClick={() => pageApi.setPage(page)}>{label}</li>;
     }
