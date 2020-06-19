@@ -53,7 +53,7 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
     }
 
     refreshTransactions(transactionDataStore: TransactionDataStoreClient) {
-        transactionDataStore.getTransactions().then(transactions => {
+        transactionDataStore.getImportedTransactions().then(transactions => {
             this.setState({
                 transactions
             });

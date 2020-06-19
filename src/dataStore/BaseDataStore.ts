@@ -10,7 +10,8 @@ export enum DataStoreEvent {
     Insert = 'datastore-insert',
     InsertMany = 'datastore-insert-many',
     Update = 'datastore-update',
-    Find = 'datastore-find'
+    Find = 'datastore-find',
+    FindOne = 'datastore-find-one',
 }
 
 export enum DataStoreChange {
@@ -163,6 +164,18 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
             });
         });
     }
+
+    protected findOne(query: any = {}): Promise<T> {
+        return new Promise((resolve, reject) => {
+            this.db.findOne(query, (err: Error, document: T) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(document);
+                }
+            });
+        });
+    }
 }
 
 export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
@@ -185,6 +198,10 @@ export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStor
 
     protected find(query: any = {}, sort?: any): Promise<T[]> {
         return this.invoke(DataStoreEvent.Find, query, sort);
+    }
+
+    protected findOne(query: any = {}): Promise<T> {
+        return this.invoke(DataStoreEvent.FindOne, query);
     }
 
     onChange(callback: (change: DataStoreChange) => void) {

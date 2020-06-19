@@ -16,6 +16,8 @@ export interface Transaction extends BaseDataStoreRecord {
     fractionalAmount: number; // signed, integer, in thousandths, range 0...999
     
     originalRecord?: Record<string, string>;
+
+    linkedTransactions?: string[];
 }
 
 export class TransactionDataStore extends DataStore<Transaction> {
@@ -39,5 +41,21 @@ export class TransactionDataStoreClient extends DataStoreClient<Transaction> {
 
     getTransactions(query: any = {}) {
         return this.find(query, { date: -1 });
+    }
+
+    getTransactionById(id: string) {
+        return this.findOne({ _id: id });
+    }
+
+    getTransactionsById(ids: string[]) {
+        return this.find({
+            _id: { $in: ids }
+        });
+    }
+
+    getImportedTransactions() {
+        return this.getTransactions({
+            originalRecord: { $exists: true }
+        });
     }
 }
