@@ -119,18 +119,25 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
 
     private linkedTransactionsFormatter(value: string, row: Transaction) {
         const linkedIds = row.linkedTransactions;
+        const existingLinks = linkedIds?.map(id => this.state.linkedTransactions[id]) || [];
+        const balance = existingLinks.reduce(
+            (bal: Currency, link: Transaction) => {
+                // subtract linked amounts to see if it zeros out
+                return bal.sub(Currency.fromTransaction(link));
+            },
+            Currency.fromTransaction(row)
+        );
         
         const clickHander = (e: React.MouseEvent) => {
             e.preventDefault();
 
-            const existingLinks = linkedIds?.map(id => this.state.linkedTransactions[id]);
             const modal = <AddLinkedTransactions transaction={row} existingLinks={existingLinks} />;
             
             getAppContext().modalApi.queueModal(modal);
         };
         
         let icon = <i className="material-icons transaction-list-icon-unlinked">error_outline</i>;
-        if (linkedIds && linkedIds.length) {
+        if (balance.isZero()) {
             icon = <i className="material-icons transaction-list-icon-linked">check_circle_outline</i>;
         }
 

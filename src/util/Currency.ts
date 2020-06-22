@@ -1,7 +1,10 @@
 import { leftPad } from './Formatters';
 import { Log } from './Logger';
+import { Transaction } from '../dataStore/impl/TransactionDataStore';
+import { Account } from '@/dataStore/impl/AccountDataStore';
 
-const PRECISION = 1000; // thousandths
+const PRECISION_DIGITS = 3; // thousandths
+const PRECISION = Math.pow(10, PRECISION_DIGITS);
 const CENTS_PRECISION = 100;
 
 const NEGATIVE_SYMBOL = '-';
@@ -9,8 +12,8 @@ const THOUSANDS_SEPARATOR = ',';
 const DECIMAL_SEPARATOR = '.';
 
 export class Currency {
-    wholeAmount: number; // signed, integer
-    fractionalAmount: number; // signed, integer, range 0...{precision - 1}
+    readonly wholeAmount: number; // signed, integer
+    readonly fractionalAmount: number; // signed, integer, range 0...{precision - 1}
 
     constructor(wholeAmount: number, fractionalAmount: number) {
         this.wholeAmount = wholeAmount;
@@ -19,6 +22,10 @@ export class Currency {
 
     isValid() {
         return !(isNaN(this.wholeAmount) || isNaN(this.fractionalAmount));
+    }
+
+    isZero() {
+        return this.wholeAmount === 0 && this.fractionalAmount === 0;
     }
 
     isNegative() {
@@ -77,7 +84,8 @@ export class Currency {
     }
 
     toString() {
-        return `${this.wholeAmount}.${this.fractionalAmount}`;
+        const formattedFrac = leftPad(this.fractionalAmount.toFixed(0), PRECISION_DIGITS, '0');        
+        return `${this.wholeAmount}.${formattedFrac}`;
     }
 
     static fromPrecisionInt(n: number): Currency {
@@ -86,6 +94,14 @@ export class Currency {
         const frac = n % PRECISION;
         
         return new Currency(whole, frac);
+    }
+
+    static fromTransaction(t: Transaction) {
+        return new Currency(t.wholeAmount, t.fractionalAmount);
+    }
+
+    static fromAccountBalance(a: Account) {
+        return new Currency(a.balanceWholeAmount, a.balancefractionalAmount);
     }
 
     static parse(s: string): Currency {
