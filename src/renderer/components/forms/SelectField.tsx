@@ -24,6 +24,8 @@ export class SelectField extends React.Component<SelectFieldProps, {}> {
                 value={this.props.value}
                 onChange={(e) => this.props.onChange(e)}
             >
+                <option key="">{/* Default, empty option */}</option>
+
                 {this.props.options.map(option => <option
                     key={option.value}
                     value={option.value}

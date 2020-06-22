@@ -62,12 +62,16 @@ export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsPr
         const dismissModal = getAppContext().modalApi.dismissModal;
         const transaction = this.props.transaction;
 
-        const buttons: ModalButton[] = [{
+        const modalButtons: ModalButton[] = [{
             buttonText: 'Close',
             onClick: () => dismissModal()
         }];
 
-        return <BaseModal heading="Add Linked Transactions" buttons={buttons} closeButtonHandler={() => dismissModal()}>
+        const accountNameSelectOptions = this.state.envelopes.map(envelope => ({
+            value: envelope.name
+        }));
+
+        return <BaseModal heading="Add Linked Transactions" buttons={modalButtons} closeButtonHandler={() => dismissModal()}>
             <div className="add-linked-transactions">
 
                 <div className="add-linked-transactions-transaction">
@@ -113,9 +117,7 @@ export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsPr
                         value={this.state.formValues.accountName || ''}
                         error={this.state.formErrors.accountName}
                         onChange={(e) => this.validator.setValue('accountName', e.target.value)}
-                        options={this.state.envelopes.map(envelope => ({
-                            value: envelope.name
-                        }))}
+                        options={accountNameSelectOptions}
                     />
                     <TextField
                         name="amount"
