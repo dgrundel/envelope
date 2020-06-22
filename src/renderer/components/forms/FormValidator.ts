@@ -37,8 +37,8 @@ export class CommonValidators {
         };
     }
 
-    static required(fieldLabel: string): FieldValidator {
-        return (value?: FieldValue) => typeof value === 'string' && value.trim().length > 0 ? true : `Please enter a ${fieldLabel}`;
+    static required(): FieldValidator {
+        return (value?: FieldValue) => typeof value === 'string' && value.trim().length > 0 ? true : `This field is required.`;
     }
 
     static accountType(): FieldValidator {

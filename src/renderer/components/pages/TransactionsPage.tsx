@@ -7,6 +7,8 @@ import { Box } from "../Box";
 import { DataTable } from '../DataTable';
 import { EventListener } from '../EventListener';
 import { Currency } from '@/util/Currency';
+import { AddLinkedTransactions } from '../AddLinkedTransactions';
+import { getAppContext } from '@/renderer/AppContext';
 
 export interface TransactionsPageProps {
 }
@@ -113,11 +115,23 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
     }
 
     private linkedTransactionsFormatter(value: string, row: Transaction) {
-        const linked = row.linkedTransactions;
-        if (linked && linked.length) {
-            return <i className="material-icons transaction-list-icon-linked">check_circle_outline</i>;
-        } else {
-            return <i className="material-icons transaction-list-icon-unlinked">error_outline</i>;
+        const linkedIds = row.linkedTransactions;
+        
+        const clickHander = (e: React.MouseEvent) => {
+            e.preventDefault();
+
+            const existingLinks = linkedIds?.map(id => this.state.linkedTransactions[id]);
+
+            getAppContext().modalApi.queueModal(<AddLinkedTransactions transaction={row} existingLinks={existingLinks} />);
+        };
+        
+        let icon = <i className="material-icons transaction-list-icon-unlinked">error_outline</i>;
+        if (linkedIds && linkedIds.length) {
+            icon = <i className="material-icons transaction-list-icon-linked">check_circle_outline</i>;
         }
+
+        return <span onClick={clickHander}>
+            {icon}
+        </span>;
     }
 }

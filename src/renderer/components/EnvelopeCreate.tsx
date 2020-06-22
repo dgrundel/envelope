@@ -17,7 +17,7 @@ export interface EnvelopeCreateState {
 
 const fieldValidators = [{
     name: 'name',
-    validator: CommonValidators.required('Name')
+    validator: CommonValidators.required()
 }];
 
 export class EnvelopeCreate extends React.Component<EnvelopeCreateProps, EnvelopeCreateState> {

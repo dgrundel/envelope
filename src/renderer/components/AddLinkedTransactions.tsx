@@ -9,6 +9,7 @@ import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidat
 import { SelectField } from './forms/SelectField';
 import { TextField } from './forms/TextField';
 import { BaseModal, Modal, ModalButton } from './Modal';
+import { Log } from '@/util/Logger';
 
 
 export interface AddLinkedTransactionsProps {
@@ -24,8 +25,14 @@ export interface AddLinkedTransactionsState {
 }
 
 const fieldValidators = [{
+    name: 'accountName',
+    validator: CommonValidators.required()
+},{
     name: 'amount',
-    validator: CommonValidators.currency()
+    validator: CommonValidators.chain(
+        CommonValidators.required(),
+        CommonValidators.currency()
+    )
 }];
 
 export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsProps, AddLinkedTransactionsState> implements Modal {
@@ -147,7 +154,7 @@ export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsPr
         
         if (this.validator.allValid()) {
             const values = this.validator.values();
-
+            Log.debug('submitted linked transaction form', values);
             
         } else {
             this.setState({

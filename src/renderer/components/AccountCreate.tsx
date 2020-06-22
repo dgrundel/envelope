@@ -17,7 +17,7 @@ export interface AccountCreateState {
 
 const fieldValidators = [{
     name: 'name',
-    validator: CommonValidators.required('Name')
+    validator: CommonValidators.required()
 }, {
     name: 'type',
     validator: CommonValidators.accountType()
