@@ -17,6 +17,7 @@ export interface TransactionsPageState {
     transactions: Transaction[];
     linkedTransactions: Record<string, Transaction>;
     accounts: Record<string, Account>;
+    ready: boolean;
 }
 
 export class TransactionsPage extends EventListener<TransactionsPageProps, TransactionsPageState> {
@@ -30,12 +31,14 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
         this.state = {
             transactions: [],
             linkedTransactions: {},
-            accounts: {}
+            accounts: {},
+            ready: false
         };
 
-        this.refreshTransactions(transactionDataStore);
-        this.refreshAccounts(accountDataStore);
-  
+        Promise.all([
+            this.refreshTransactions(transactionDataStore),
+            this.refreshAccounts(accountDataStore)
+        ]).then(() => this.setState({ ready: true }));
         
         this.addListener(() => transactionDataStore.onChange((change) => {
             if (change === DataStoreChange.Insert) {
@@ -57,7 +60,7 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
     }
 
     refreshTransactions(transactionDataStore: TransactionDataStoreClient) {
-        transactionDataStore.getImportedTransactions().then(transactions => {
+        return transactionDataStore.getImportedTransactions().then(transactions => {
             this.setState({
                 transactions
             });
@@ -66,7 +69,7 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
                 return ids.concat(transaction.linkedTransactions || []);
             }, []);
 
-            transactionDataStore.getTransactionsById(linkedIds)
+            return transactionDataStore.getTransactionsById(linkedIds)
                 .then(linkedTransactions => {
                     this.setState({
                         linkedTransactions: recordsToMap(linkedTransactions)
@@ -76,7 +79,7 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
     }
 
     refreshAccounts(accountDataStore: AccountDataStoreClient) {
-        accountDataStore.getUserAccounts().then(accounts => {
+        return accountDataStore.getUserAccounts().then(accounts => {
             this.setState({
                 accounts: recordsToMap(accounts)
             });
@@ -84,7 +87,7 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
     }
 
     renderList() {
-        if (this.state.transactions.length > 0) {
+        if (this.state.ready) {
             return <DataTable<Transaction>
                 rows={this.state.transactions}
                 fields={[{
@@ -111,7 +114,7 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
             />
         }
 
-        return 'No transactions yet!';
+        return 'Just a moment...';
     }
 
     private linkedTransactionsFormatter(value: string, row: Transaction) {
@@ -121,8 +124,9 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
             e.preventDefault();
 
             const existingLinks = linkedIds?.map(id => this.state.linkedTransactions[id]);
-
-            getAppContext().modalApi.queueModal(<AddLinkedTransactions transaction={row} existingLinks={existingLinks} />);
+            const modal = <AddLinkedTransactions transaction={row} existingLinks={existingLinks} />;
+            
+            getAppContext().modalApi.queueModal(modal);
         };
         
         let icon = <i className="material-icons transaction-list-icon-unlinked">error_outline</i>;
