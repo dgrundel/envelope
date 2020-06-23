@@ -1,7 +1,6 @@
 import { leftPad } from './Formatters';
 import { Log } from './Logger';
 import { Transaction } from '../dataStore/impl/TransactionDataStore';
-import { Account } from '@/dataStore/impl/AccountDataStore';
 
 const PRECISION_DIGITS = 3; // thousandths
 const PRECISION = Math.pow(10, PRECISION_DIGITS);
@@ -12,6 +11,8 @@ const THOUSANDS_SEPARATOR = ',';
 const DECIMAL_SEPARATOR = '.';
 
 export class Currency {
+    static ZERO = Currency.fromPrecisionInt(0);
+
     readonly wholeAmount: number; // signed, integer
     readonly fractionalAmount: number; // signed, integer, range 0...{precision - 1}
 
@@ -98,10 +99,6 @@ export class Currency {
 
     static fromTransaction(t: Transaction) {
         return new Currency(t.wholeAmount, t.fractionalAmount);
-    }
-
-    static fromAccountBalance(a: Account) {
-        return new Currency(a.balanceWholeAmount, a.balancefractionalAmount);
     }
 
     static parse(s: string): Currency {

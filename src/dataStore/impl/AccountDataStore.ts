@@ -25,7 +25,7 @@ export class AccountDataStoreClient extends DataStoreClient<AccountData, Account
                     return this.addAccount({
                         name: `${created.name} Payment`,
                         type: AccountType.PaymentEnvelope,
-                        balance: Currency.fromPrecisionInt(0),
+                        balance: Currency.ZERO,
                         linkedAccountIds: [created._id as string]
                     }).then(associated => Promise.resolve([created].concat(associated)));
                 } else {

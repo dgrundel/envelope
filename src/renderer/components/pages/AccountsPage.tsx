@@ -1,4 +1,5 @@
-import { Account, AccountDataStoreClient, AccountType, getAccountTypeLabel } from '@/dataStore/impl/AccountDataStore';
+import { Account, AccountType, getAccountTypeLabel } from '@models/Account';
+import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { Currency } from '@/util/Currency';
 import * as React from "react";
 import { AccountCreate } from '../AccountCreate';
@@ -69,7 +70,7 @@ export class AccountsPage extends EventListener<AccountsPageProps, AccountsPageS
                     {this.state.accounts.map(account => <tr key={account._id}>
                         <td>{account.name}</td>
                         <td>{getAccountTypeLabel(account.type)}</td>
-                        <td>{new Currency(account.balanceWholeAmount, account.balancefractionalAmount).toFormattedString()}</td>
+                        <td>{account.balance.toFormattedString()}</td>
                     </tr>)}
                 </tbody>
             </table>;

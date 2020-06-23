@@ -1,10 +1,11 @@
-import * as React from "react";
-import { TextField } from "./forms/TextField";
-import { RadioSelectField } from "./forms/RadioSelectField";
-import { getUserAccountTypes, getAccountTypeLabel, AccountType, Account, AccountDataStoreClient } from "@/dataStore/impl/AccountDataStore";
-import { Log } from "@/util/Logger";
+import { AccountDataStoreClient } from "@/dataStore/impl/AccountDataStore";
 import { Currency } from "@/util/Currency";
-import { FormValidator, CommonValidators, FieldValue } from './forms/FormValidator';
+import { Log } from "@/util/Logger";
+import { AccountData, AccountType, getAccountTypeLabel, getBankAccountTypes } from '@models/Account';
+import * as React from "react";
+import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
+import { RadioSelectField } from "./forms/RadioSelectField";
+import { TextField } from "./forms/TextField";
 
 export interface AccountCreateProps {
 
@@ -53,7 +54,7 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
                 label="Account Type"
                 value={this.state.values.type}
                 error={this.state.errors.type}
-                options={getUserAccountTypes().map(value => ({
+                options={getBankAccountTypes().map(value => ({
                     value,
                     label: getAccountTypeLabel(value)
                 }))}
@@ -90,11 +91,11 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
             const values = this.validator.values();
 
             const balance = Currency.parse((values.balance as string || '').trim());
-            const account: Account = {
+            const account: AccountData = {
                 name: (values.name as string || '').trim(),
                 type: values.type as AccountType,
-                balanceWholeAmount: balance.isValid() ? balance.wholeAmount : 0,
-                balancefractionalAmount: balance.isValid() ? balance.fractionalAmount : 0
+                balance: balance.isValid() ? balance : Currency.ZERO,
+                linkedAccountIds: []
             };
             const client = new AccountDataStoreClient();
             client.addAccount(account)

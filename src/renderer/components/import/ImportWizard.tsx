@@ -1,4 +1,5 @@
-import { Account, AccountDataStoreClient, AccountType, getAccountBalance, getAccountTypeLabel } from '@/dataStore/impl/AccountDataStore';
+import { Account, getAccountTypeLabel, AccountType } from '@models/Account';
+import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { getTransactionAmount, Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
 import { getAppContext } from '@/renderer/AppContext';
 import { Currency } from '@/util/Currency';
@@ -408,7 +409,7 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
                 accountDataStore
                     .getAccount(accountName)
                     .then(account => {
-                        const balance = sum.add(getAccountBalance(account));
+                        const balance = sum.add(account.balance);
                         accountDataStore.updateAccountBalance(accountName, balance)
                             .then(updated => Log.debug('Updated account balance:', updated, accountName, balance.toString()));
                     });

@@ -1,5 +1,5 @@
-import { getUserAccountTypes } from '@/dataStore/impl/AccountDataStore';
 import { Currency } from '@/util/Currency';
+import { getBankAccountTypes } from '@/models/Account';
 
 export type FieldValue = string | string[] | undefined;
 export type ValidationResult = string | boolean;
@@ -42,7 +42,7 @@ export class CommonValidators {
     }
 
     static accountType(): FieldValidator {
-        return (value?: FieldValue) => typeof value === 'string' && getUserAccountTypes().findIndex(t => t === value) !== -1 ? true : `Please select an account type.`;
+        return (value?: FieldValue) => typeof value === 'string' && getBankAccountTypes().findIndex(t => t === value) !== -1 ? true : `Please select an account type.`;
     }
     
     static currency(): FieldValidator {

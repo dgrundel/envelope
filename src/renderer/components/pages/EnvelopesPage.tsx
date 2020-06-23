@@ -1,5 +1,5 @@
-import { Account, AccountDataStoreClient, AccountType } from '@/dataStore/impl/AccountDataStore';
-import { Log } from '@/util/Logger';
+import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
+import { Account } from '@models/Account';
 import * as React from "react";
 import { Box } from '../Box';
 import { DataTable } from '../DataTable';

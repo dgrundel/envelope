@@ -1,10 +1,9 @@
-import { app, ipcMain, ipcRenderer, BrowserWindow } from 'electron';
-import * as path from 'path';
-import * as Nedb from 'nedb';
 import { Log } from '@/util/Logger';
-import { listToMap } from '@/util/Data';
+import { app, BrowserWindow, ipcMain, ipcRenderer } from 'electron';
+import * as Nedb from 'nedb';
+import * as path from 'path';
 
-const dataStores: Record<string, DataStore<any>> = {};
+const dataStores: Record<string, DataStore<any, any>> = {};
 
 export enum DataStoreEvent {
     Changed = 'datastore-changed',

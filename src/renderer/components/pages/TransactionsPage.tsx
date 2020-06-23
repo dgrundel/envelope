@@ -1,5 +1,6 @@
 import { DataStoreChange } from '@/dataStore/BaseDataStore';
-import { Account, AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
+import { Account } from '@models/Account';
+import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
 import { getAppContext } from '@/renderer/AppContext';
 import { Currency } from '@/util/Currency';
