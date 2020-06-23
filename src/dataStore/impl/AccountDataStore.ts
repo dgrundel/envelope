@@ -1,5 +1,5 @@
-import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
 import { Currency } from '@/util/Currency';
+import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
 
 const NAME = 'accounts';
 const DEFAULT_SORT = { name: 1 };
@@ -101,6 +101,11 @@ export class AccountDataStoreClient extends DataStoreClient<Account> {
 
     getUserEnvelopes() {
         const query = { type: AccountType.EnvelopeUser };
+        return this.find(query, DEFAULT_SORT);
+    }
+
+    getAllAccounts() {
+        const query = {};
         return this.find(query, DEFAULT_SORT);
     }
 }

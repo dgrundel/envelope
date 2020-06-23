@@ -1,6 +1,5 @@
-import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
 import { Currency } from '@/util/Currency';
-import { Log } from "@/util/Logger";
+import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
 
 const NAME = 'transactions';
 const DEFAULT_SORT = { date: -1 };

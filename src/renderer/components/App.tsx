@@ -7,6 +7,10 @@ import { Sidebar } from './Sidebar';
 import { EnvelopesPage } from './pages/EnvelopesPage';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { initAppContext } from '../AppContext';
+import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
+import { ReduxStore } from '../store/store';
+import { loadAccounts } from '../store/actions/Account';
+import { Currency } from '@/util/Currency';
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
 
@@ -26,6 +30,7 @@ export interface AppProps {
 }
 
 export interface AppState {
+    ready: boolean;
     modals: Modal[];
     page: AppPage;
 }
@@ -36,6 +41,7 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         super(props);
 
         this.state = {
+            ready: false,
             modals: [],
             page: AppPage.Dashboard
         };
@@ -54,6 +60,12 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         //     const sampleModal = <BaseModal heading="Test modal" buttons={ButtonSets.ok(this)} closeButtonHandler={this.dismissModal}>Hello, modal.</BaseModal>;
         //     this.queueModal(sampleModal);
         // }, 2000);
+
+        new AccountDataStoreClient().getAllAccounts()
+            .then(accounts => {
+                // ReduxStore.dispatch(loadAccounts(accounts);
+                this.setState({ ready: true });
+            });
     }
 
     render() {

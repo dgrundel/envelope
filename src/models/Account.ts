@@ -9,10 +9,13 @@ export enum AccountType {
     UserEnvelope = 'user-envelope'
 }
 
-export interface Account {
-    _id: string;
+export interface AccountData {
     name: string;
     type: AccountType;
     balance: Currency;
     linkedAccounts: Account[];
+}
+
+export interface Account extends AccountData {
+    _id: string;
 }

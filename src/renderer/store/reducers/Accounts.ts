@@ -1,5 +1,5 @@
-import { AccountAction, CreateAccountAction, UpdateAccountAction, LoadAccountAction } from '../actions/Account';
-import { Account } from '../interfaces/Account';
+import { AccountAction, InsertAccountAction, UpdateAccountAction, LoadAccountAction } from '../actions/Account';
+import { Account } from '../../../models/Account';
 import { listToMap } from '@/util/Data';
 
 type AccountState = Record<string, Account>;
@@ -9,11 +9,11 @@ export const accounts = (state: AccountState = {}, action: any): AccountState =>
         case AccountAction.Load:
             const loadAction = action as LoadAccountAction;
             return listToMap(loadAction.accounts);
-        case AccountAction.Create:
-            const createAction = action as CreateAccountAction;
+        case AccountAction.Insert:
+            const insertAction = action as InsertAccountAction;
             return {
                 ...state,
-                [createAction.account._id]: createAction.account
+                [insertAction.account._id]: insertAction.account
             };
         case AccountAction.Update:
             const updateAction = action as UpdateAccountAction;

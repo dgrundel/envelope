@@ -1,8 +1,11 @@
-import { Account } from '../interfaces/Account';
+import { Account, AccountData } from '@models/Account';
+import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
+
+const database = new AccountDataStoreClient();
 
 export enum AccountAction {
     Load = 'store:action:account-load',
-    Create = 'store:action:account-create',
+    Insert = 'store:action:account-insert',
     Update = 'store:action:account-update'
 }
 
@@ -16,15 +19,26 @@ export const loadAccounts = (accounts: Account[]): LoadAccountAction => ({
     accounts
 });
 
-export interface CreateAccountAction {
-    type: AccountAction.Create;
+export interface InsertAccountAction {
+    type: AccountAction.Insert;
     account: Account;
 }
 
-export const createAccount = (account: Account): CreateAccountAction => ({
-    type: AccountAction.Create,
-    account
-});
+export const insertAccount = (account: Account) => (dispatch: any) => {
+    
+    // TODO: insert record into database, get back full record with id
+    // database.addAccount({
+    //     ...
+    // }).then(created => {
+    //     dispatch({
+    //         type: AccountAction.Insert,
+    //         account: {
+    //             ...account,
+    //             _id: created._id
+    //         }
+    //     });
+    // });
+};
 
 export interface UpdateAccountAction {
     type: AccountAction.Update;
