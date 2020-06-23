@@ -63,7 +63,7 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
 
         new AccountDataStoreClient().getAllAccounts()
             .then(accounts => {
-                // ReduxStore.dispatch(loadAccounts(accounts);
+                ReduxStore.dispatch(loadAccounts(accounts))
                 this.setState({ ready: true });
             });
     }

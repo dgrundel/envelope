@@ -417,6 +417,6 @@ export class ImportWizard extends React.Component<ImportWizardProps, ImportWizar
                 Log.debug('Saved transactions', inserted);
             });
 
-        // pop a success modal?
+        // TODO: pop a success modal?
     }
 }

@@ -21,23 +21,18 @@ export const loadAccounts = (accounts: Account[]): LoadAccountAction => ({
 
 export interface InsertAccountAction {
     type: AccountAction.Insert;
-    account: Account;
+    accounts: Account[];
 }
 
-export const insertAccount = (account: Account) => (dispatch: any) => {
-    
-    // TODO: insert record into database, get back full record with id
-    // database.addAccount({
-    //     ...
-    // }).then(created => {
-    //     dispatch({
-    //         type: AccountAction.Insert,
-    //         account: {
-    //             ...account,
-    //             _id: created._id
-    //         }
-    //     });
-    // });
+export const insertAccount = (accountData: AccountData) => (dispatch: any) => {
+    database.addAccount(accountData)
+        .then(accounts => {
+            const action: InsertAccountAction = {
+                type: AccountAction.Insert,
+                accounts
+            };
+            dispatch(action);
+        });
 };
 
 export interface UpdateAccountAction {
