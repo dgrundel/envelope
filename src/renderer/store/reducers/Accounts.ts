@@ -1,29 +1,24 @@
-import { AccountAction, InsertAccountAction, UpdateAccountAction, LoadAccountAction, insertAccount } from '../actions/Account';
-import { Account } from '../../../models/Account';
 import { listToMap } from '@/util/Data';
+import { Account } from '../../../models/Account';
+import { AccountAction, LoadAccountAction } from '../actions/Account';
 
-type AccountState = Record<string, Account>;
+export interface AccountState {
+    accounts: Record<string, Account>;
+    sortedIds: string[];
+}
 
-export const accounts = (state: AccountState = {}, action: any): AccountState => {
+const initialState: AccountState = {
+    accounts: {},
+    sortedIds: []
+};
+
+export const accounts = (state: AccountState = initialState, action: any): AccountState => {
     switch(action.type as AccountAction) {
         case AccountAction.Load:
             const loadAction = action as LoadAccountAction;
-            return listToMap(loadAction.accounts);
-        case AccountAction.Insert:
-            const insertAction = action as InsertAccountAction;
-            const inserted = listToMap(insertAction.accounts);
             return {
-                ...state,
-                ...inserted
-            };
-        case AccountAction.Update:
-            const updateAction = action as UpdateAccountAction;
-            return {
-                ...state,
-                [updateAction.id]: {
-                    ...state[updateAction.id],
-                    ...updateAction.updates
-                }
+                accounts: listToMap(loadAction.accounts),
+                sortedIds: loadAction.accounts.map(a => a._id)
             };
         default:
             return state;

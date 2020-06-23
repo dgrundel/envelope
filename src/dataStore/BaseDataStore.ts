@@ -188,8 +188,11 @@ export class DataStoreClient<D, R extends D> extends BaseDataStore<D, R> {
         return this.invoke(DataStoreEvent.InsertMany, items);
     }
 
-    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<number> {
-        return this.invoke(DataStoreEvent.Update, query, update, options);
+    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<R[]> {
+        return this.invoke(DataStoreEvent.Update, query, update, {
+            ...options,
+            returnUpdatedDocs: true
+        });
     }
 
     protected find(query: any = {}, sort?: any): Promise<R[]> {

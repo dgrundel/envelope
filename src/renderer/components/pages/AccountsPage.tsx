@@ -1,40 +1,28 @@
 import { Account, AccountType, getAccountTypeLabel } from '@models/Account';
-import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
-import { Currency } from '@/util/Currency';
 import * as React from "react";
+import { connect } from 'react-redux';
 import { AccountCreate } from '../AccountCreate';
 import { Box } from "../Box";
-import { EventListener } from '../EventListener';
+import { AccountState } from '@/renderer/store/reducers/Accounts';
+import { CombinedState } from '@/renderer/store/store';
 
 // import '@public/components/AccountsPage.scss';
 
 export interface AccountsPageProps {
+    accounts?: Account[];
 }
 
 export interface AccountsPageState {
-    accounts: Account[];
-    dataStore: AccountDataStoreClient;
     newAccountName?: string;
     newAccountType?: AccountType;
 }
 
-export class AccountsPage extends EventListener<AccountsPageProps, AccountsPageState> {
+class Component extends React.Component<AccountsPageProps, AccountsPageState> {
 
     constructor(props: AccountsPageProps) {
         super(props);
 
-        const dataStore = new AccountDataStoreClient();
-        
-        this.state = {
-            accounts: [],
-            dataStore
-        };
-
-        this.refreshAccounts(dataStore);
-  
-        this.addListener(() => dataStore.onChange((change) => {
-            this.refreshAccounts(dataStore);
-        }));
+        this.state = {};
     }
 
     render() {
@@ -48,16 +36,9 @@ export class AccountsPage extends EventListener<AccountsPageProps, AccountsPageS
         </>;
     }
 
-    refreshAccounts(dataStore: AccountDataStoreClient) {
-        dataStore.getUserAccounts().then(accounts => {
-            this.setState({
-                accounts: accounts
-            });
-        });
-    }
-
     renderList() {
-        if (this.state.accounts.length > 0) {
+        const accounts = this.props.accounts || [];
+        if (accounts.length > 0) {
             return <table>
                 <thead>
                     <tr>
@@ -67,7 +48,7 @@ export class AccountsPage extends EventListener<AccountsPageProps, AccountsPageS
                     </tr>
                 </thead>
                 <tbody>
-                    {this.state.accounts.map(account => <tr key={account._id}>
+                    {accounts.map(account => <tr key={account._id}>
                         <td>{account.name}</td>
                         <td>{getAccountTypeLabel(account.type)}</td>
                         <td>{account.balance.toFormattedString()}</td>
@@ -79,3 +60,10 @@ export class AccountsPage extends EventListener<AccountsPageProps, AccountsPageS
         return 'No accounts yet!';
     }
 }
+
+const mapStateToProps = (state: CombinedState, ownProps: AccountsPageProps): AccountsPageProps => ({
+    ...ownProps,
+    accounts: state.accounts.sortedIds.map(id => state.accounts.accounts[id])
+})
+
+export const AccountsPage = connect(mapStateToProps, {})(Component);

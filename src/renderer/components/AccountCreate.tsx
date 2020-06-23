@@ -6,9 +6,11 @@ import * as React from "react";
 import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
 import { RadioSelectField } from "./forms/RadioSelectField";
 import { TextField } from "./forms/TextField";
+import { connect } from "react-redux";
+import { insertAccount } from "../store/actions/Account";
 
 export interface AccountCreateProps {
-
+    insertAccount?: (accountData: AccountData) => void;
 }
 
 export interface AccountCreateState {
@@ -27,7 +29,7 @@ const fieldValidators = [{
     validator: CommonValidators.currency()
 }];
 
-export class AccountCreate extends React.Component<AccountCreateProps, AccountCreateState> {
+class Component extends React.Component<AccountCreateProps, AccountCreateState> {
     private readonly validator: FormValidator;
 
     constructor(props: AccountCreateProps) {
@@ -97,10 +99,9 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
                 balance: balance.isValid() ? balance : Currency.ZERO,
                 linkedAccountIds: []
             };
-            const client = new AccountDataStoreClient();
-            client.addAccount(account)
-                .then(created => Log.debug('Created account', created))
-                .catch(reason => Log.error('Error during add account', reason));
+            
+            this.props.insertAccount && this.props.insertAccount(account);
+
         } else {
             const errors = this.validator.errors();
             this.setState({
@@ -109,3 +110,5 @@ export class AccountCreate extends React.Component<AccountCreateProps, AccountCr
         }
     }
 }
+
+export const AccountCreate = connect(null, { insertAccount })(Component);

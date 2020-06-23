@@ -5,6 +5,11 @@ import { DataStore, DataStoreClient } from "../BaseDataStore";
 const NAME = 'accounts';
 const DEFAULT_SORT = { name: 1 };
 
+const convertFields = (account: Account) => ({
+    ...account,
+    balance: Currency.fromObject(account.balance)
+})
+
 export class AccountDataStore extends DataStore<AccountData, Account> {
     constructor() {
         super(NAME);
@@ -16,6 +21,16 @@ export class AccountDataStore extends DataStore<AccountData, Account> {
 export class AccountDataStoreClient extends DataStoreClient<AccountData, Account> {
     constructor() {
         super(NAME);
+    }
+
+    protected find(query: any = {}, sort?: any): Promise<Account[]> {
+        return super.find(query, sort)
+            .then(accounts => accounts.map(convertFields));
+    }
+
+    protected findOne(query: any = {}): Promise<Account> {
+        return super.findOne(query)
+            .then(convertFields);
     }
 
     addAccount(acct: AccountData): Promise<Account[]> {

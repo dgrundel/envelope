@@ -6,7 +6,7 @@ import { App } from './components/App';
 import { ReduxStore } from './store/store';
 import { Log } from '@/util/Logger';
 
-ReduxStore.subscribe(() => Log.debug(ReduxStore.getState()));
+ReduxStore.subscribe(() => Log.debug('Redux Store Change', ReduxStore.getState()));
 
 ReactDOM.render(
     <Provider store={ReduxStore}>

@@ -4,9 +4,7 @@ import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 const database = new AccountDataStoreClient();
 
 export enum AccountAction {
-    Load = 'store:action:account-load',
-    Insert = 'store:action:account-insert',
-    Update = 'store:action:account-update'
+    Load = 'store:action:account-load'
 }
 
 export interface LoadAccountAction {
@@ -19,30 +17,10 @@ export const loadAccounts = (accounts: Account[]): LoadAccountAction => ({
     accounts
 });
 
-export interface InsertAccountAction {
-    type: AccountAction.Insert;
-    accounts: Account[];
-}
-
 export const insertAccount = (accountData: AccountData) => (dispatch: any) => {
     database.addAccount(accountData)
+        .then(() => database.getAllAccounts())
         .then(accounts => {
-            const action: InsertAccountAction = {
-                type: AccountAction.Insert,
-                accounts
-            };
-            dispatch(action);
+            dispatch(loadAccounts(accounts));
         });
 };
-
-export interface UpdateAccountAction {
-    type: AccountAction.Update;
-    id: string;
-    updates: Record<string, any>;
-}
-
-export const updateAccount = (id: string, updates: any): UpdateAccountAction => ({
-    type: AccountAction.Update,
-    id,
-    updates
-});

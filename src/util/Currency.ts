@@ -97,6 +97,10 @@ export class Currency {
         return new Currency(whole, frac);
     }
 
+    static fromObject(o: any) {
+        return new Currency(o.wholeAmount, o.fractionalAmount);
+    }
+
     static fromTransaction(t: Transaction) {
         return new Currency(t.wholeAmount, t.fractionalAmount);
     }
