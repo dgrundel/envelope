@@ -1,10 +1,9 @@
+import '@public/style.scss';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-
-import '@public/style.scss';
 import { App } from './components/App';
 
 ReactDOM.render(
-  <App/>,
-  document.getElementById('root')
+    <App/>,
+    document.getElementById('root')
 );
