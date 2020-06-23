@@ -6,7 +6,8 @@ const DEFAULT_SORT = { date: -1 };
 
 export const getTransactionAmount = (t: Transaction) => new Currency(t.wholeAmount, t.fractionalAmount);
 
-export interface Transaction extends BaseDataStoreRecord {
+export interface Transaction {
+    _id?: string;
     accountName: string;
 
     date: Date;
@@ -21,13 +22,13 @@ export interface Transaction extends BaseDataStoreRecord {
     linkedTransactions?: string[];
 }
 
-export class TransactionDataStore extends DataStore<Transaction> {
+export class TransactionDataStore extends DataStore<Transaction, Transaction> {
     constructor() {
         super(NAME);
     }
 }
 
-export class TransactionDataStoreClient extends DataStoreClient<Transaction> {
+export class TransactionDataStoreClient extends DataStoreClient<Transaction, Transaction> {
     constructor() {
         super(NAME);
     }

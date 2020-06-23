@@ -13,9 +13,28 @@ export interface AccountData {
     name: string;
     type: AccountType;
     balance: Currency;
-    linkedAccounts: Account[];
+    linkedAccountIds: string[];
 }
 
 export interface Account extends AccountData {
     _id: string;
 }
+
+const typeLabels = {
+    [AccountType.Checking]: 'Checking',
+    [AccountType.Savings]: 'Savings',
+    [AccountType.CreditCard]: 'Credit Card',
+    [AccountType.Unallocated]: 'Unallocated',
+    [AccountType.PaymentEnvelope]: 'Payment Envelope',
+    [AccountType.UserEnvelope]: 'User-Defined Envelope',
+};
+
+export const getAccountTypeLabel = (t: AccountType) => typeLabels[t];
+
+const bankAccountTypes = [
+    AccountType.Checking,
+    AccountType.Savings,
+    AccountType.CreditCard
+];
+
+export const getBankAccountTypes = () => bankAccountTypes;

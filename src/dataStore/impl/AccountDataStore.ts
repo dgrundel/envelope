@@ -1,48 +1,11 @@
+import { Account, AccountData, AccountType, getBankAccountTypes } from '@/models/Account';
 import { Currency } from '@/util/Currency';
-import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
+import { DataStore, DataStoreClient } from "../BaseDataStore";
 
 const NAME = 'accounts';
 const DEFAULT_SORT = { name: 1 };
 
-export enum AccountType {
-    Checking = 'checking' ,
-    Savings = 'savings' ,
-    CreditCard = 'credit-card',
-    EnvelopePool = 'envelope-pool',
-    EnvelopeCreditCard = 'envelope-credit-card',
-    EnvelopeUser = 'envelope-user'
-}
-
-const accountTypeLabels = {
-    'checking': 'Checking',
-    'savings': 'Savings',
-    'credit-card': 'Credit Card',
-
-    // we'll probably never show these to users
-    'envelope-pool': 'Pool Envelope',
-    'envelope-credit-card': 'Credit Card Payment Envelope',
-    'envelope-user': 'User-Defined Envelope'
-};
-
-export const getUserAccountTypes = () => [
-    AccountType.Checking,
-    AccountType.Savings,
-    AccountType.CreditCard
-];
-
-export const getAccountTypeLabel = (t: AccountType) => accountTypeLabels[t];
-
-export const getAccountBalance = (a: Account) => new Currency(a.balanceWholeAmount, a.balancefractionalAmount);
-
-export interface Account extends BaseDataStoreRecord {
-    type: AccountType;
-    name: string;
-    balanceWholeAmount: number; // signed, integer
-    balancefractionalAmount: number; // signed, integer, in thousandths, range 0...999
-    linkedAccounts?: string[];
-}
-
-export class AccountDataStore extends DataStore<Account> {
+export class AccountDataStore extends DataStore<AccountData, Account> {
     constructor() {
         super(NAME);
 
@@ -50,21 +13,20 @@ export class AccountDataStore extends DataStore<Account> {
     }
 }
 
-export class AccountDataStoreClient extends DataStoreClient<Account> {
+export class AccountDataStoreClient extends DataStoreClient<AccountData, Account> {
     constructor() {
         super(NAME);
     }
 
-    addAccount(acct: Account): Promise<Account[]> {
+    addAccount(acct: AccountData): Promise<Account[]> {
         return this.insert(acct)
             .then(created => {
                 if (created.type === AccountType.CreditCard) {
                     return this.addAccount({
                         name: `${created.name} Payment`,
-                        type: AccountType.EnvelopeCreditCard,
-                        balanceWholeAmount: 0,
-                        balancefractionalAmount: 0,
-                        linkedAccounts: [created._id as string]
+                        type: AccountType.PaymentEnvelope,
+                        balance: Currency.fromPrecisionInt(0),
+                        linkedAccountIds: [created._id as string]
                     }).then(associated => Promise.resolve([created].concat(associated)));
                 } else {
                     return Promise.resolve([created]);
@@ -76,8 +38,7 @@ export class AccountDataStoreClient extends DataStoreClient<Account> {
         const query = { name: accountName };
         const update = {
             $set: {
-                balanceWholeAmount: balance.wholeAmount,
-                balancefractionalAmount: balance.fractionalAmount
+                balance
             }
         };
         return this.update(query, update);
@@ -90,17 +51,17 @@ export class AccountDataStoreClient extends DataStoreClient<Account> {
     }
 
     getUserAccounts() {
-        const query = { type: { $in: getUserAccountTypes() } };
+        const query = { type: { $in: getBankAccountTypes() } };
         return this.find(query, DEFAULT_SORT);
     }
 
     getCreditCardEnvelopes() {
-        const query = { type: AccountType.EnvelopeCreditCard };
+        const query = { type: AccountType.PaymentEnvelope };
         return this.find(query, DEFAULT_SORT);
     }
 
     getUserEnvelopes() {
-        const query = { type: AccountType.EnvelopeUser };
+        const query = { type: AccountType.UserEnvelope };
         return this.find(query, DEFAULT_SORT);
     }
 

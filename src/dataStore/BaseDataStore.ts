@@ -22,10 +22,6 @@ export enum DataStoreChange {
 
 export const buildEventName = (event: DataStoreEvent, name: string) => `${event}:${name}`;
 
-export interface BaseDataStoreRecord {
-    _id?: string;
-};
-
 interface IPCResult {
     success: boolean;
     data: any;
@@ -37,7 +33,7 @@ const getSerializableError = (err: Error) => Object.getOwnPropertyNames(err)
         return serializable;
     }, {});
 
-abstract class BaseDataStore<T extends BaseDataStoreRecord> {
+abstract class BaseDataStore<D, R extends D> {
     protected readonly name: string;
 
     constructor(name: string) {
@@ -47,13 +43,10 @@ abstract class BaseDataStore<T extends BaseDataStoreRecord> {
     protected buildEventName(event: DataStoreEvent, name: string) {
         return `${event}:${name}`;
     }
-
-    protected abstract insert(item: T): Promise<T>;
-    protected abstract find(query?: any): Promise<T[]>;
 }
 
-export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
-    private readonly db: Nedb<T>;
+export class DataStore<D, R extends D> extends BaseDataStore<D, R> {
+    private readonly db: Nedb<D>;
 
     constructor(name: string) {
         super(name);
@@ -71,10 +64,10 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
             corruptAlertThreshold: 0
         });
 
-        this.handle(DataStoreEvent.Insert, (event, item: T) => {
+        this.handle(DataStoreEvent.Insert, (event, item: D) => {
             return this.insert(item);
         });
-        this.handle(DataStoreEvent.InsertMany, (event, items: T[]) => {
+        this.handle(DataStoreEvent.InsertMany, (event, items: D[]) => {
             return this.insertMany(items);
         });
         this.handle(DataStoreEvent.Update, (event, query: any, update: any, options: Nedb.UpdateOptions) => {
@@ -112,27 +105,27 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         this.db.ensureIndex(options, err => err && Log.error(`Error while adding index in database ${this.name}`, options, err));
     }
 
-    protected insert(item: T): Promise<T> {
+    protected insert(item: D): Promise<R> {
         return new Promise((resolve, reject) => {
-            this.db.insert(item, (err: Error, document: T) => {
+            this.db.insert(item, (err: Error, record: R) => {
                 if (err) {
                     reject(err);
                 } else {
                     this.triggerChanged(DataStoreChange.Insert);
-                    resolve(document);
+                    resolve(record);
                 }
             });
         });
     }
 
-    protected insertMany(items: T[]): Promise<T[]> {
+    protected insertMany(items: D[]): Promise<R[]> {
         return new Promise((resolve, reject) => {
-            this.db.insert(items, (err: Error, documents: T[]) => {
+            this.db.insert(items, (err: Error, records: R[]) => {
                 if (err) {
                     reject(err);
                 } else {
                     this.triggerChanged(DataStoreChange.Insert);
-                    resolve(documents);
+                    resolve(records);
                 }
             });
         });
@@ -151,7 +144,7 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         });
     }
 
-    protected find(query: any = {}, sort?: any): Promise<T[]> {
+    protected find(query: any = {}, sort?: any): Promise<R[]> {
         return new Promise((resolve, reject) => {
             let cursor = this.db.find(query);
 
@@ -159,40 +152,40 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
                 cursor = cursor.sort(sort);
             }
 
-            cursor.exec((err: Error, documents: T[]) => {
+            cursor.exec((err: Error, records: R[]) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(documents);
+                    resolve(records);
                 }
             });
         });
     }
 
-    protected findOne(query: any = {}): Promise<T> {
+    protected findOne(query: any = {}): Promise<R> {
         return new Promise((resolve, reject) => {
-            this.db.findOne(query, (err: Error, document: T) => {
+            this.db.findOne(query, (err: Error, record: R) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(document);
+                    resolve(record);
                 }
             });
         });
     }
 }
 
-export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
+export class DataStoreClient<D, R extends D> extends BaseDataStore<D, R> {
     private invoke(event: DataStoreEvent, ...args: any) {
         return ipcRenderer.invoke(buildEventName(event, this.name), ...args)
             .then((result: IPCResult) => result.success ? Promise.resolve(result.data) : Promise.reject(result.data));
     }
 
-    protected insert(item: T): Promise<T> {
+    protected insert(item: D): Promise<R> {
         return this.invoke(DataStoreEvent.Insert, item);
     }
 
-    protected insertMany(items: T[]): Promise<T[]> {
+    protected insertMany(items: D[]): Promise<R[]> {
         return this.invoke(DataStoreEvent.InsertMany, items);
     }
 
@@ -200,11 +193,11 @@ export class DataStoreClient<T extends BaseDataStoreRecord> extends BaseDataStor
         return this.invoke(DataStoreEvent.Update, query, update, options);
     }
 
-    protected find(query: any = {}, sort?: any): Promise<T[]> {
+    protected find(query: any = {}, sort?: any): Promise<R[]> {
         return this.invoke(DataStoreEvent.Find, query, sort);
     }
 
-    protected findOne(query: any = {}): Promise<T> {
+    protected findOne(query: any = {}): Promise<R> {
         return this.invoke(DataStoreEvent.FindOne, query);
     }
 
