@@ -1,5 +1,20 @@
-.section {
-    .section-heading {
+@import '../config.scss';
+@import '../mixins.scss';
 
+.section {
+    $section-padding: 0.5em;
+
+    margin: .75em 0;
+    padding: $section-padding;
+    border: 0.5px solid $color-border;
+    @include rounded();
+
+    .section-heading {
+        font-weight: 400;
+        font-size: 1em;
+        text-transform: uppercase;
+        margin: (-1 * $section-padding) (-1 * $section-padding) $section-padding;
+        padding: $section-padding;
+        // border-bottom: 0.5px solid $color-lt-gray;
     }
 }

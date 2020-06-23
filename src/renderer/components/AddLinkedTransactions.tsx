@@ -113,7 +113,7 @@ export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsPr
             return;
         }
 
-        return <Section>
+        return <Section heading="Envelopes">
             <DataTable<Transaction>
                 rows={this.state.linkedTransactions}
                 fields={[{
@@ -138,28 +138,30 @@ export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsPr
             value: envelope.name
         }));
 
-        return <form onSubmit={e => this.onSubmitTransaction(e)}>
-            <SelectField
-                name="accountName"
-                label="Envelope"
-                value={this.state.formValues.accountName || ''}
-                error={this.state.formErrors.accountName}
-                onChange={(e) => this.validator.setValue('accountName', e.target.value)}
-                options={accountNameSelectOptions}
-            />
-            <TextField
-                name="amount"
-                label="Amount"
-                value={this.state.formValues.amount || ''}
-                error={this.state.formErrors.amount}
-                onChange={(e) => this.validator.setValue('amount', e.target.value)}
-            />
-            <div>
-                <button className="btn" type="submit">
-                    Add
-                </button>
-            </div>
-        </form>;
+        return <Section heading="Link to Envelope">
+            <form onSubmit={e => this.onSubmitTransaction(e)}>
+                <SelectField
+                    name="accountName"
+                    label="Envelope"
+                    value={this.state.formValues.accountName || ''}
+                    error={this.state.formErrors.accountName}
+                    onChange={(e) => this.validator.setValue('accountName', e.target.value)}
+                    options={accountNameSelectOptions}
+                />
+                <TextField
+                    name="amount"
+                    label="Amount"
+                    value={this.state.formValues.amount || ''}
+                    error={this.state.formErrors.amount}
+                    onChange={(e) => this.validator.setValue('amount', e.target.value)}
+                />
+                <div>
+                    <button className="btn" type="submit">
+                        Add
+                    </button>
+                </div>
+            </form>
+        </Section>;
     }
 
     refreshEnvelopes() {
