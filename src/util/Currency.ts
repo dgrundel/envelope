@@ -25,7 +25,7 @@ export class Currency {
     }
 
     isZero() {
-        return this.wholeAmount === 0 && this.fractionalAmount === 0;
+        return this.toPrecisionInt() === 0;
     }
 
     isNegative() {

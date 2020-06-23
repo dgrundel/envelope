@@ -1,6 +1,7 @@
 import { Account, AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
-import { Transaction } from '@/dataStore/impl/TransactionDataStore';
+import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
 import { Currency } from '@/util/Currency';
+import { Log } from '@/util/Logger';
 import * as React from "react";
 import { getAppContext } from '../AppContext';
 import { DataTable } from './DataTable';
@@ -9,12 +10,14 @@ import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidat
 import { SelectField } from './forms/SelectField';
 import { TextField } from './forms/TextField';
 import { BaseModal, Modal, ModalButton } from './Modal';
-import { Log } from '@/util/Logger';
+import { Section } from './Section';
 
 
 export interface AddLinkedTransactionsProps {
     transaction: Transaction;
     existingLinks?: Transaction[];
+    suggestedValue: Currency;
+    maxValue: Currency;
 }
 
 export interface AddLinkedTransactionsState {
@@ -24,37 +27,42 @@ export interface AddLinkedTransactionsState {
     formErrors: Record<string, string>;
 }
 
-const fieldValidators = [{
-    name: 'accountName',
-    validator: CommonValidators.required()
-},{
-    name: 'amount',
-    validator: CommonValidators.chain(
-        CommonValidators.required(),
-        CommonValidators.currency()
-    )
-}];
-
 export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsProps, AddLinkedTransactionsState> implements Modal {
     private readonly validator: FormValidator;
+    private readonly accountDataStore: AccountDataStoreClient;
+    private readonly transactionDataStore: TransactionDataStoreClient;
 
     constructor(props: AddLinkedTransactionsProps) {
         super(props);
+
+        const fieldValidators = [{
+            name: 'accountName',
+            validator: CommonValidators.required()
+        },{
+            name: 'amount',
+            validator: CommonValidators.chain(
+                CommonValidators.required(),
+                CommonValidators.currencyMax(props.maxValue),
+                CommonValidators.currencyPositive()
+            ),
+            value: props.suggestedValue.toString()
+        }];
 
         this.validator = new FormValidator(fieldValidators, this.onFieldChange.bind(this));
         this.state = {
             envelopes: [],
             linkedTransactions: props.existingLinks || [],
-            formValues: {},
-            formErrors: {}
+            formValues: this.validator.values(),
+            formErrors: this.validator.errors()
         };
 
-        const accountDataStore = new AccountDataStoreClient();
+        this.accountDataStore = new AccountDataStoreClient();
+        this.transactionDataStore = new TransactionDataStoreClient();
 
-        this.refreshEnvelopes(accountDataStore);
+        this.refreshEnvelopes();
 
-        this.addListener(() => accountDataStore.onChange((change) => {
-            this.refreshEnvelopes(accountDataStore);
+        this.addListener(() => this.accountDataStore.onChange((change) => {
+            this.refreshEnvelopes();
         }));
     }
 
@@ -66,10 +74,6 @@ export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsPr
             buttonText: 'Close',
             onClick: () => dismissModal()
         }];
-
-        const accountNameSelectOptions = this.state.envelopes.map(envelope => ({
-            value: envelope.name
-        }));
 
         return <BaseModal heading="Add Linked Transactions" buttons={modalButtons} closeButtonHandler={() => dismissModal()}>
             <div className="add-linked-transactions">
@@ -97,47 +101,69 @@ export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsPr
                     </table>
                 </div>
 
-                <DataTable<Transaction>
-                    rows={this.state.linkedTransactions}
-                    fields={[{
-                        name: 'accountName',
-                        label: 'Account'
-                    },{
-                        name: 'amount',
-                        label: 'Amount',
-                        formatter: (value, row) => new Currency(row.wholeAmount, row.fractionalAmount).toFormattedString()
-                    }]}
-                    keyField={'_id'}
-                />
+                {this.renderExistingLinks()}
 
-                <form onSubmit={e => this.onSubmitTransaction(e)}>
-                    <SelectField
-                        name="accountName"
-                        label="Account"
-                        value={this.state.formValues.accountName || ''}
-                        error={this.state.formErrors.accountName}
-                        onChange={(e) => this.validator.setValue('accountName', e.target.value)}
-                        options={accountNameSelectOptions}
-                    />
-                    <TextField
-                        name="amount"
-                        label="Amount"
-                        value={this.state.formValues.amount || ''}
-                        error={this.state.formErrors.amount}
-                        onChange={(e) => this.validator.setValue('amount', e.target.value)}
-                    />
-                    <div>
-                        <button className="btn" type="submit">
-                            Add
-                        </button>
-                    </div>
-                </form>
+                {this.renderForm()}
             </div>
         </BaseModal>;
     }
 
-    refreshEnvelopes(dataStore: AccountDataStoreClient) {
-        dataStore.getUserEnvelopes().then(envelopes => {
+    renderExistingLinks() {
+        if (this.state.linkedTransactions.length === 0) {
+            return;
+        }
+
+        return <Section>
+            <DataTable<Transaction>
+                rows={this.state.linkedTransactions}
+                fields={[{
+                    name: 'accountName',
+                    label: 'Envelope'
+                },{
+                    name: 'amount',
+                    label: 'Amount',
+                    formatter: (value, row) => new Currency(row.wholeAmount, row.fractionalAmount).toFormattedString()
+                }]}
+                keyField={'_id'}
+            />
+        </Section>;
+    }
+
+    renderForm() {
+        if (this.props.maxValue.isZero()) {
+            return null;
+        }
+
+        const accountNameSelectOptions = this.state.envelopes.map(envelope => ({
+            value: envelope.name
+        }));
+
+        return <form onSubmit={e => this.onSubmitTransaction(e)}>
+            <SelectField
+                name="accountName"
+                label="Envelope"
+                value={this.state.formValues.accountName || ''}
+                error={this.state.formErrors.accountName}
+                onChange={(e) => this.validator.setValue('accountName', e.target.value)}
+                options={accountNameSelectOptions}
+            />
+            <TextField
+                name="amount"
+                label="Amount"
+                value={this.state.formValues.amount || ''}
+                error={this.state.formErrors.amount}
+                onChange={(e) => this.validator.setValue('amount', e.target.value)}
+            />
+            <div>
+                <button className="btn" type="submit">
+                    Add
+                </button>
+            </div>
+        </form>;
+    }
+
+    refreshEnvelopes() {
+        this.accountDataStore.getUserEnvelopes().then(envelopes => {
             this.setState({
                 envelopes
             });
@@ -157,6 +183,25 @@ export class AddLinkedTransactions extends EventListener<AddLinkedTransactionsPr
         if (this.validator.allValid()) {
             const values = this.validator.values();
             Log.debug('submitted linked transaction form', values);
+
+            const amount = Currency.parse(values.amount as string);
+            const date = new Date();
+
+            this.transactionDataStore.addLinkedTransaction({
+                accountName: values.accountName as string,
+                date: date,
+                year: date.getFullYear(),
+                month: date.getMonth(),
+                wholeAmount: amount.wholeAmount,
+                fractionalAmount: amount.fractionalAmount,
+                description: `Linked from ${this.props.transaction._id}`
+            }, this.props.transaction)
+            .then(created => {
+                Log.debug('Created transaction', created);
+            })
+            .catch(reason => {
+                Log.error('Error during add transaction', reason);
+            });
             
         } else {
             this.setState({

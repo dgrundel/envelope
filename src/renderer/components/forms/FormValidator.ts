@@ -57,7 +57,38 @@ export class CommonValidators {
             return `Hmm, this doesn't look like a number.`
         };
     }
+
+    static currencyMax(max: Currency): FieldValidator {
+        return (value?: FieldValue) => {
+            const isCurrency = CommonValidators.currency()(value);
+            if (isCurrency === true) {
+                const currency = Currency.parse(value as string);
+                if (currency.gt(max)) {
+                    return `This value cannot exceed ${max.toString()}`;
+                }
+                return true;
+            }
+            return isCurrency;
+        };
+    }
+
+    static currencyMin(min: Currency): FieldValidator {
+        return (value?: FieldValue) => {
+            const isCurrency = CommonValidators.currency()(value);
+            if (isCurrency === true) {
+                const currency = Currency.parse(value as string);
+                if (currency.lt(min)) {
+                    return `This value must not be less than ${min.toString()}`;
+                }
+                return true;
+            }
+            return isCurrency;
+        };
+    }
     
+    static currencyPositive(): FieldValidator {
+        return CommonValidators.currencyMin(new Currency(0, 10));
+    }
 };
 
 export class FormValidator {

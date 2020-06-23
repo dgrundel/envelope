@@ -89,6 +89,9 @@ export class DataStore<T extends BaseDataStoreRecord> extends BaseDataStore<T> {
         this.handle(DataStoreEvent.Find, (event, query?: any, sort?: any) => {
             return this.find(query, sort);
         });
+        this.handle(DataStoreEvent.FindOne, (event, query?: any) => {
+            return this.findOne(query);
+        });
     }
 
     private handle(event: DataStoreEvent, callback: (...args: any) => Promise<any>) {

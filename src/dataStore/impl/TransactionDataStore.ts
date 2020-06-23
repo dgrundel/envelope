@@ -1,5 +1,6 @@
 import { BaseDataStoreRecord, DataStore, DataStoreClient } from "../BaseDataStore";
 import { Currency } from '@/util/Currency';
+import { Log } from "@/util/Logger";
 
 const NAME = 'transactions';
 const DEFAULT_SORT = { date: -1 };
@@ -34,6 +35,21 @@ export class TransactionDataStoreClient extends DataStoreClient<Transaction> {
 
     addTransaction(transaction: Transaction) {
         return this.insert(transaction);
+    }
+
+    addLinkedTransaction(transaction: Transaction, linkTo: Transaction) {
+        return this.insert(transaction)
+            .then(created => {
+                return this.update({
+                    _id: linkTo._id
+                }, { 
+                    $addToSet: {
+                        linkedTransactions: created._id as string
+                    }
+                })
+                .then(() => this.getTransactionById(linkTo._id as string))
+                .then(updated => [created, updated]);
+            });
     }
 
     addTransactions(transactions: Transaction[]) {

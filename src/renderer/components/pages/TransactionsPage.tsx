@@ -69,8 +69,11 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
                 return ids.concat(transaction.linkedTransactions || []);
             }, []);
 
+            Log.debug('linkedIds', linkedIds);
+            
             return transactionDataStore.getTransactionsById(linkedIds)
                 .then(linkedTransactions => {
+                    Log.debug('linkedTransactions', linkedTransactions);
                     this.setState({
                         linkedTransactions: recordsToMap(linkedTransactions)
                     });
@@ -122,16 +125,19 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
         const existingLinks = linkedIds?.map(id => this.state.linkedTransactions[id]) || [];
         const balance = existingLinks.reduce(
             (bal: Currency, link: Transaction) => {
+                Log.debug('link', link);
                 // subtract linked amounts to see if it zeros out
                 return bal.sub(Currency.fromTransaction(link));
             },
             Currency.fromTransaction(row)
         );
+
+        Log.debug('balance', row.description, balance.toString());
         
         const clickHander = (e: React.MouseEvent) => {
             e.preventDefault();
 
-            const modal = <AddLinkedTransactions transaction={row} existingLinks={existingLinks} />;
+            const modal = <AddLinkedTransactions transaction={row} existingLinks={existingLinks} suggestedValue={balance} maxValue={balance} />;
             
             getAppContext().modalApi.queueModal(modal);
         };
