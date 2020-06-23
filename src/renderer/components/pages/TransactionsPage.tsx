@@ -1,14 +1,15 @@
-import { DataStoreChange, recordsToMap } from '@/dataStore/BaseDataStore';
+import { DataStoreChange } from '@/dataStore/BaseDataStore';
 import { Account, AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
+import { getAppContext } from '@/renderer/AppContext';
+import { Currency } from '@/util/Currency';
+import { listToMap } from '@/util/Data';
 import { Log } from '@/util/Logger';
 import * as React from "react";
+import { AddLinkedTransactions } from '../AddLinkedTransactions';
 import { Box } from "../Box";
 import { DataTable } from '../DataTable';
 import { EventListener } from '../EventListener';
-import { Currency } from '@/util/Currency';
-import { AddLinkedTransactions } from '../AddLinkedTransactions';
-import { getAppContext } from '@/renderer/AppContext';
 
 export interface TransactionsPageProps {
 }
@@ -75,7 +76,7 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
                 .then(linkedTransactions => {
                     Log.debug('linkedTransactions', linkedTransactions);
                     this.setState({
-                        linkedTransactions: recordsToMap(linkedTransactions)
+                        linkedTransactions: listToMap(linkedTransactions)
                     });
                 });
         });
@@ -84,7 +85,7 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
     refreshAccounts(accountDataStore: AccountDataStoreClient) {
         return accountDataStore.getUserAccounts().then(accounts => {
             this.setState({
-                accounts: recordsToMap(accounts)
+                accounts: listToMap(accounts)
             });
         })
     }

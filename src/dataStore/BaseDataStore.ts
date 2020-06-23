@@ -2,6 +2,7 @@ import { app, ipcMain, ipcRenderer, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as Nedb from 'nedb';
 import { Log } from '@/util/Logger';
+import { listToMap } from '@/util/Data';
 
 const dataStores: Record<string, DataStore<any>> = {};
 
@@ -35,13 +36,6 @@ const getSerializableError = (err: Error) => Object.getOwnPropertyNames(err)
         serializable[prop] = (err as any)[prop]
         return serializable;
     }, {});
-
-export const recordsToMap = <T extends BaseDataStoreRecord>(records: T[]): Record<string, T> => {
-    return records.reduce((map: Record<string, T>, record: T) => {
-        map[record._id as string] = record;
-        return map;
-    }, {});
-};
 
 abstract class BaseDataStore<T extends BaseDataStoreRecord> {
     protected readonly name: string;

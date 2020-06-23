@@ -1,9 +1,20 @@
-import { Account } from '../interfaces/AccountInterfaces';
+import { Account } from '../interfaces/Account';
 
 export enum AccountAction {
+    Load = 'store:action:account-load',
     Create = 'store:action:account-create',
     Update = 'store:action:account-update'
 }
+
+export interface LoadAccountAction {
+    type: AccountAction.Load;
+    accounts: Account[];
+}
+
+export const loadAccounts = (accounts: Account[]): LoadAccountAction => ({
+    type: AccountAction.Load,
+    accounts
+});
 
 export interface CreateAccountAction {
     type: AccountAction.Create;
