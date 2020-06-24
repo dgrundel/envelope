@@ -8,7 +8,7 @@ const DEFAULT_SORT = { name: 1 };
 const convertFields = (account: Account) => ({
     ...account,
     balance: Currency.fromObject(account.balance)
-})
+});
 
 export class AccountDataStore extends DataStore<AccountData, Account> {
     constructor() {

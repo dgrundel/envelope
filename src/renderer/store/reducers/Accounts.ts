@@ -1,5 +1,5 @@
 import { listToMap } from '@/util/Data';
-import { Account } from '../../../models/Account';
+import { Account } from '@models/Account';
 import { AccountAction, LoadAccountAction } from '../actions/Account';
 
 export interface AccountState {

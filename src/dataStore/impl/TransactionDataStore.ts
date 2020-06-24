@@ -1,59 +1,61 @@
 import { Currency } from '@/util/Currency';
 import { DataStore, DataStoreClient } from "../BaseDataStore";
+import { TransactionData, Transaction } from '@/models/Transaction';
 
 const NAME = 'transactions';
 const DEFAULT_SORT = { date: -1 };
 
-export const getTransactionAmount = (t: Transaction) => new Currency(t.wholeAmount, t.fractionalAmount);
+const convertFields = (transaction: Transaction) => ({
+    ...transaction,
+    amount: Currency.fromObject(transaction.amount)
+});
 
-export interface Transaction {
-    _id?: string;
-    accountName: string;
-
-    date: Date;
-    year: number;
-    month: number;
-    description: string;
-    wholeAmount: number; // signed, integer
-    fractionalAmount: number; // signed, integer, in thousandths, range 0...999
-    
-    originalRecord?: Record<string, string>;
-
-    linkedTransactions?: string[];
-}
-
-export class TransactionDataStore extends DataStore<Transaction, Transaction> {
+export class TransactionDataStore extends DataStore<TransactionData, Transaction> {
     constructor() {
         super(NAME);
     }
 }
 
-export class TransactionDataStoreClient extends DataStoreClient<Transaction, Transaction> {
+export class TransactionDataStoreClient extends DataStoreClient<TransactionData, Transaction> {
     constructor() {
         super(NAME);
     }
 
-    addTransaction(transaction: Transaction) {
+    protected find(query: any = {}, sort?: any): Promise<Transaction[]> {
+        return super.find(query, sort)
+            .then(transactions => transactions.map(convertFields));
+    }
+
+    protected findOne(query: any = {}): Promise<Transaction> {
+        return super.findOne(query)
+            .then(convertFields);
+    }
+
+    addTransaction(transaction: TransactionData) {
         return this.insert(transaction);
     }
 
-    addLinkedTransaction(transaction: Transaction, linkTo: Transaction) {
+    addLinkedTransaction(transaction: TransactionData, linkTo: Transaction) {
         return this.insert(transaction)
             .then(created => {
                 return this.update({
                     _id: linkTo._id
                 }, { 
                     $addToSet: {
-                        linkedTransactions: created._id as string
+                        linkedTransactions: created._id
                     }
                 })
-                .then(() => this.getTransactionById(linkTo._id as string))
+                .then(() => this.getTransactionById(linkTo._id))
                 .then(updated => [created, updated]);
             });
     }
 
-    addTransactions(transactions: Transaction[]) {
+    addTransactions(transactions: TransactionData[]) {
         return this.insertMany(transactions);
+    }
+
+    getAllTransactions() {
+        return this.find({}, DEFAULT_SORT);
     }
 
     getTransactions(query: any = {}) {

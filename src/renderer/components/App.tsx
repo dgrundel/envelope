@@ -1,16 +1,17 @@
+import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
+import { TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
 import '@public/components/App.scss';
 import * as React from "react";
+import { initAppContext } from '../AppContext';
+import { loadAccounts } from '../store/actions/Account';
+import { loadTransactions } from '../store/actions/Transaction';
+import { ReduxStore } from '../store/store';
 import { Modal, ModalApi } from "./Modal";
 import { AccountsPage } from "./pages/AccountsPage";
 import { DashboardPage } from './pages/DashboardPage';
-import { Sidebar } from './Sidebar';
 import { EnvelopesPage } from './pages/EnvelopesPage';
 import { TransactionsPage } from './pages/TransactionsPage';
-import { initAppContext } from '../AppContext';
-import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
-import { ReduxStore } from '../store/store';
-import { loadAccounts } from '../store/actions/Account';
-import { Currency } from '@/util/Currency';
+import { Sidebar } from './Sidebar';
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
 
@@ -61,11 +62,12 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         //     this.queueModal(sampleModal);
         // }, 2000);
 
-        new AccountDataStoreClient().getAllAccounts()
-            .then(accounts => {
-                ReduxStore.dispatch(loadAccounts(accounts))
-                this.setState({ ready: true });
-            });
+        Promise.all([
+            new AccountDataStoreClient().getAllAccounts()
+                .then(accounts => ReduxStore.dispatch(loadAccounts(accounts))),
+            new TransactionDataStoreClient().getAllTransactions()
+                .then(transactions => ReduxStore.dispatch(loadTransactions(transactions)))
+        ]).then(() => this.setState({ ready: true }));
     }
 
     render() {
