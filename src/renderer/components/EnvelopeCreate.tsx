@@ -1,14 +1,13 @@
-import * as React from "react";
-import { TextField } from "./forms/TextField";
-import { RadioSelectField } from "./forms/RadioSelectField";
-import { Account, AccountType, AccountData } from '@models/Account';
-import { AccountDataStoreClient } from "@/dataStore/impl/AccountDataStore";
-import { Log } from "@/util/Logger";
 import { Currency } from "@/util/Currency";
-import { FormValidator, CommonValidators, FieldValue } from './forms/FormValidator';
+import { AccountData, AccountType } from '@models/Account';
+import * as React from "react";
+import { connect } from "react-redux";
+import { insertAccount } from "../store/actions/Account";
+import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
+import { TextField } from "./forms/TextField";
 
 export interface EnvelopeCreateProps {
-
+    insertAccount?: (accountData: AccountData) => void;
 }
 
 export interface EnvelopeCreateState {
@@ -21,7 +20,7 @@ const fieldValidators = [{
     validator: CommonValidators.required()
 }];
 
-export class EnvelopeCreate extends React.Component<EnvelopeCreateProps, EnvelopeCreateState> {
+class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState> {
     private readonly validator: FormValidator;
 
     constructor(props: EnvelopeCreateProps) {
@@ -72,17 +71,9 @@ export class EnvelopeCreate extends React.Component<EnvelopeCreateProps, Envelop
                 balance: Currency.ZERO,
                 linkedAccountIds: []
             };
-            const client = new AccountDataStoreClient();
-            client.addAccount(account)
-                .then(created => Log.debug('Created envelope account', created))
-                .catch(reason => {
-                    Log.error('Error during add envelope account', reason);
-                    // errorType: "uniqueViolated"
-                    // key: "test"
-                    // message: "Can't insert key test, it violates the unique constraint"
+            
+            this.props.insertAccount && this.props.insertAccount(account);
 
-                    // TODO: show error to user.
-                });
         } else {
             const errors = this.validator.errors();
             this.setState({
@@ -91,3 +82,5 @@ export class EnvelopeCreate extends React.Component<EnvelopeCreateProps, Envelop
         }
     }
 }
+
+export const EnvelopeCreate = connect(null, { insertAccount })(Component);

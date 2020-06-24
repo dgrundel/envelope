@@ -1,4 +1,4 @@
-import { Account, AccountType, getAccountTypeLabel } from '@models/Account';
+import { Account, AccountType, getAccountTypeLabel, getBankAccountTypes } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { AccountCreate } from '../AccountCreate';
@@ -64,6 +64,7 @@ class Component extends React.Component<AccountsPageProps, AccountsPageState> {
 const mapStateToProps = (state: CombinedState, ownProps: AccountsPageProps): AccountsPageProps => ({
     ...ownProps,
     accounts: state.accounts.sortedIds.map(id => state.accounts.accounts[id])
+        .filter(account => getBankAccountTypes().findIndex(t => t === account.type) !== -1)
 })
 
 export const AccountsPage = connect(mapStateToProps, {})(Component);

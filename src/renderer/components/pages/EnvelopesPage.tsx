@@ -1,71 +1,93 @@
 import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
-import { Account } from '@models/Account';
+import { Account, AccountType } from '@models/Account';
 import * as React from "react";
 import { Box } from '../Box';
 import { DataTable } from '../DataTable';
 import { EnvelopeCreate } from '../EnvelopeCreate';
 import { EventListener } from '../EventListener';
+import { connect } from 'react-redux';
+import { CombinedState } from '@/renderer/store/store';
+import { Currency } from '@/util/Currency';
 
 export interface EnvelopesPageProps {
+    userEnvelopes?: Account[];
+    creditCardEnvelopes?: Account[];
 }
 
 export interface EnvelopesPageState {
-    dataStore: AccountDataStoreClient;
-    userEnvelopes: Account[];
-    creditCardEnvelopes: Account[];
 }
 
-export class EnvelopesPage extends EventListener<EnvelopesPageProps, EnvelopesPageState> {
+class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> {
     
     constructor(props: EnvelopesPageProps) {
         super(props);
 
-        this.state = {
-            dataStore: new AccountDataStoreClient(),
-            userEnvelopes: [],
-            creditCardEnvelopes: []
-        };
-
-        this.updateEnvelopes();
-        this.addListener(() => this.state.dataStore.onChange(() => {
-            this.updateEnvelopes();
-        }));
+        this.state = {};
     }
     
-    private updateEnvelopes() {
-        this.state.dataStore.getCreditCardEnvelopes().then(creditCardEnvelopes => {
-            this.setState({ creditCardEnvelopes });
-        });
-        this.state.dataStore.getUserEnvelopes().then(userEnvelopes => {
-            this.setState({ userEnvelopes });
-        });
-    }
-
     render() {
         return <>
             <Box heading="Create an Envelope">
                 <EnvelopeCreate/>
             </Box>
-            <Box heading="My Credit Card Payments">
-                <DataTable<Account>
-                    rows={this.state.creditCardEnvelopes}
-                    fields={[{
-                        name: 'name',
-                        label: 'Envelope Name'
-                    }]}
-                    keyField={'_id'}
-                />
-            </Box>
-            <Box heading="My Envelopes">
-                <DataTable<Account>
-                    rows={this.state.userEnvelopes}
-                    fields={[{
-                        name: 'name',
-                        label: 'Envelope Name'
-                    }]}
-                    keyField={'_id'}
-                />
-            </Box>
+            {this.renderCreditCardEnvelopes()}
+            {this.renderUserEnvelopes()}
         </>;
     }
+    renderUserEnvelopes() {
+        const envelopes = this.props.userEnvelopes || [];
+
+        if (envelopes.length === 0) {
+            return null;
+        }
+
+        return <Box heading="My Envelopes">
+            <DataTable<Account>
+                rows={envelopes}
+                fields={[{
+                    name: 'name',
+                    label: 'Envelope Name'
+                },{
+                    name: 'balance',
+                    label: 'Available',
+                    formatter: (value: Currency) => value.toFormattedString()
+                }]}
+                keyField={'_id'}
+            />
+        </Box>;
+    }
+
+    renderCreditCardEnvelopes() {
+        const envelopes = this.props.creditCardEnvelopes || [];
+
+        if (envelopes.length === 0) {
+            return null;
+        }
+        
+        return <Box heading="My Credit Card Payments">
+            <DataTable<Account>
+                rows={envelopes}
+                fields={[{
+                    name: 'name',
+                    label: 'Envelope Name'
+                },{
+                    name: 'balance',
+                    label: 'Available',
+                    formatter: (value: Currency) => value.toFormattedString()
+                }]}
+                keyField={'_id'}
+            />
+        </Box>
+    }
 }
+
+const mapStateToProps = (state: CombinedState, ownProps: EnvelopesPageProps): EnvelopesPageProps => {
+    const allAcounts = state.accounts.sortedIds.map(id => state.accounts.accounts[id]);
+    return {
+        ...ownProps,
+        userEnvelopes: allAcounts.filter(account => account.type === AccountType.UserEnvelope),
+        creditCardEnvelopes: allAcounts.filter(account => account.type === AccountType.PaymentEnvelope)
+    };
+}
+
+export const EnvelopesPage = connect(mapStateToProps, {})(Component); 

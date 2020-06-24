@@ -38,7 +38,7 @@ export class AccountDataStoreClient extends DataStoreClient<AccountData, Account
             .then(created => {
                 if (created.type === AccountType.CreditCard) {
                     return this.addAccount({
-                        name: `${created.name} Payment`,
+                        name: `Payment for "${created.name}"`,
                         type: AccountType.PaymentEnvelope,
                         balance: Currency.ZERO,
                         linkedAccountIds: [created._id as string]
