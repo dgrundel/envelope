@@ -2,7 +2,7 @@ import * as React from "react";
 
 import '@public/components/Modal.scss';
 import { getAppContext } from '../AppContext';
-import { DefaultButton } from '@fluentui/react';
+import { DefaultButton, FontIcon } from '@fluentui/react';
 
 export interface Modal {
     // marker interface
@@ -82,7 +82,7 @@ export class BaseModal extends React.Component<ModalProps, {}> implements Modal 
         if (heading || closeButtonHandler) {
             return <h2 className="modal-heading">
                 {heading || ''}
-                {closeButtonHandler ? <i className="pe-7s-close modal-close-icon" onClick={() => closeButtonHandler()}></i> : ''}
+                {closeButtonHandler ? <FontIcon iconName="Cancel" className="modal-close-icon" onClick={() => closeButtonHandler()} /> : ''}
             </h2>;
         }
     }
@@ -91,7 +91,7 @@ export class BaseModal extends React.Component<ModalProps, {}> implements Modal 
         const buttons = this.props.buttons;
         if (buttons) {
             return <div className="modal-footer">
-                {buttons.map(button => <DefaultButton text={button.buttonText} onClick={() => button.onClick()} />)}
+                {buttons.map(button => <DefaultButton key={button.buttonText} text={button.buttonText} onClick={() => button.onClick()} />)}
             </div>
         }
     }

@@ -5,6 +5,7 @@ import * as csv from 'neat-csv';
 import * as React from "react";
 import { DropTarget } from "../DropTarget";
 import { ImportWizard } from './ImportWizard';
+import { FontIcon } from '@fluentui/react';
 
 
 export interface ImportProps {
@@ -21,7 +22,7 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
     render() {
         return <DropTarget handler={this.dropHandler}>
             <p className="import-drop-target-content">
-                <i className="pe-7s-upload import-drop-target-icon"></i>
+                <FontIcon iconName="BulkUpload" className="import-drop-target-icon" />
                 Drop CSV files here to import transactions.
             </p>
         </DropTarget>;

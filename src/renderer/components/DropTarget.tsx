@@ -1,5 +1,6 @@
 import '@public/components/DropTarget.scss';
 import * as React from "react";
+import { FontIcon } from '@fluentui/react';
 
 export interface DropTargetProps {
     children?: any;
@@ -33,7 +34,7 @@ export class DropTarget extends React.Component<DropTargetProps, DropTargetState
 
     renderDefaultContent() {
         return <p className="drop-target-default-content">
-            <i className="pe-7s-upload drop-target-default-icon"></i>
+            <FontIcon iconName="BulkUpload" className="drop-target-default-icon" />
             Drop files here.
         </p>
     }
