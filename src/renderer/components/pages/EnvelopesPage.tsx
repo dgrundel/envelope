@@ -1,13 +1,11 @@
-import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
+import { CombinedState } from '@/renderer/store/store';
+import { Currency } from '@/util/Currency';
 import { Account, AccountType } from '@models/Account';
 import * as React from "react";
+import { connect } from 'react-redux';
 import { Box } from '../Box';
 import { DataTable } from '../DataTable';
 import { EnvelopeCreate } from '../EnvelopeCreate';
-import { EventListener } from '../EventListener';
-import { connect } from 'react-redux';
-import { CombinedState } from '@/renderer/store/store';
-import { Currency } from '@/util/Currency';
 
 export interface EnvelopesPageProps {
     userEnvelopes?: Account[];
