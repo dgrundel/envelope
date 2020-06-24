@@ -12,6 +12,18 @@ import { DashboardPage } from './pages/DashboardPage';
 import { EnvelopesPage } from './pages/EnvelopesPage';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { Sidebar } from './Sidebar';
+import { FontIcon } from '@fluentui/react/lib/Icon';
+import { mergeStyles } from '@fluentui/react/lib/Styling';
+
+import { initializeIcons } from '@uifabric/icons';
+initializeIcons('fonts/');
+
+const iconClass = mergeStyles({
+  fontSize: 50,
+  height: 50,
+  width: 50,
+  margin: '0 25px',
+});
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
 
@@ -78,6 +90,7 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
             </div>
             <Sidebar/>
             <div id="main">
+                <FontIcon iconName="Dictionary" className={iconClass} />
                 {this.renderPage()}
                 {this.showModal()}
             </div>

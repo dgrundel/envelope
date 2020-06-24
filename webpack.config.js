@@ -1,6 +1,7 @@
 const lodash = require('lodash');
 const CopyPkgJsonPlugin = require('copy-pkg-json-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
 
 function srcPaths(src) {
@@ -92,6 +93,15 @@ rendererConfig.output.filename = 'renderer.bundle.js';
 rendererConfig.plugins = [
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, './public/index.html'),
+  }),
+  new CopyPlugin({
+    patterns: [
+      {
+        from: './public/fonts/fabric-icons-*', 
+        to: 'fonts',
+        flatten: true,
+      },
+    ],
   }),
 ];
 
