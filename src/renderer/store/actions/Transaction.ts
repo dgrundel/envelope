@@ -1,6 +1,6 @@
 import { TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
-import { Transaction, TransactionData } from '@models/Transaction';
 import { Log } from '@/util/Logger';
+import { Transaction, TransactionData } from '@models/Transaction';
 
 const database = new TransactionDataStoreClient();
 
@@ -17,15 +17,6 @@ export const loadTransactions = (transactions: Transaction[]): LoadTransactionAc
     type: TransactionAction.Load,
     transactions
 });
-
-export const insertTransaction = (transactionData: TransactionData) => (dispatch: any) => {
-    return database.addTransaction(transactionData)
-        .then(result => Log.debug('addTransaction', result))    
-        .then(() => database.getAllTransactions())
-        .then(transactions => {
-            dispatch(loadTransactions(transactions));
-        });
-};
 
 export const addLinkedTransaction = (transaction: TransactionData, linkTo: Transaction) => (dispatch: any) => {
     return database.addLinkedTransaction(transaction, linkTo)

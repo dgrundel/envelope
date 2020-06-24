@@ -9,3 +9,6 @@ export const filterOnlyBankAccounts = filterOnlyAccountTypeIn(getBankAccountType
 export const filterOnlyAssignableAccounts = filterOnlyAccountTypeIn(getAssignableAccountTypes());
 
 export const filterOnlyImportedTransactions = (transaction: TransactionData) => !!transaction.originalRecord;
+
+export const isNotBlank = (s?: string) => typeof s === 'string' && s.trim().length > 0;
+export const isBlank = (s?: string) => !isNotBlank(s);

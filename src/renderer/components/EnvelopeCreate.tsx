@@ -1,13 +1,11 @@
-import { Currency } from "@/util/Currency";
-import { AccountData, AccountType } from '@models/Account';
 import * as React from "react";
 import { connect } from "react-redux";
-import { insertAccount } from "../store/actions/Account";
+import { createEnvelope } from "../store/actions/Account";
 import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
 import { TextField } from "./forms/TextField";
 
 export interface EnvelopeCreateProps {
-    insertAccount?: (accountData: AccountData) => void;
+    createEnvelope?: (name: string) => Promise<void>;
 }
 
 export interface EnvelopeCreateState {
@@ -64,15 +62,8 @@ class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState
         
         if (this.validator.allValid()) {
             const values = this.validator.values();
-
-            const account: AccountData = {
-                name: (values.name as string || '').trim(),
-                type: AccountType.UserEnvelope,
-                balance: Currency.ZERO,
-                linkedAccountIds: []
-            };
             
-            this.props.insertAccount && this.props.insertAccount(account);
+            this.props.createEnvelope && this.props.createEnvelope(values.name as string);
 
         } else {
             const errors = this.validator.errors();
@@ -83,4 +74,4 @@ class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState
     }
 }
 
-export const EnvelopeCreate = connect(null, { insertAccount })(Component);
+export const EnvelopeCreate = connect(null, { createEnvelope })(Component);

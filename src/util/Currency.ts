@@ -31,6 +31,10 @@ export class Currency {
         return this.wholeAmount < 0 || this.fractionalAmount < 0;
     }
 
+    or(other: Currency) {
+        return this.isValid() ? this : other;
+    }
+
     add(other: Currency) {
         const sum = this.toPrecisionInt() + other.toPrecisionInt();
         return Currency.fromPrecisionInt(sum);
@@ -113,7 +117,7 @@ export class Currency {
     }
 
     static parse(s: string): Currency {
-        const stripped = s
+        const stripped = (s || '')
             // strip non-numeric, non-dash chars from end of string
             .replace(/[^0-9-]+$/, '')
             // strip non-numeric, non-dash chars from beginning of string

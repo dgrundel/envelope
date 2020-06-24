@@ -5,7 +5,7 @@ import { Account, getAssignableAccountTypes } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { getAppContext } from '../AppContext';
-import { insertTransaction, addLinkedTransaction } from '../store/actions/Transaction';
+import { addLinkedTransaction } from '../store/actions/Transaction';
 import { CombinedState } from '../store/store';
 import { DataTable } from './DataTable';
 import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';

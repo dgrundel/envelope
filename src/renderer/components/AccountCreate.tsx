@@ -1,14 +1,14 @@
 import { Currency } from "@/util/Currency";
-import { AccountData, AccountType, getAccountTypeLabel, getBankAccountTypes } from '@models/Account';
+import { AccountType, getAccountTypeLabel, getBankAccountTypes } from '@models/Account';
 import * as React from "react";
 import { connect } from "react-redux";
-import { insertAccount } from "../store/actions/Account";
+import { createBankAccount } from "../store/actions/Account";
 import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
 import { RadioSelectField } from "./forms/RadioSelectField";
 import { TextField } from "./forms/TextField";
 
 export interface AccountCreateProps {
-    insertAccount?: (accountData: AccountData) => void;
+    createBankAccount?: (name: string, type: AccountType, balance: Currency) => Promise<void>;
 }
 
 export interface AccountCreateState {
@@ -89,16 +89,12 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
         
         if (this.validator.allValid()) {
             const values = this.validator.values();
-
-            const balance = Currency.parse((values.balance as string || '').trim());
-            const account: AccountData = {
-                name: (values.name as string || '').trim(),
-                type: values.type as AccountType,
-                balance: balance.isValid() ? balance : Currency.ZERO,
-                linkedAccountIds: []
-            };
             
-            this.props.insertAccount && this.props.insertAccount(account);
+            const accountName = (values.name as string);
+            const accountType = (values.type as AccountType);
+            const balance = Currency.parse(values.balance as string).or(Currency.ZERO);
+            
+            this.props.createBankAccount && this.props.createBankAccount(accountName, accountType, balance);
 
         } else {
             const errors = this.validator.errors();
@@ -109,4 +105,4 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
     }
 }
 
-export const AccountCreate = connect(null, { insertAccount })(Component);
+export const AccountCreate = connect(null, { createBankAccount })(Component);
