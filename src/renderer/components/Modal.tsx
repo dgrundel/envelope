@@ -2,6 +2,7 @@ import * as React from "react";
 
 import '@public/components/Modal.scss';
 import { getAppContext } from '../AppContext';
+import { DefaultButton } from '@fluentui/react';
 
 export interface Modal {
     // marker interface
@@ -88,12 +89,9 @@ export class BaseModal extends React.Component<ModalProps, {}> implements Modal 
 
     renderFooter() {
         const buttons = this.props.buttons;
-
         if (buttons) {
             return <div className="modal-footer">
-                {buttons.map(button => <div key={button.buttonText} className={`btn ${button.className || ''}`} onClick={() => button.onClick()}>
-                    {button.buttonText}
-                </div>)}
+                {buttons.map(button => <DefaultButton text={button.buttonText} onClick={() => button.onClick()} />)}
             </div>
         }
     }

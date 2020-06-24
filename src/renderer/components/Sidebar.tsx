@@ -3,7 +3,7 @@ import * as React from "react";
 import { getAppContext } from '../AppContext';
 import { AppPage } from './App';
 import { ImportDropTarget } from './import/ImportDropTarget';
-
+import { FontIcon } from '@fluentui/react/lib/Icon';
 
 export interface SidebarProps {
 }
@@ -18,7 +18,7 @@ export class Sidebar extends React.Component<SidebarProps, {}> {
                 {this.renderNavLink(AppPage.Envelopes, 'Envelopes')}
                 {this.renderNavLink(AppPage.Transactions, <>
                     Transactions
-                    <i className="material-icons">notification_important</i>
+                    <FontIcon iconName="AlertSolid" />
                 </>)}
             </ul>
             <ImportDropTarget/>

@@ -5,6 +5,9 @@ import { Provider } from 'react-redux'
 import { App } from './components/App';
 import { ReduxStore } from './store/store';
 import { Log } from '@/util/Logger';
+import { initializeIcons } from '@uifabric/icons';
+
+initializeIcons('fonts/');
 
 ReduxStore.subscribe(() => Log.debug('Redux Store Change', ReduxStore.getState()));
 

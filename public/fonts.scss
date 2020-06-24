@@ -9,10 +9,3 @@ $notosans-fontface-path: $font-path;
 
 $pe-7s-font-path: $font-path;
 @import "node_modules/pe7-icon/dist/scss/pe-icon-7-stroke";
-
-$material-design-icons-font-directory-path: $font-path + '/';
-@import '~material-design-icons-iconfont/src/material-design-icons';
-
-.material-icons.material-icons {
-  font-size: inherit;
-}

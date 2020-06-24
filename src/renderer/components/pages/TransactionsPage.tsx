@@ -10,6 +10,7 @@ import { AddLinkedTransactions } from '../AddLinkedTransactions';
 import { Box } from "../Box";
 import { DataTable } from '../DataTable';
 import { filterOnlyImportedTransactions } from '@/util/Filters';
+import { FontIcon } from '@fluentui/react';
 
 export interface TransactionsPageProps {
     sortedTransactions?: Transaction[];
@@ -93,9 +94,9 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
             getAppContext().modalApi.queueModal(modal);
         };
         
-        let icon = <i className="material-icons transaction-list-icon-unlinked">error_outline</i>;
+        let icon = <FontIcon iconName="Error" />;
         if (balance.isZero()) {
-            icon = <i className="material-icons transaction-list-icon-linked">check_circle_outline</i>;
+            icon = <FontIcon iconName="CheckMark" />;
         }
 
         return <span onClick={clickHander}>
