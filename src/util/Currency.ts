@@ -61,8 +61,16 @@ export class Currency {
         return this.toPrecisionInt() === other.toPrecisionInt();
     }
 
+    clone() {
+        return Currency.fromPrecisionInt(this.toPrecisionInt());
+    }
+
     getInverse() {
         return Currency.fromPrecisionInt(this.toPrecisionInt() * -1);
+    }
+
+    getAbsolute() {
+        return this.isNegative() ? this.getInverse() : this.clone();
     }
 
     toPrecisionInt() {
@@ -87,7 +95,8 @@ export class Currency {
     }
 
     toString() {
-        const formattedFrac = leftPad(this.fractionalAmount.toFixed(0), PRECISION_DIGITS, '0');        
+        const fracStr = Math.abs(this.fractionalAmount).toFixed(0);
+        const formattedFrac = leftPad(fracStr, PRECISION_DIGITS, '0');        
         return `${this.wholeAmount}.${formattedFrac}`;
     }
 

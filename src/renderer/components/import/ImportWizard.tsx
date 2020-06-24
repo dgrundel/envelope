@@ -14,6 +14,7 @@ import { RowSelect } from '../RowSelect';
 import { SpinnerModal } from '../SpinnerModal';
 import { Wizard, WizardApi, WizardStep } from '../wizard/Wizard';
 import { ImportRowSelect } from './ImportRowSelect';
+import { filterOnlyBankAccounts } from '@/util/Filters';
 
 
 export interface Row {
@@ -79,13 +80,15 @@ const accountSelectStep: WizardStep<ImportWizardState> = {
             api.updateState(state);
         };
 
-        if (state.accounts.length === 0) {
+        const bankAccounts = state.accounts.filter(filterOnlyBankAccounts);
+
+        if (bankAccounts.length === 0) {
             Log.debug('No accounts to use for import. Should pop a modal here for adding an account.');
 
             return <p>No accounts to use for import. Please add an account first!</p>;
         }
 
-        const accountRow = state.accounts.reduce((row: Row, account: Account) => {
+        const accountRow = bankAccounts.reduce((row: Row, account: Account) => {
             row[account._id] = getAccountTypeLabel(account.type);
             return row;
         }, {});
@@ -404,7 +407,12 @@ class Component extends React.Component<ImportWizardProps, ImportWizardState> {
                 // calculate sum of all transactions to update account balance
                 const sum = transactions.reduce((sum: Currency, transaction) => sum.add(transaction.amount), Currency.ZERO);
                 // TODO: should this be an add or a subtract?
+
+                Log.debug('Starting account balance', account.balance.toFormattedString());
+
                 const balance = sum.add(account.balance);
+
+                Log.debug('Account balance after transactions applied', balance.toFormattedString());
                 
                 wizardState.updateAccountBalance(accountId, balance);
             })

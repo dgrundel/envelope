@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import { AddLinkedTransactions } from '../AddLinkedTransactions';
 import { Box } from "../Box";
 import { DataTable } from '../DataTable';
+import { filterOnlyImportedTransactions } from '@/util/Filters';
 
 export interface TransactionsPageProps {
     sortedTransactions?: Transaction[];
@@ -34,6 +35,7 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
 
     renderList() {
         const sortedTransactions = this.props.sortedTransactions || [];
+        const accounts = this.props.accounts || {};
 
         if (sortedTransactions.length === 0) {
             return 'No transactions yet.';
@@ -46,8 +48,9 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
                 label: 'Date',
                 formatter: (value, row) => row.date.toLocaleDateString()
             },{
-                name: 'accountName',
-                label: 'Account'
+                name: 'accountId',
+                label: 'Account',
+                formatter: (id) => accounts[id].name
             },{
                 name: 'description',
                 label: 'Description'
@@ -68,22 +71,24 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
 
     private linkedTransactionsFormatter(value: string, row: Transaction) {
         const transactionMap = this.props.transactions || {};
-        const existingLinks = row.linkedTransactionIds.map(id => transactionMap[id]) || [];
+        const transaction = transactionMap[row._id];
+        const existingLinks = transaction.linkedTransactionIds.map(id => transactionMap[id]) || [];
+        
         const balance = existingLinks.reduce(
             (bal: Currency, link: Transaction) => {
                 Log.debug('link', link);
                 // subtract linked amounts to see if it zeros out
                 return bal.sub(link.amount);
             },
-            row.amount
+            transaction.amount
         );
 
-        Log.debug('balance', row.description, balance.toString());
+        Log.debug('balance', transaction.description, balance.toString());
         
         const clickHander = (e: React.MouseEvent) => {
             e.preventDefault();
 
-            const modal = <AddLinkedTransactions transaction={row} existingLinks={existingLinks} suggestedValue={balance} maxValue={balance} />;
+            const modal = <AddLinkedTransactions transaction={transaction} suggestedValue={balance} maxValue={balance} />;
             
             getAppContext().modalApi.queueModal(modal);
         };
@@ -103,7 +108,9 @@ const mapStateToProps = (state: CombinedState, ownProps: TransactionsPageProps):
     ...ownProps,
     transactions: state.transactions.transactions,
     accounts: state.accounts.accounts,
-    sortedTransactions: state.transactions.sortedIds.map(id => state.transactions.transactions[id])
+    sortedTransactions: state.transactions.sortedIds
+        .map(id => state.transactions.transactions[id])
+        .filter(filterOnlyImportedTransactions)
 });
 
 export const TransactionsPage = connect(mapStateToProps, {})(Component);

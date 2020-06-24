@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { Box } from '../Box';
 import { DataTable } from '../DataTable';
 import { EnvelopeCreate } from '../EnvelopeCreate';
+import { filterOnlyAccountType } from '@/util/Filters';
 
 export interface EnvelopesPageProps {
     userEnvelopes?: Account[];
@@ -83,8 +84,8 @@ const mapStateToProps = (state: CombinedState, ownProps: EnvelopesPageProps): En
     const allAcounts = state.accounts.sortedIds.map(id => state.accounts.accounts[id]);
     return {
         ...ownProps,
-        userEnvelopes: allAcounts.filter(account => account.type === AccountType.UserEnvelope),
-        creditCardEnvelopes: allAcounts.filter(account => account.type === AccountType.PaymentEnvelope)
+        userEnvelopes: allAcounts.filter(filterOnlyAccountType(AccountType.UserEnvelope)),
+        creditCardEnvelopes: allAcounts.filter(filterOnlyAccountType(AccountType.PaymentEnvelope))
     };
 }
 

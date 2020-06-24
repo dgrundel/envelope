@@ -5,7 +5,7 @@ import { Account, getAssignableAccountTypes } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { getAppContext } from '../AppContext';
-import { insertTransaction } from '../store/actions/Transaction';
+import { insertTransaction, addLinkedTransaction } from '../store/actions/Transaction';
 import { CombinedState } from '../store/store';
 import { DataTable } from './DataTable';
 import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
@@ -22,7 +22,7 @@ export interface AddLinkedTransactionsProps {
     accountMap?: Record<string, Account>;
     envelopes?: Account[];
     existingLinks?: Transaction[];
-    insertTransaction?: (t: TransactionData) => void;
+    addLinkedTransaction?: (transaction: TransactionData, linkTo: Transaction) => void;
 }
 
 export interface AddLinkedTransactionsState {
@@ -186,10 +186,10 @@ class Component extends React.Component<AddLinkedTransactionsProps, AddLinkedTra
                 date: date,
                 amount: amount,
                 description: `Linked from ${this.props.transaction._id}`,
-                linkedTransactionIds: [this.props.transaction._id]
+                linkedTransactionIds: []
             };
 
-            this.props.insertTransaction && this.props.insertTransaction(transactionData);
+            this.props.addLinkedTransaction && this.props.addLinkedTransaction(transactionData, this.props.transaction);
             
         } else {
             this.setState({
@@ -208,4 +208,4 @@ const mapStateToProps = (state: CombinedState, ownProps: AddLinkedTransactionsPr
     existingLinks: ownProps.transaction.linkedTransactionIds.map(id => state.transactions.transactions[id])
 })
 
-export const AddLinkedTransactions = connect(mapStateToProps, { insertTransaction })(Component);
+export const AddLinkedTransactions = connect(mapStateToProps, { addLinkedTransaction })(Component);

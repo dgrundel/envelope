@@ -5,6 +5,7 @@ import { AccountCreate } from '../AccountCreate';
 import { Box } from "../Box";
 import { AccountState } from '@/renderer/store/reducers/Accounts';
 import { CombinedState } from '@/renderer/store/store';
+import { filterOnlyBankAccounts } from '@/util/Filters';
 
 // import '@public/components/AccountsPage.scss';
 
@@ -63,8 +64,7 @@ class Component extends React.Component<AccountsPageProps, AccountsPageState> {
 
 const mapStateToProps = (state: CombinedState, ownProps: AccountsPageProps): AccountsPageProps => ({
     ...ownProps,
-    accounts: state.accounts.sortedIds.map(id => state.accounts.accounts[id])
-        .filter(account => getBankAccountTypes().findIndex(t => t === account.type) !== -1)
+    accounts: state.accounts.sortedIds.map(id => state.accounts.accounts[id]).filter(filterOnlyBankAccounts)
 })
 
 export const AccountsPage = connect(mapStateToProps, {})(Component);

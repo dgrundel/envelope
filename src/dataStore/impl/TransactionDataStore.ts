@@ -42,7 +42,7 @@ export class TransactionDataStoreClient extends DataStoreClient<TransactionData,
                     _id: linkTo._id
                 }, { 
                     $addToSet: {
-                        linkedTransactions: created._id
+                        linkedTransactionIds: created._id
                     }
                 })
                 .then(() => this.getTransactionById(linkTo._id))
