@@ -38,3 +38,10 @@ const bankAccountTypes = [
 ];
 
 export const getBankAccountTypes = () => bankAccountTypes;
+
+const assignableAccountTypes = [
+    AccountType.UserEnvelope,
+    AccountType.PaymentEnvelope
+];
+
+export const getAssignableAccountTypes = () => assignableAccountTypes;

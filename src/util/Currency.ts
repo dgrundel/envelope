@@ -1,6 +1,4 @@
 import { leftPad } from './Formatters';
-import { Log } from './Logger';
-import { Transaction } from '../dataStore/impl/TransactionDataStore';
 
 const PRECISION_DIGITS = 3; // thousandths
 const PRECISION = Math.pow(10, PRECISION_DIGITS);
@@ -63,6 +61,10 @@ export class Currency {
         return this.toPrecisionInt() === other.toPrecisionInt();
     }
 
+    getInverse() {
+        return Currency.fromPrecisionInt(this.toPrecisionInt() * -1);
+    }
+
     toPrecisionInt() {
         return (this.isNegative() ? -1 : 1) * (Math.abs(this.wholeAmount * PRECISION) + Math.abs(this.fractionalAmount));
     }
@@ -99,10 +101,6 @@ export class Currency {
 
     static fromObject(o: any) {
         return new Currency(o.wholeAmount, o.fractionalAmount);
-    }
-
-    static fromTransaction(t: Transaction) {
-        return new Currency(t.wholeAmount, t.fractionalAmount);
     }
 
     static parse(s: string): Currency {

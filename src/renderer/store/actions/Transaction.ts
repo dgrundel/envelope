@@ -18,7 +18,15 @@ export const loadTransactions = (transactions: Transaction[]): LoadTransactionAc
 });
 
 export const insertTransaction = (transactionData: TransactionData) => (dispatch: any) => {
-    database.addTransaction(transactionData)
+    return database.addTransaction(transactionData)
+        .then(() => database.getAllTransactions())
+        .then(transactions => {
+            dispatch(loadTransactions(transactions));
+        });
+};
+
+export const insertTransactions = (transactionData: TransactionData[]) => (dispatch: any) => {
+    return database.addTransactions(transactionData)
         .then(() => database.getAllTransactions())
         .then(transactions => {
             dispatch(loadTransactions(transactions));

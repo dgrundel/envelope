@@ -1,5 +1,6 @@
 import { Account, AccountData } from '@models/Account';
 import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
+import { Currency } from '@/util/Currency';
 
 const database = new AccountDataStoreClient();
 
@@ -18,7 +19,15 @@ export const loadAccounts = (accounts: Account[]): LoadAccountAction => ({
 });
 
 export const insertAccount = (accountData: AccountData) => (dispatch: any) => {
-    database.addAccount(accountData)
+    return database.addAccount(accountData)
+        .then(() => database.getAllAccounts())
+        .then(accounts => {
+            dispatch(loadAccounts(accounts));
+        });
+};
+
+export const updateAccountBalance = (id: string, balance: Currency) => (dispatch: any) => {
+    return database.updateAccountBalance(id, balance)
         .then(() => database.getAllAccounts())
         .then(accounts => {
             dispatch(loadAccounts(accounts));

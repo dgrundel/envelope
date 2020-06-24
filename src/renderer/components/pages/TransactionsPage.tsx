@@ -1,58 +1,29 @@
-import { DataStoreChange } from '@/dataStore/BaseDataStore';
-import { Account } from '@models/Account';
-import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
-import { Transaction, TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
+import { Transaction } from '@/models/Transaction';
 import { getAppContext } from '@/renderer/AppContext';
+import { CombinedState } from '@/renderer/store/store';
 import { Currency } from '@/util/Currency';
-import { listToMap } from '@/util/Data';
 import { Log } from '@/util/Logger';
+import { Account } from '@models/Account';
 import * as React from "react";
+import { connect } from 'react-redux';
 import { AddLinkedTransactions } from '../AddLinkedTransactions';
 import { Box } from "../Box";
 import { DataTable } from '../DataTable';
-import { EventListener } from '../EventListener';
 
 export interface TransactionsPageProps {
+    sortedTransactions?: Transaction[];
+    transactions?: Record<string, Transaction>;
+    accounts?: Record<string, Account>;
 }
 
 export interface TransactionsPageState {
-    transactions: Transaction[];
-    linkedTransactions: Record<string, Transaction>;
-    accounts: Record<string, Account>;
-    ready: boolean;
 }
 
-export class TransactionsPage extends EventListener<TransactionsPageProps, TransactionsPageState> {
+class Component extends React.Component<TransactionsPageProps, TransactionsPageState> {
 
     constructor(props: TransactionsPageProps) {
         super(props);
-
-        const transactionDataStore = new TransactionDataStoreClient();
-        const accountDataStore = new AccountDataStoreClient();
-        
-        this.state = {
-            transactions: [],
-            linkedTransactions: {},
-            accounts: {},
-            ready: false
-        };
-
-        Promise.all([
-            this.refreshTransactions(transactionDataStore),
-            this.refreshAccounts(accountDataStore)
-        ]).then(() => this.setState({ ready: true }));
-        
-        this.addListener(() => transactionDataStore.onChange((change) => {
-            if (change === DataStoreChange.Insert) {
-                this.refreshTransactions(transactionDataStore);
-            }
-        }));
-
-        this.addListener(() => accountDataStore.onChange((change) => {
-            if (change === DataStoreChange.Insert) {
-                this.refreshAccounts(accountDataStore);
-            }
-        }));
+        this.state = {};
     }
 
     render() {
@@ -61,77 +32,50 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
         </Box>;
     }
 
-    refreshTransactions(transactionDataStore: TransactionDataStoreClient) {
-        return transactionDataStore.getImportedTransactions().then(transactions => {
-            this.setState({
-                transactions
-            });
-
-            const linkedIds = transactions.reduce((ids: string[], transaction) => {
-                return ids.concat(transaction.linkedTransactions || []);
-            }, []);
-
-            Log.debug('linkedIds', linkedIds);
-            
-            return transactionDataStore.getTransactionsById(linkedIds)
-                .then(linkedTransactions => {
-                    Log.debug('linkedTransactions', linkedTransactions);
-                    this.setState({
-                        linkedTransactions: listToMap(linkedTransactions)
-                    });
-                });
-        });
-    }
-
-    refreshAccounts(accountDataStore: AccountDataStoreClient) {
-        return accountDataStore.getUserAccounts().then(accounts => {
-            this.setState({
-                accounts: listToMap(accounts)
-            });
-        })
-    }
-
     renderList() {
-        if (this.state.ready) {
-            return <DataTable<Transaction>
-                rows={this.state.transactions}
-                fields={[{
-                    name: 'date',
-                    label: 'Date',
-                    formatter: (value, row) => row.date.toLocaleDateString()
-                },{
-                    name: 'accountName',
-                    label: 'Account'
-                },{
-                    name: 'description',
-                    label: 'Description'
-                },{
-                    name: 'amount',
-                    label: 'Amount',
-                    formatter: (value, row) => new Currency(row.wholeAmount, row.fractionalAmount).toFormattedString()
-                },{
-                    name: 'linkedTransactions',
-                    label: '',
-                    formatter: this.linkedTransactionsFormatter.bind(this)
-                }]}
-                keyField={'_id'}
-                onSelect={(selected) => Log.debug('Table selection changed', selected)}
-            />
+        const sortedTransactions = this.props.sortedTransactions || [];
+
+        if (sortedTransactions.length === 0) {
+            return 'No transactions yet.';
         }
 
-        return 'Just a moment...';
+        return <DataTable<Transaction>
+            rows={sortedTransactions}
+            fields={[{
+                name: 'date',
+                label: 'Date',
+                formatter: (value, row) => row.date.toLocaleDateString()
+            },{
+                name: 'accountName',
+                label: 'Account'
+            },{
+                name: 'description',
+                label: 'Description'
+            },{
+                name: 'amount',
+                label: 'Amount',
+                formatter: (value: Currency, row) => value.toFormattedString()
+            },{
+                name: 'linkedTransactions',
+                label: '',
+                formatter: this.linkedTransactionsFormatter.bind(this)
+            }]}
+            keyField={'_id'}
+            onSelect={(selected) => Log.debug('Table selection changed', selected)}
+        />
+
     }
 
     private linkedTransactionsFormatter(value: string, row: Transaction) {
-        const linkedIds = row.linkedTransactions;
-        const existingLinks = linkedIds?.map(id => this.state.linkedTransactions[id]) || [];
+        const transactionMap = this.props.transactions || {};
+        const existingLinks = row.linkedTransactionIds.map(id => transactionMap[id]) || [];
         const balance = existingLinks.reduce(
             (bal: Currency, link: Transaction) => {
                 Log.debug('link', link);
                 // subtract linked amounts to see if it zeros out
-                return bal.sub(Currency.fromTransaction(link));
+                return bal.sub(link.amount);
             },
-            Currency.fromTransaction(row)
+            row.amount
         );
 
         Log.debug('balance', row.description, balance.toString());
@@ -154,3 +98,12 @@ export class TransactionsPage extends EventListener<TransactionsPageProps, Trans
         </span>;
     }
 }
+
+const mapStateToProps = (state: CombinedState, ownProps: TransactionsPageProps): TransactionsPageProps => ({
+    ...ownProps,
+    transactions: state.transactions.transactions,
+    accounts: state.accounts.accounts,
+    sortedTransactions: state.transactions.sortedIds.map(id => state.transactions.transactions[id])
+});
+
+export const TransactionsPage = connect(mapStateToProps, {})(Component);

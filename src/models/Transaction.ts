@@ -7,7 +7,7 @@ export interface TransactionData {
     description: string;
     amount: Currency;
     originalRecord?: Record<string, string>;
-    linkedTransactionIds?: string[];
+    linkedTransactionIds: string[];
 }
 
 export interface Transaction extends TransactionData {
