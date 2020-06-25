@@ -8,11 +8,6 @@
   overflow-x: auto;
   @include rounded();
   @include shadow();
-
-  &.box-success {
-    background-color: $color-success;
-    color: $color-white;
-  }
 }
 
 .box-heading {
