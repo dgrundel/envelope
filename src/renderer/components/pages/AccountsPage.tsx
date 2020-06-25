@@ -31,7 +31,7 @@ class Component extends React.Component<AccountsPageProps, AccountsPageState> {
             <Box heading="Accounts">
                 {this.renderList()}
             </Box>
-            <Box>
+            <Box heading="Add an Account">
                 <AccountCreate/>
             </Box>
         </>;
