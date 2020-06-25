@@ -38,7 +38,7 @@ const bankAccountTypes = [
 ];
 
 export const getBankAccountTypes = () => bankAccountTypes;
-export const isBankAccountType = (type: AccountType) => bankAccountTypes.findIndex(t => t === type) !== -1;
+export const isBankAccountType = (type: AccountType) => bankAccountTypes.some(t => t === type);
 
 const assignableAccountTypes = [
     AccountType.UserEnvelope,

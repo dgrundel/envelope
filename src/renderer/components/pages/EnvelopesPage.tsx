@@ -11,6 +11,7 @@ import { filterOnlyAccountType } from '@/util/Filters';
 export interface EnvelopesPageProps {
     userEnvelopes?: Account[];
     creditCardEnvelopes?: Account[];
+    unallocatedAccount?: Account;
 }
 
 export interface EnvelopesPageState {
@@ -28,6 +29,9 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
         return <>
             <Box heading="Create an Envelope">
                 <EnvelopeCreate/>
+            </Box>
+            <Box heading="Available">
+                {this.props.unallocatedAccount?.balance.toFormattedString()}
             </Box>
             {this.renderCreditCardEnvelopes()}
             {this.renderUserEnvelopes()}
@@ -82,10 +86,12 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
 
 const mapStateToProps = (state: CombinedState, ownProps: EnvelopesPageProps): EnvelopesPageProps => {
     const allAcounts = state.accounts.sortedIds.map(id => state.accounts.accounts[id]);
+    const unallocatedId = state.accounts.unallocatedId;
     return {
         ...ownProps,
         userEnvelopes: allAcounts.filter(filterOnlyAccountType(AccountType.UserEnvelope)),
-        creditCardEnvelopes: allAcounts.filter(filterOnlyAccountType(AccountType.PaymentEnvelope))
+        creditCardEnvelopes: allAcounts.filter(filterOnlyAccountType(AccountType.PaymentEnvelope)),
+        unallocatedAccount: unallocatedId ? state.accounts.accounts[unallocatedId] : undefined
     };
 }
 

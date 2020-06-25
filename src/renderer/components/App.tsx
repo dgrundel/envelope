@@ -1,17 +1,22 @@
 import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
+import { Account, AccountType, AccountData } from '@/models/Account';
+import { Transaction } from '@/models/Transaction';
 import '@public/components/App.scss';
 import * as React from "react";
+import { connect } from 'react-redux';
 import { initAppContext } from '../AppContext';
 import { loadAccounts } from '../store/actions/Account';
 import { loadTransactions } from '../store/actions/Transaction';
-import { ReduxStore } from '../store/store';
 import { Modal, ModalApi } from "./Modal";
 import { AccountsPage } from "./pages/AccountsPage";
 import { DashboardPage } from './pages/DashboardPage';
 import { EnvelopesPage } from './pages/EnvelopesPage';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { Sidebar } from './Sidebar';
+import { filterOnlyAccountType } from '@/util/Filters';
+import { Currency } from '@/util/Currency';
+import { Log } from '@/util/Logger';
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
 
@@ -28,6 +33,8 @@ export interface PageApi {
 }
 
 export interface AppProps {
+    loadAccounts?: (accounts: Account[]) => void;
+    loadTransactions?: (transactions: Transaction[]) => void;
 }
 
 export interface AppState {
@@ -36,8 +43,8 @@ export interface AppState {
     page: AppPage;
 }
 
-export class App extends React.Component<AppProps, AppState> implements ModalApi, PageApi {
-
+class Component extends React.Component<AppProps, AppState> implements ModalApi, PageApi {
+    
     constructor(props: AppProps) {
         super(props);
 
@@ -62,11 +69,46 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         //     this.queueModal(sampleModal);
         // }, 2000);
 
+        this.initApp();
+    }
+
+    initApp() {
+        const loadAccounts = this.props.loadAccounts!;
+        const loadTransactions = this.props.loadTransactions!;
+
+        const accountsDataStore = new AccountDataStoreClient();
+        const accountsPromise = accountsDataStore.getAllAccounts()
+            .then(accounts => {
+                const unallocatedAccountExists = accounts.some(filterOnlyAccountType(AccountType.Unallocated));
+                if (unallocatedAccountExists) {
+                    return accounts;
+                } else {
+                    Log.debug('No unallocated account exists. Creating.');
+
+                    // leading slashes in name are a dumb 
+                    // performance optimization, as we expect:
+                    // - returned records to be sorted by name
+                    // - `find` to search in order
+                    const accountData: AccountData = {
+                        name: '__Unallocated',
+                        type: AccountType.Unallocated,
+                        balance: Currency.ZERO,
+                        linkedAccountIds: []
+                    };
+                    return accountsDataStore.addAccount(accountData)
+                        .then(created => {
+                            Log.debug('Created "unallocated" account', created);
+                            return accountsDataStore.getAllAccounts()
+                        });
+                }
+            })
+            .then(accounts => loadAccounts(accounts));
+        const transactionsPromise = new TransactionDataStoreClient().getAllTransactions()
+            .then(transactions => loadTransactions(transactions));
+        
         Promise.all([
-            new AccountDataStoreClient().getAllAccounts()
-                .then(accounts => ReduxStore.dispatch(loadAccounts(accounts))),
-            new TransactionDataStoreClient().getAllTransactions()
-                .then(transactions => ReduxStore.dispatch(loadTransactions(transactions)))
+            accountsPromise,
+            transactionsPromise
         ]).then(() => this.setState({ ready: true }));
     }
 
@@ -129,3 +171,5 @@ export class App extends React.Component<AppProps, AppState> implements ModalApi
         });
     }
 }
+
+export const App = connect(null, { loadAccounts, loadTransactions })(Component); 

@@ -56,26 +56,26 @@ export class AccountDataStoreClient extends DataStoreClient<AccountData, Account
             .then(result => result.affectedDocuments as Account);
     }
 
-    getAccount(name: string): Promise<Account> {
-        const query = { name };
-        return this.find(query)
-            .then(accounts => Promise.resolve(accounts[0]));
-    }
+    // getAccount(name: string): Promise<Account> {
+    //     const query = { name };
+    //     return this.find(query)
+    //         .then(accounts => Promise.resolve(accounts[0]));
+    // }
 
-    getUserAccounts() {
-        const query = { type: { $in: getBankAccountTypes() } };
-        return this.find(query, DEFAULT_SORT);
-    }
+    // getUserAccounts() {
+    //     const query = { type: { $in: getBankAccountTypes() } };
+    //     return this.find(query, DEFAULT_SORT);
+    // }
 
-    getCreditCardEnvelopes() {
-        const query = { type: AccountType.PaymentEnvelope };
-        return this.find(query, DEFAULT_SORT);
-    }
+    // getCreditCardEnvelopes() {
+    //     const query = { type: AccountType.PaymentEnvelope };
+    //     return this.find(query, DEFAULT_SORT);
+    // }
 
-    getUserEnvelopes() {
-        const query = { type: AccountType.UserEnvelope };
-        return this.find(query, DEFAULT_SORT);
-    }
+    // getUserEnvelopes() {
+    //     const query = { type: AccountType.UserEnvelope };
+    //     return this.find(query, DEFAULT_SORT);
+    // }
 
     getAllAccounts() {
         const query = {};

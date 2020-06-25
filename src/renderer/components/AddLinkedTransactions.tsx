@@ -199,7 +199,7 @@ const mapStateToProps = (state: CombinedState, ownProps: AddLinkedTransactionsPr
     accountMap: state.accounts.accounts,
     envelopes: state.accounts.sortedIds
         .map(id => state.accounts.accounts[id])
-        .filter(account => getAssignableAccountTypes().findIndex(t => t === account.type) !== -1),
+        .filter(account => getAssignableAccountTypes().some(t => t === account.type)),
     existingLinks: ownProps.transaction.linkedTransactionIds.map(id => state.transactions.transactions[id])
 })
 

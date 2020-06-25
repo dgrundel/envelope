@@ -25,7 +25,7 @@ export class RowSelect extends React.Component<RowSelectProps, {}> {
         return <div className={`row-select ${this.props.className || ''}`}>
             {this.props.options.map(option => {
                 const checked = Array.isArray(value) 
-                    ? value.findIndex(v => v === option.value) !== -1 
+                    ? value.some(v => v === option.value) 
                     : option.value === value;
 
                 return <label key={option.value} className={`row-select-row ${checked ? 'row-select-selected-row' : ''}`}>

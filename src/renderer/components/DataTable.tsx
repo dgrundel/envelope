@@ -50,7 +50,7 @@ export class DataTable<T> extends React.Component<DataTableProps<T>, DataTableSt
                     const rowMap = (row as any);
                     const key = rowMap[keyField];
                     const inputId = `${this.state.id}-${key}`;
-                    const isSelected = enableSelect && this.state.selectedRows.findIndex((r: any) => r[keyField] === key) !== -1;
+                    const isSelected = enableSelect && this.state.selectedRows.some((r: any) => r[keyField] === key);
 
                     return <tr key={key} className={`data-table-row ${isSelected ? 'data-table-row-selected' : ''}`}>
                         {enableSelect ? <td><label><input 

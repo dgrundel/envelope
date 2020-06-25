@@ -42,7 +42,7 @@ export class CommonValidators {
     }
 
     static accountType(): FieldValidator {
-        return (value?: FieldValue) => typeof value === 'string' && getBankAccountTypes().findIndex(t => t === value) !== -1 ? true : `Please select an account type.`;
+        return (value?: FieldValue) => typeof value === 'string' && getBankAccountTypes().some(t => t === value) ? true : `Please select an account type.`;
     }
     
     static currency(): FieldValidator {
