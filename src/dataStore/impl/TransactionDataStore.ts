@@ -5,11 +5,6 @@ import { TransactionData, Transaction } from '@/models/Transaction';
 const NAME = 'transactions';
 const DEFAULT_SORT = { date: -1 };
 
-const convertFields = (transaction: Transaction) => ({
-    ...transaction,
-    amount: Currency.fromObject(transaction.amount)
-});
-
 export class TransactionDataStore extends DataStore<TransactionData, Transaction> {
     constructor() {
         super(NAME);
@@ -21,40 +16,11 @@ export class TransactionDataStoreClient extends DataStoreClient<TransactionData,
         super(NAME);
     }
 
-    // TODO: move convertFields to an abstract in the base class, implement it in the subclasses
-    // then have the base class use the the method so we don't have to keep adding these duplicate
-    // overrides across subclasses
-    protected insert(item: TransactionData): Promise<Transaction> {
-        return super.insert(item)
-            .then(convertFields);
-    }
-
-    protected insertMany(items: TransactionData[]): Promise<Transaction[]> {
-        return super.insertMany(items)
-            .then(items => items.map(convertFields));
-    }
-
-    protected find(query: any = {}, sort?: any): Promise<Transaction[]> {
-        return super.find(query, sort)
-            .then(transactions => transactions.map(convertFields));
-    }
-
-    protected findOne(query: any = {}): Promise<Transaction> {
-        return super.findOne(query)
-            .then(convertFields);
-    }
-
-    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<UpdateResult<Transaction>> {
-        return super.update(query, update, options)
-            .then(result => {
-                const affectedDocuments = Array.isArray(result.affectedDocuments)
-                    ? result.affectedDocuments.map(convertFields)
-                    : convertFields(result.affectedDocuments);
-                return {
-                    ...result,
-                    affectedDocuments
-                };
-            })
+    protected convertFields(transaction: Transaction): Transaction {
+        return {
+            ...transaction,
+            amount: Currency.fromObject(transaction.amount)
+        };
     }
 
     addTransaction(transaction: TransactionData) {

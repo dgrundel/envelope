@@ -5,11 +5,6 @@ import { DataStore, DataStoreClient, UpdateResult } from "../BaseDataStore";
 const NAME = 'accounts';
 const DEFAULT_SORT = { name: 1 };
 
-const convertFields = (account: Account) => ({
-    ...account,
-    balance: Currency.fromObject(account.balance)
-});
-
 export class AccountDataStore extends DataStore<AccountData, Account> {
     constructor() {
         super(NAME);
@@ -23,37 +18,11 @@ export class AccountDataStoreClient extends DataStoreClient<AccountData, Account
         super(NAME);
     }
 
-    protected insert(item: AccountData): Promise<Account> {
-        return super.insert(item)
-            .then(convertFields);
-    }
-
-    protected insertMany(items: AccountData[]): Promise<Account[]> {
-        return super.insertMany(items)
-            .then(items => items.map(convertFields));
-    }
-
-    protected find(query: any = {}, sort?: any): Promise<Account[]> {
-        return super.find(query, sort)
-            .then(accounts => accounts.map(convertFields));
-    }
-
-    protected findOne(query: any = {}): Promise<Account> {
-        return super.findOne(query)
-            .then(convertFields);
-    }
-
-    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<UpdateResult<Account>> {
-        return super.update(query, update, options)
-            .then(result => {
-                const affectedDocuments = Array.isArray(result.affectedDocuments)
-                    ? result.affectedDocuments.map(convertFields)
-                    : convertFields(result.affectedDocuments);
-                return {
-                    ...result,
-                    affectedDocuments
-                };
-            })
+    protected convertFields(account: Account): Account {
+        return {
+            ...account,
+            balance: Currency.fromObject(account.balance)
+        };
     }
 
     addAccount(acct: AccountData): Promise<Account[]> {

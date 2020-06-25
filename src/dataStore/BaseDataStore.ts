@@ -182,33 +182,48 @@ export class DataStore<D, R extends D> extends BaseDataStore<D, R> {
     }
 }
 
-export class DataStoreClient<D, R extends D> extends BaseDataStore<D, R> {
+export abstract class DataStoreClient<D, R extends D> extends BaseDataStore<D, R> {
     private invoke(event: DataStoreEvent, ...args: any) {
         return ipcRenderer.invoke(buildEventName(event, this.name), ...args)
             .then((result: IPCResult) => result.success ? Promise.resolve(result.data) : Promise.reject(result.data));
     }
 
+    protected abstract convertFields(item: R):R;
+
     protected insert(item: D): Promise<R> {
-        return this.invoke(DataStoreEvent.Insert, item);
+        return this.invoke(DataStoreEvent.Insert, item)
+            .then((item: R) => this.convertFields(item));
     }
 
     protected insertMany(items: D[]): Promise<R[]> {
-        return this.invoke(DataStoreEvent.InsertMany, items);
+        return this.invoke(DataStoreEvent.InsertMany, items)
+            .then((items: R[]) => items.map(item => this.convertFields(item)));
     }
 
     protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<UpdateResult<R>> {
         return this.invoke(DataStoreEvent.Update, query, update, {
             ...options,
             returnUpdatedDocs: true
+        })
+        .then(result => {
+            const affectedDocuments = Array.isArray(result.affectedDocuments)
+                ? result.affectedDocuments.map((document: R) => this.convertFields(document))
+                : this.convertFields(result.affectedDocuments);
+            return {
+                ...result,
+                affectedDocuments
+            };
         });
     }
 
     protected find(query: any = {}, sort?: any): Promise<R[]> {
-        return this.invoke(DataStoreEvent.Find, query, sort);
+        return this.invoke(DataStoreEvent.Find, query, sort)
+            .then((items: R[]) => items.map(item => this.convertFields(item)));
     }
 
     protected findOne(query: any = {}): Promise<R> {
-        return this.invoke(DataStoreEvent.FindOne, query);
+        return this.invoke(DataStoreEvent.FindOne, query)
+            .then((item: R) => this.convertFields(item));
     }
 
     onChange(callback: (change: DataStoreChange) => void) {
