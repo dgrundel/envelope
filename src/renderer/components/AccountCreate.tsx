@@ -6,6 +6,7 @@ import { createBankAccount } from "../store/actions/Account";
 import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
 import { RadioSelectField } from "./forms/RadioSelectField";
 import { TextField } from "./forms/TextField";
+import { PrimaryButton } from '@fluentui/react';
 
 export interface AccountCreateProps {
     createBankAccount?: (name: string, type: AccountType, balance: Currency) => Promise<void>;
@@ -68,9 +69,7 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
                 onChange={(e) => this.validator.setValue('balance', e.target.value)}
             />
             <div>
-                <button className="btn" type="submit">
-                    Save
-                </button>
+                <PrimaryButton type="submit" text="Save" />
             </div>
         </form>;
     }

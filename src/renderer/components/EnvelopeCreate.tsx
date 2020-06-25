@@ -1,3 +1,4 @@
+import { PrimaryButton } from '@fluentui/react';
 import * as React from "react";
 import { connect } from "react-redux";
 import { createEnvelope } from "../store/actions/Account";
@@ -41,9 +42,7 @@ class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState
                 onChange={(e) => this.validator.setValue('name', e.target.value)}
             />
             <div>
-                <button className="btn" type="submit">
-                    Save
-                </button>
+                <PrimaryButton type="submit" text="Save" />
             </div>
         </form>;
     }

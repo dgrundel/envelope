@@ -76,22 +76,3 @@ table.offset-table {
 .hide.hide.hide {
   display: none;
 }
-
-.btn {
-  cursor: pointer;
-  border: .5px solid;
-  display: inline-block;
-  padding: .5em .75em;
-  color: #3c3c3d;
-  background-color: transparent;
-  border-color: #6c757d;
-  user-select: none;
-  
-  @include rounded();
-  
-  &:hover {
-    color: #fff;
-    background-color: #5a6268;
-    border-color: #545b62;
-  }
-}

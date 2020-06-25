@@ -13,6 +13,7 @@ import { SelectField } from './forms/SelectField';
 import { TextField } from './forms/TextField';
 import { BaseModal, Modal, ModalButton } from './Modal';
 import { Section } from './Section';
+import { PrimaryButton } from '@fluentui/react';
 
 
 export interface AddLinkedTransactionsProps {
@@ -156,9 +157,7 @@ class Component extends React.Component<AddLinkedTransactionsProps, AddLinkedTra
                     onChange={(e) => this.validator.setValue('amount', e.target.value)}
                 />
                 <div>
-                    <button className="btn" type="submit">
-                        Add
-                    </button>
+                    <PrimaryButton type="submit" text="Add" />
                 </div>
             </form>
         </Section>;
