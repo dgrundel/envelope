@@ -23,6 +23,16 @@ export class AccountDataStoreClient extends DataStoreClient<AccountData, Account
         super(NAME);
     }
 
+    protected insert(item: AccountData): Promise<Account> {
+        return super.insert(item)
+            .then(convertFields);
+    }
+
+    protected insertMany(items: AccountData[]): Promise<Account[]> {
+        return super.insertMany(items)
+            .then(items => items.map(convertFields));
+    }
+
     protected find(query: any = {}, sort?: any): Promise<Account[]> {
         return super.find(query, sort)
             .then(accounts => accounts.map(convertFields));
@@ -49,8 +59,8 @@ export class AccountDataStoreClient extends DataStoreClient<AccountData, Account
             });
     }
 
-    updateAccountBalance(accountName: string, balance: Currency) {
-        const query = { name: accountName };
+    updateAccountBalance(accountId: string, balance: Currency) {
+        const query = { _id: accountId };
         const update = {
             $set: {
                 balance

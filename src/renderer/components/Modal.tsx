@@ -91,7 +91,7 @@ export class BaseModal extends React.Component<ModalProps, {}> implements Modal 
         const buttons = this.props.buttons;
         if (buttons) {
             return <div className="modal-footer">
-                {buttons.map(button => <DefaultButton key={button.buttonText} text={button.buttonText} onClick={() => button.onClick()} />)}
+                {buttons.map(button => <DefaultButton key={button.buttonText} text={button.buttonText} onClick={() => button.onClick()} className={button.className} />)}
             </div>
         }
     }

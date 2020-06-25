@@ -21,6 +21,16 @@ export class TransactionDataStoreClient extends DataStoreClient<TransactionData,
         super(NAME);
     }
 
+    protected insert(item: TransactionData): Promise<Transaction> {
+        return super.insert(item)
+            .then(convertFields);
+    }
+
+    protected insertMany(items: TransactionData[]): Promise<Transaction[]> {
+        return super.insertMany(items)
+            .then(items => items.map(convertFields));
+    }
+
     protected find(query: any = {}, sort?: any): Promise<Transaction[]> {
         return super.find(query, sort)
             .then(transactions => transactions.map(convertFields));
@@ -35,7 +45,7 @@ export class TransactionDataStoreClient extends DataStoreClient<TransactionData,
         return this.insert(transaction);
     }
 
-    addLinkedTransaction(transaction: TransactionData, linkTo: Transaction) {
+    addLinkedTransaction(transaction: TransactionData, linkTo: Transaction): Promise<[Transaction, Transaction]> {
         return this.insert(transaction)
             .then(created => {
                 return this.update({

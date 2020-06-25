@@ -84,7 +84,7 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
             transaction.amount
         );
 
-        Log.debug('balance', transaction.description, balance.toString());
+        // Log.debug('balance', transaction.description, balance.toString());
         
         const clickHander = (e: React.MouseEvent) => {
             e.preventDefault();

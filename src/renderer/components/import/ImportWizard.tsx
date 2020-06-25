@@ -1,9 +1,9 @@
 import { Transaction, TransactionData } from '@/models/Transaction';
 import { getAppContext } from '@/renderer/AppContext';
-import { updateAccountBalance } from '@/renderer/store/actions/Account';
 import { insertTransactions } from '@/renderer/store/actions/Transaction';
 import { CombinedState } from '@/renderer/store/store';
 import { Currency } from '@/util/Currency';
+import { filterOnlyBankAccounts } from '@/util/Filters';
 import { Log } from '@/util/Logger';
 import { Account, AccountType, getAccountTypeLabel } from '@models/Account';
 import '@public/components/import/ImportWizard.scss';
@@ -14,7 +14,7 @@ import { RowSelect } from '../RowSelect';
 import { SpinnerModal } from '../SpinnerModal';
 import { Wizard, WizardApi, WizardStep } from '../wizard/Wizard';
 import { ImportRowSelect } from './ImportRowSelect';
-import { filterOnlyBankAccounts } from '@/util/Filters';
+import { AppPage } from '../App';
 
 
 export interface Row {
@@ -34,8 +34,6 @@ export interface ImportWizardState {
     descriptionColumns?: string[];
 
     transactions?: Transaction[];
-
-    updateAccountBalance: (id: string, balance: Currency) => Promise<void>;
     insertTransactions: (transactionData: TransactionData[]) => Promise<void>;
 }
 
@@ -43,7 +41,6 @@ export interface ImportWizardProps {
     rows: Row[];
     accountMap?: Record<string, Account>;
     accounts?: Account[];
-    updateAccountBalance?: (id: string, balance: Currency) => Promise<void>;
     insertTransactions?: (transactionData: TransactionData[]) => Promise<void>;
 }
 
@@ -347,7 +344,6 @@ class Component extends React.Component<ImportWizardProps, ImportWizardState> {
             invertTransactions: false,
             accounts: props.accounts || [],
             accountMap: props.accountMap || {},
-            updateAccountBalance: props.updateAccountBalance as any,
             insertTransactions: props.insertTransactions as any
         };
     }
@@ -361,7 +357,6 @@ class Component extends React.Component<ImportWizardProps, ImportWizardState> {
                     accounts: this.state.accounts,
                     accountMap: this.state.accountMap,
                     invertTransactions: false,
-                    updateAccountBalance: this.state.updateAccountBalance,
                     insertTransactions: this.state.insertTransactions
                 },
                 steps: [
@@ -389,9 +384,6 @@ class Component extends React.Component<ImportWizardProps, ImportWizardState> {
         // description: string;
         // amount: number;
         // originalRecord: Record<string, string>;
-        
-        // dismiss import modal
-        getAppContext().modalApi.dismissModal();
 
         const accountId = wizardState.accountId as string;
         const dateColumn = wizardState.dateColumn as string;
@@ -401,23 +393,12 @@ class Component extends React.Component<ImportWizardProps, ImportWizardState> {
         
         const transactions = convertToTransactions(this.props.rows, invert, dateColumn, amountColumn, descriptionColumns, accountId);
 
-        wizardState.insertTransactions(transactions)
-            .then(() => {
-                const account = wizardState.accountMap[accountId];
-                // calculate sum of all transactions to update account balance
-                const sum = transactions.reduce((sum: Currency, transaction) => sum.add(transaction.amount), Currency.ZERO);
-                // TODO: should this be an add or a subtract?
-
-                Log.debug('Starting account balance', account.balance.toFormattedString());
-
-                const balance = sum.add(account.balance);
-
-                Log.debug('Account balance after transactions applied', balance.toFormattedString());
-                
-                wizardState.updateAccountBalance(accountId, balance);
-            })
-
-        // TODO: pop a success modal?
+        wizardState.insertTransactions(transactions).then(() => {
+            const appContext = getAppContext();
+            // dismiss import modal
+            appContext.modalApi.dismissModal();
+            appContext.pageApi.setPage(AppPage.Transactions);
+        });
     }
 }
 
@@ -427,4 +408,4 @@ const mapStateToProps = (state: CombinedState, ownProps: ImportWizardProps): Imp
     accountMap: state.accounts.accounts
 });
 
-export const ImportWizard = connect(mapStateToProps, { insertTransactions, updateAccountBalance })(Component);
+export const ImportWizard = connect(mapStateToProps, { insertTransactions })(Component);
