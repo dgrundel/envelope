@@ -26,6 +26,11 @@ interface IPCResult {
     data: any;
 }
 
+export interface UpdateResult<R> { 
+    numUpdated: number;
+    affectedDocuments: R|R[]
+}
+
 const getSerializableError = (err: Error) => Object.getOwnPropertyNames(err)
     .reduce((serializable: any, prop: string) => {
         serializable[prop] = (err as any)[prop]
@@ -130,14 +135,17 @@ export class DataStore<D, R extends D> extends BaseDataStore<D, R> {
         });
     }
 
-    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<number> {
+    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<UpdateResult<R>> {
         return new Promise((resolve, reject) => {
-            this.db.update(query, update, options, (err: Error, numUpdated: number) => {
+            this.db.update(query, update, options, (err: Error, numUpdated: number, affectedDocuments: R|R[]) => {
                 if (err) {
                     reject(err);
                 } else {
                     this.triggerChanged(DataStoreChange.Update);
-                    resolve(numUpdated);
+                    resolve({
+                        numUpdated,
+                        affectedDocuments
+                    });
                 }
             });
         });
@@ -188,7 +196,7 @@ export class DataStoreClient<D, R extends D> extends BaseDataStore<D, R> {
         return this.invoke(DataStoreEvent.InsertMany, items);
     }
 
-    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<R[]> {
+    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<UpdateResult<R>> {
         return this.invoke(DataStoreEvent.Update, query, update, {
             ...options,
             returnUpdatedDocs: true

@@ -1,6 +1,6 @@
 import { listToMap } from '@/util/Data';
 import { Account } from '@models/Account';
-import { AccountAction, LoadAccountAction } from '../actions/Account';
+import { AccountAction, LoadAccountAction, UpdateAccountAction } from '../actions/Account';
 
 export interface AccountState {
     accounts: Record<string, Account>;
@@ -20,6 +20,15 @@ export const accounts = (state: AccountState = initialState, action: any): Accou
                 accounts: listToMap(loadAction.accounts),
                 sortedIds: loadAction.accounts.map(a => a._id)
             };
+        case AccountAction.Update:
+            const updateAction = action as UpdateAccountAction;
+            return {
+                ...state,
+                accounts: {
+                    ...state.accounts,
+                    [action.account._id]: action.account
+                }
+            }
         default:
             return state;
     }

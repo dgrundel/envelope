@@ -9,7 +9,8 @@ import { Log } from '@/util/Logger';
 const database = new AccountDataStoreClient();
 
 export enum AccountAction {
-    Load = 'store:action:account-load'
+    Load = 'store:action:account-load',
+    Update = 'store:action:account-update'
 }
 
 export interface LoadAccountAction {
@@ -20,6 +21,16 @@ export interface LoadAccountAction {
 export const loadAccounts = (accounts: Account[]): LoadAccountAction => ({
     type: AccountAction.Load,
     accounts
+});
+
+export interface UpdateAccountAction {
+    type: AccountAction.Update;
+    account: Account;
+}
+
+export const updateAccount = (account: Account): UpdateAccountAction => ({
+    type: AccountAction.Update,
+    account
 });
 
 export const createEnvelope = (name: string) => (dispatch: any) => {
@@ -70,12 +81,14 @@ export const applyTransactionToAccount = (transaction: TransactionData) => (disp
     return applyTransactionsToAccount([transaction]);
 };
 
-// TODO: [Broken] This doesn't work because we're not updating 
-// the account in the redux store. So, the account balance we're working
-// from is out of date. (Because we're breaking the [single source of truth]
-//  rules of the redux store)
 export const applyTransactionsToAccount = (transactions: TransactionData[]) => (dispatch: any, getState: () => CombinedState) => {
-    return Promise.all(transactions.map(transaction => {
+    
+    const next = (i: number): Promise<void> => {
+        if (i >= transactions.length) {
+            return Promise.resolve();
+        }
+
+        const transaction = transactions[i];
         const account = getState().accounts.accounts[transaction.accountId];
         const newBalance = account.balance.add(transaction.amount);
 
@@ -88,10 +101,10 @@ export const applyTransactionsToAccount = (transactions: TransactionData[]) => (
             `updated balance: ${newBalance.toString()}`,
         );
 
-        return database.updateAccountBalance(account._id, newBalance);
-    }))
-        .then(() => database.getAllAccounts())
-        .then(accounts => {
-            dispatch(loadAccounts(accounts));
-        });
+        return database.updateAccountBalance(account._id, newBalance)
+            .then(account => dispatch(updateAccount(account)))
+            .then(() => next(i + 1));
+    };
+    
+    return next(0);
 };

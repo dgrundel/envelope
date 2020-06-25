@@ -1,6 +1,6 @@
 import { Account, AccountData, AccountType, getBankAccountTypes } from '@/models/Account';
 import { Currency } from '@/util/Currency';
-import { DataStore, DataStoreClient } from "../BaseDataStore";
+import { DataStore, DataStoreClient, UpdateResult } from "../BaseDataStore";
 
 const NAME = 'accounts';
 const DEFAULT_SORT = { name: 1 };
@@ -43,6 +43,19 @@ export class AccountDataStoreClient extends DataStoreClient<AccountData, Account
             .then(convertFields);
     }
 
+    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<UpdateResult<Account>> {
+        return super.update(query, update, options)
+            .then(result => {
+                const affectedDocuments = Array.isArray(result.affectedDocuments)
+                    ? result.affectedDocuments.map(convertFields)
+                    : convertFields(result.affectedDocuments);
+                return {
+                    ...result,
+                    affectedDocuments
+                };
+            })
+    }
+
     addAccount(acct: AccountData): Promise<Account[]> {
         return this.insert(acct)
             .then(created => {
@@ -66,7 +79,12 @@ export class AccountDataStoreClient extends DataStoreClient<AccountData, Account
                 balance
             }
         };
-        return this.update(query, update);
+        const options = {
+            multi: false,
+            returnUpdatedDocs: true
+        };
+        return this.update(query, update, options)
+            .then(result => result.affectedDocuments as Account);
     }
 
     getAccount(name: string): Promise<Account> {

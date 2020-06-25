@@ -1,5 +1,5 @@
 import { Currency } from '@/util/Currency';
-import { DataStore, DataStoreClient } from "../BaseDataStore";
+import { DataStore, DataStoreClient, UpdateResult } from "../BaseDataStore";
 import { TransactionData, Transaction } from '@/models/Transaction';
 
 const NAME = 'transactions';
@@ -21,6 +21,9 @@ export class TransactionDataStoreClient extends DataStoreClient<TransactionData,
         super(NAME);
     }
 
+    // TODO: move convertFields to an abstract in the base class, implement it in the subclasses
+    // then have the base class use the the method so we don't have to keep adding these duplicate
+    // overrides across subclasses
     protected insert(item: TransactionData): Promise<Transaction> {
         return super.insert(item)
             .then(convertFields);
@@ -39,6 +42,19 @@ export class TransactionDataStoreClient extends DataStoreClient<TransactionData,
     protected findOne(query: any = {}): Promise<Transaction> {
         return super.findOne(query)
             .then(convertFields);
+    }
+
+    protected update(query: any, update: any, options: Nedb.UpdateOptions = {}): Promise<UpdateResult<Transaction>> {
+        return super.update(query, update, options)
+            .then(result => {
+                const affectedDocuments = Array.isArray(result.affectedDocuments)
+                    ? result.affectedDocuments.map(convertFields)
+                    : convertFields(result.affectedDocuments);
+                return {
+                    ...result,
+                    affectedDocuments
+                };
+            })
     }
 
     addTransaction(transaction: TransactionData) {
