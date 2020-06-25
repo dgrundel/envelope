@@ -1,6 +1,7 @@
 import { Transaction, TransactionData } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { Log } from '@/util/Logger';
+import { Dropdown, MessageBar, MessageBarType, PrimaryButton, TextField } from '@fluentui/react';
 import { Account, getAssignableAccountTypes } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
@@ -8,12 +9,9 @@ import { getAppContext } from '../AppContext';
 import { addLinkedTransaction } from '../store/actions/Transaction';
 import { CombinedState } from '../store/store';
 import { DataTable } from './DataTable';
-import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
-import { SelectField } from './forms/SelectField';
-import { TextField } from './forms/TextField';
+import { CommonValidators, FieldValue, FormValidator } from '../../util/FormValidator';
 import { BaseModal, Modal, ModalButton } from './Modal';
 import { Section } from './Section';
-import { PrimaryButton } from '@fluentui/react';
 
 
 export interface AddLinkedTransactionsProps {
@@ -102,7 +100,8 @@ class Component extends React.Component<AddLinkedTransactionsProps, AddLinkedTra
 
     renderExistingLinks() {
         const existingLinks = this.props.existingLinks || [];
-        
+        const accounts = this.props.accountMap || {};
+
         if (existingLinks.length === 0) {
             return;
         }
@@ -111,8 +110,9 @@ class Component extends React.Component<AddLinkedTransactionsProps, AddLinkedTra
             <DataTable<Transaction>
                 rows={existingLinks}
                 fields={[{
-                    name: 'accountName',
-                    label: 'Envelope'
+                    name: 'accountId',
+                    label: 'Envelope',
+                    formatter: (value: string) => accounts[value].name
                 },{
                     name: 'amount',
                     label: 'Amount',
@@ -129,32 +129,28 @@ class Component extends React.Component<AddLinkedTransactionsProps, AddLinkedTra
         }
 
         const envelopes = this.props.envelopes || [];
-
         if (envelopes.length === 0) {
             return;
         }
 
-        const accountIdSelectOptions = envelopes.map(envelope => ({
-            label: envelope.name,
-            value: envelope._id
-        }));
-
         return <Section heading="Link to Envelope">
             <form onSubmit={e => this.onSubmitTransaction(e)}>
-                <SelectField
-                    name="accountId"
+                <Dropdown
                     label="Envelope"
-                    value={this.state.formValues.accountId || ''}
-                    error={this.state.formErrors.accountId}
-                    onChange={(e) => this.validator.setValue('accountId', e.target.value)}
-                    options={accountIdSelectOptions}
+                    selectedKey={this.state.formValues.accountId}
+                    onChange={(e, option) => this.validator.setValue('accountId', option?.key.toString())}
+                    placeholder="Select an Envelope"
+                    options={envelopes.map(envelope => ({
+                        key: envelope._id,
+                        text: envelope.name
+                    }))}
                 />
+                {this.state.formErrors.accountId && <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>{this.state.formErrors.accountId}</MessageBar>}
                 <TextField
-                    name="amount"
                     label="Amount"
                     value={this.state.formValues.amount || ''}
-                    error={this.state.formErrors.amount}
-                    onChange={(e) => this.validator.setValue('amount', e.target.value)}
+                    errorMessage={this.state.formErrors.amount}
+                    onChange={(e, value?) => this.validator.setValue('amount', value)}
                 />
                 <div>
                     <PrimaryButton type="submit" text="Add" />

@@ -8,7 +8,7 @@
         display: grid;
         grid-template-columns: 4ex 1fr 1fr;
         padding: .5rem;
-        border-bottom: 0.5px solid $color-lt-gray;
+        border-bottom: $border-width solid $color-lt-gray;
 
         &:last-child {
             border-bottom: none;

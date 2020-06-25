@@ -1,5 +1,14 @@
 @import './config.scss';
 
+@mixin firstLastVerticalMargin {
+  &:first-child {
+    margin-top: 0;
+  }
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
 @mixin shadow {
   box-shadow: 0 0.46875rem 2.1875rem rgba(4,9,20,0.03),
     0 0.9375rem 1.40625rem rgba(4,9,20,0.03),
@@ -41,7 +50,7 @@
 
 @mixin table-heading-row {
   @include table-heading();
-  border-bottom: .5px solid $color-lt-gray;
+  border-bottom: $border-width solid $color-lt-gray;
   vertical-align: bottom;
 }
 

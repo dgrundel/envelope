@@ -2,6 +2,7 @@
 @import './mixins.scss';
 @import './config.scss';
 @import './fonts.scss';
+@import './helpers.scss';
 
 html, body {
   background-color: $color-body-bg;
@@ -16,13 +17,7 @@ html, body {
 table {
   width: 100%;
   margin: 1rem 0;
-
-  &:first-child {
-    margin-top: 0;
-  }
-  &:last-child {
-    margin-bottom: 0;
-  }
+  @include firstLastVerticalMargin();
 
   th, td {
     @include table-cell();
@@ -50,7 +45,7 @@ option {
   line-height: inherit;
   color: inherit;
   background-color: inherit;
-  border: .5px solid $color-med-gray;
+  border: $border-width solid $color-med-gray;
 }
 
 strong {
@@ -64,15 +59,12 @@ h3 {
 
 p {
   margin: .8em 0;
+  @include firstLastVerticalMargin();
 }
 
 table.offset-table {
   $horizontal-margin: 2rem;
   margin: 2rem $horizontal-margin;
   width: calc(100% - #{$horizontal-margin * 2});
-  border: 1px solid $color-lt-gray;
-}
-
-.hide.hide.hide {
-  display: none;
+  border: $border-width solid $color-lt-gray;
 }

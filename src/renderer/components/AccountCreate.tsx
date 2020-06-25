@@ -1,12 +1,10 @@
 import { Currency } from "@/util/Currency";
+import { ChoiceGroup, PrimaryButton, TextField, MessageBar, MessageBarType } from '@fluentui/react';
 import { AccountType, getAccountTypeLabel, getBankAccountTypes } from '@models/Account';
 import * as React from "react";
 import { connect } from "react-redux";
 import { createBankAccount } from "../store/actions/Account";
-import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
-import { RadioSelectField } from "./forms/RadioSelectField";
-import { TextField } from "./forms/TextField";
-import { PrimaryButton } from '@fluentui/react';
+import { CommonValidators, FieldValue, FormValidator } from '../../util/FormValidator';
 
 export interface AccountCreateProps {
     createBankAccount?: (name: string, type: AccountType, balance: Currency) => Promise<void>;
@@ -47,30 +45,30 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
                 name="name"
                 label="Account Name"
                 value={this.state.values.name || ''}
-                error={this.state.errors.name}
-                onChange={(e) => this.validator.setValue('name', e.target.value)}
+                errorMessage={this.state.errors.name}
+                onChange={(e, value?) => this.validator.setValue('name', value)}
             />
-            <RadioSelectField
+            <ChoiceGroup 
                 name="type"
-                label="Account Type"
-                value={this.state.values.type}
-                error={this.state.errors.type}
-                options={getBankAccountTypes().map(value => ({
-                    value,
-                    label: getAccountTypeLabel(value)
+                label="Account Type" 
+                selectedKey={this.state.values.type} 
+                options={getBankAccountTypes().map(key => ({
+                    key,
+                    text: getAccountTypeLabel(key)
                 }))}
-                onChange={(e) => this.validator.setValue('type', e.target.value)}
+                onChange={(e, option) => this.validator.setValue('type', option?.key)} 
             />
+            {this.state.errors.type && <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>{this.state.errors.type}</MessageBar>}
             <TextField
                 name="balance"
                 label="Current Balance"
                 value={this.state.values.balance || ''}
-                error={this.state.errors.balance}
-                onChange={(e) => this.validator.setValue('balance', e.target.value)}
+                errorMessage={this.state.errors.balance}
+                onChange={(e, value?) => this.validator.setValue('balance', value)}
             />
-            <div>
+            <p style={({ textAlign: 'right' })}>
                 <PrimaryButton type="submit" text="Save" />
-            </div>
+            </p>
         </form>;
     }
 

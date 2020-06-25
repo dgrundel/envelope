@@ -1,9 +1,8 @@
-import { PrimaryButton } from '@fluentui/react';
+import { PrimaryButton, TextField } from '@fluentui/react';
 import * as React from "react";
 import { connect } from "react-redux";
 import { createEnvelope } from "../store/actions/Account";
-import { CommonValidators, FieldValue, FormValidator } from './forms/FormValidator';
-import { TextField } from "./forms/TextField";
+import { CommonValidators, FieldValue, FormValidator } from '../../util/FormValidator';
 
 export interface EnvelopeCreateProps {
     createEnvelope?: (name: string) => Promise<void>;
@@ -38,12 +37,12 @@ class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState
                 name="name"
                 label="Account Name"
                 value={this.state.values.name || ''}
-                error={this.state.errors.name}
-                onChange={(e) => this.validator.setValue('name', e.target.value)}
+                errorMessage={this.state.errors.name}
+                onChange={(e, value?) => this.validator.setValue('name', value)}
             />
-            <div>
+            <p style={({ textAlign: 'right' })}>
                 <PrimaryButton type="submit" text="Save" />
-            </div>
+            </p>
         </form>;
     }
 

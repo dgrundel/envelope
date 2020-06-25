@@ -29,7 +29,7 @@ $modal-vertical-padding: 1rem;
   font-weight: 400;
   margin: 0 (-1 * $modal-horizontal-padding) $modal-vertical-padding;
   padding: 0 $modal-horizontal-padding $modal-vertical-padding;
-  border-bottom: .25px solid #e5e5e5;
+  border-bottom: $border-width solid #e5e5e5;
 }
 
 .modal-close-icon {
@@ -53,7 +53,7 @@ $modal-vertical-padding: 1rem;
 .modal-footer {
   margin: $modal-vertical-padding (-1 * $modal-horizontal-padding) 0;
   padding: $modal-vertical-padding $modal-horizontal-padding 0;
-  border-top: .25px solid #e5e5e5;
+  border-top: $border-width solid #e5e5e5;
   text-align: right;
 
   button {
