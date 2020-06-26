@@ -75,7 +75,7 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
 }
 
 export const applyTransactionToAccount = (transaction: Transaction) => (dispatch: any) => {
-    return applyTransactionsToAccount([transaction]);
+    return dispatch(applyTransactionsToAccount([transaction]));
 };
 
 export const applyTransactionsToAccount = (transactions: Transaction[]) => (dispatch: any, getState: () => CombinedState) => {
@@ -99,7 +99,30 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
 
         return database.updateAccountBalance(account._id, newBalance)
             .then(updated => dispatch(updateAccount(updated)))
-            .then(() => next(transactions, i + 1));
+            .then(() => next(transactions, i + 1))
+            .then(() => {
+                /**
+                 * Positive transactions on Checking and Savings accounts
+                 * go directly to the unallocated envelope to be distributed later.
+                 */
+                if (account.type === AccountType.Checking || account.type === AccountType.Savings) {
+                    if (transaction.amount.isPositive()) {
+                        const unallocatedId = getState().accounts.unallocatedId;
+                        if (!unallocatedId) {
+                            Log.error('No unallocated account exists');
+                            return;
+                        }
+                        
+                        return dispatch(addLinkedTransaction({
+                            accountId: unallocatedId!,
+                            date: new Date(),
+                            description: `Inflow from account ${account._id} (${account.name})`,
+                            amount: transaction.amount.clone(),
+                            linkedTransactionIds: [transaction._id]
+                        }, transaction));
+                    }
+                }
+            });
     };
     
     return next(transactions, 0);
