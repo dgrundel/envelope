@@ -12,7 +12,7 @@ https://en.wikipedia.org/wiki/Envelope_system
 
 ## Run/Build
 
-_Note:_ This project is based on 'electron-react-typescript-webpack-boilerplate', so much of the 
+_Note:_ This project is based on [**electron-react-typescript-webpack-boilerplate**](https://github.com/Devtography/electron-react-typescript-webpack-boilerplate), so much of the 
 usage/build instructions were copied from [that project's README](https://github.com/Devtography/electron-react-typescript-webpack-boilerplate/blob/master/README.md).
 
 ### Running in dev mode
@@ -23,7 +23,7 @@ watch the changes on source files for live rebuild on code changes.
 npm run dev
 ```
 
-To start the app, execute the following command:
+To start the app, execute the following command in a separate terminal:
 ```sh
 npm start
 ```
@@ -50,17 +50,17 @@ back on by removing line 23 (`"asar": false`) in `package.json`. **_
 The build scripts are pre-configured to build 64 bit installers since 64 bit 
 should be the standard for a modern applications. 32 bit builds are still 
 possible by changing the build scripts in `package.json` as below:
-```json
+```javascript
 // from
 "scripts": {
-    ...
+    // ...
     "build:win": "electron-builder build --win --x64",
     "build:mac": "electron-builder build --mac --x64"
 },
 
 // to
 "scripts": {
-    ...
+    // ...
     "build:win": "electron-builder build --win --ia32",
     // Works only on macOS version < 10.15
     "build:mac": "electron-builder build --mac --ia32"
