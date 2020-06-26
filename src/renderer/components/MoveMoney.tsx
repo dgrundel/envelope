@@ -2,7 +2,7 @@ import * as React from "react";
 import { CombinedState } from '../store/store';
 import { connect } from 'react-redux';
 import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
-import { TextField, Dropdown, IDropdownOption, DropdownMenuItemType } from '@fluentui/react';
+import { TextField, Dropdown, IDropdownOption, DropdownMenuItemType, PrimaryButton, Icon, mergeStyles } from '@fluentui/react';
 import { isValidCurrencyString, isBlank, filterOnlyAccountType } from '@/util/Filters';
 import { Account, AccountType } from '@/models/Account';
 
@@ -23,8 +23,21 @@ interface State {
     amount?: string;
 }
 
+const iconStyle = mergeStyles({
+    verticalAlign: 'middle',
+    marginRight: '1ex'
+});
+
+const onRenderOption = (option: IDropdownOption): JSX.Element => {
+    const icon = option.data && option.data.icon;
+    return <div>
+        {icon && <Icon iconName={icon} className={iconStyle} aria-hidden="true" title={icon} />}
+        <span>{option.text}</span>
+    </div>;
+};
+
 class Component extends React.Component<MoveMoneyProps, State> {
-    private readonly dropDownChoices: IDropdownOption[];
+    private dropDownChoices: IDropdownOption[];
 
     constructor(props: MoveMoneyProps) {
         super(props);
@@ -34,25 +47,34 @@ class Component extends React.Component<MoveMoneyProps, State> {
         };
 
         this.dropDownChoices = [
-            { key: (this.props.unallocatedAccount!)._id, text: (this.props.unallocatedAccount!).name },
+            { key: (this.props.unallocatedAccount!)._id, text: (this.props.unallocatedAccount!).name.trim(), data: { icon: 'Money' } },
             { key: 'divider_1', text: '-', itemType: DropdownMenuItemType.Divider },
-        ].concat(
-            { key: 'myEnvelopesHeader', text: 'My Envelopes', itemType: DropdownMenuItemType.Header },
-            (this.props.userEnvelopes!).map(envelope => ({ key: envelope._id, text: envelope.name }))
-        ).concat(
-            { key: 'paymentEnvelopesHeader', text: 'Payment Envelopes', itemType: DropdownMenuItemType.Header },
-            (this.props.paymentEnvelopes!).map(envelope => ({ key: envelope._id, text: envelope.name }))
-        );
+        ];
+
+        if (this.props.userEnvelopes && this.props.userEnvelopes.length > 0) {
+            this.dropDownChoices = this.dropDownChoices.concat(
+                { key: 'myEnvelopesHeader', text: 'My Envelopes', itemType: DropdownMenuItemType.Header },
+                this.props.userEnvelopes.map(envelope => ({ key: envelope._id, text: envelope.name, data: { icon: 'Mail' } }))
+            )
+        }
+        
+        if (this.props.paymentEnvelopes && this.props.paymentEnvelopes.length > 0) {
+            this.dropDownChoices = this.dropDownChoices.concat(
+                { key: 'paymentEnvelopesHeader', text: 'Payment Envelopes', itemType: DropdownMenuItemType.Header },
+                this.props.paymentEnvelopes.map(envelope => ({ key: envelope._id, text: envelope.name, data: { icon: 'PaymentCard' } }))
+            );
+        }
     }
 
     render() {
-        return <>
+        return <form onSubmit={e => this.onSubmit(e)}>
             <Dropdown
                 label="Move From"
                 selectedKey={this.state.fromId}
                 onChange={(e, option?) => this.setState({ fromId: option?.key as string })}
                 placeholder="Take money from..."
                 options={this.dropDownChoices}
+                onRenderOption={onRenderOption}
             />
             <Dropdown
                 label="Move To"
@@ -60,6 +82,7 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 onChange={(e, option?) => this.setState({ toId: option?.key as string })}
                 placeholder="Add money to..."
                 options={this.dropDownChoices}
+                onRenderOption={onRenderOption}
             />
             <TextField
                 label="Amount"
@@ -68,7 +91,14 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 errorMessage={(isBlank(this.state.amount) || isValidCurrencyString(this.state.amount)) ? '' : 'Hmm, that doesn\'t look like a number.'}
                 onChange={(e, amount?) => this.setState({ amount })}
             />
-        </>;
+            <p style={({ textAlign: 'right' })}>
+                <PrimaryButton type="submit" text="Move" />
+            </p>
+        </form>;
+    }
+
+    onSubmit(e: React.FormEvent<HTMLFormElement>): void {
+        e.preventDefault();
     }
 }
 
