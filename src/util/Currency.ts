@@ -31,6 +31,10 @@ export class Currency {
         return this.wholeAmount < 0 || this.fractionalAmount < 0;
     }
 
+    isPositive() {
+        return !this.isNegative();
+    }
+
     or(other: Currency) {
         return this.isValid() ? this : other;
     }

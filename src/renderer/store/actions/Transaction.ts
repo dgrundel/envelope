@@ -28,9 +28,7 @@ export const addLinkedTransaction = (transaction: TransactionData, linkTo: Trans
             return dispatch(applyTransactionToAccount(created));
         })
         .then(() => database.getAllTransactions())
-        .then(transactions => {
-            dispatch(loadTransactions(transactions));
-        });
+        .then(transactions => dispatch(loadTransactions(transactions)));
 };
 
 export const insertTransactions = (transactionData: TransactionData[]) => (dispatch: any) => {
@@ -40,7 +38,5 @@ export const insertTransactions = (transactionData: TransactionData[]) => (dispa
             return dispatch(applyTransactionsToAccount(inserted));
         })
         .then(() => database.getAllTransactions())
-        .then(transactions => {
-            dispatch(loadTransactions(transactions));
-        });
+        .then(transactions => dispatch(loadTransactions(transactions)));
 };

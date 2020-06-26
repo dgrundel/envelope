@@ -77,7 +77,7 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
         
         const balance = existingLinks.reduce(
             (bal: Currency, link: Transaction) => {
-                Log.debug('link', link);
+                // Log.debug('link', link);
                 // subtract linked amounts to see if it zeros out
                 return bal.sub(link.amount);
             },

@@ -344,7 +344,7 @@ class Component extends React.Component<ImportWizardProps, ImportWizardState> {
             invertTransactions: false,
             accounts: props.accounts || [],
             accountMap: props.accountMap || {},
-            insertTransactions: props.insertTransactions as any
+            insertTransactions: props.insertTransactions!
         };
     }
 

@@ -1,10 +1,11 @@
 import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
-import { TransactionData } from '@/models/Transaction';
+import { Transaction } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { isBlank } from '@/util/Filters';
 import { Account, AccountData, AccountType, isBankAccountType } from '@models/Account';
 import { CombinedState } from '../store';
 import { Log } from '@/util/Logger';
+import { addLinkedTransaction } from './Transaction';
 
 const database = new AccountDataStoreClient();
 
@@ -47,9 +48,7 @@ export const createEnvelope = (name: string) => (dispatch: any) => {
 
     return database.addAccount(accountData)
         .then(() => database.getAllAccounts())
-        .then(accounts => {
-            dispatch(loadAccounts(accounts));
-        });
+        .then(accounts =>  dispatch(loadAccounts(accounts)));
 };
 
 export const createBankAccount = (name: string, type: AccountType, balance: Currency) => (dispatch: any) => {
@@ -72,39 +71,36 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
     
     return database.addAccount(accountData)
         .then(() => database.getAllAccounts())
-        .then(accounts => {
-            dispatch(loadAccounts(accounts));
-        });
+        .then(accounts => dispatch(loadAccounts(accounts)));
 }
 
-export const applyTransactionToAccount = (transaction: TransactionData) => (dispatch: any) => {
+export const applyTransactionToAccount = (transaction: Transaction) => (dispatch: any) => {
     return applyTransactionsToAccount([transaction]);
 };
 
-export const applyTransactionsToAccount = (transactions: TransactionData[]) => (dispatch: any, getState: () => CombinedState) => {
-    
-    const next = (i: number): Promise<void> => {
+export const applyTransactionsToAccount = (transactions: Transaction[]) => (dispatch: any, getState: () => CombinedState) => {
+
+    const next = (transactions: Transaction[], i: number): Promise<void> => {
         if (i >= transactions.length) {
             return Promise.resolve();
         }
 
         const transaction = transactions[i];
-        const account = getState().accounts.accounts[transaction.accountId];
+        const accountsState = getState().accounts;
+        const account = accountsState.accounts[transaction.accountId];
         const newBalance = account.balance.add(transaction.amount);
-
+        
         Log.debug(
             'applyTransactionsToAccount', 
-            `transaction: ${transaction.description}`,
-            `account: ${account.name}`,
-            `starting balance: ${account.balance.toString()}`,
-            `transaction amount: ${transaction.amount.toString()}`,
+            'transaction:', transaction,
+            'account:', account,
             `updated balance: ${newBalance.toString()}`,
         );
 
         return database.updateAccountBalance(account._id, newBalance)
-            .then(account => dispatch(updateAccount(account)))
-            .then(() => next(i + 1));
+            .then(updated => dispatch(updateAccount(updated)))
+            .then(() => next(transactions, i + 1));
     };
     
-    return next(0);
+    return next(transactions, 0);
 };
