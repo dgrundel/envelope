@@ -6,7 +6,7 @@ https://en.wikipedia.org/wiki/Envelope_system
 
 ## Data Flows
 
-### Transaction Import
+![account create sequence](docs/account-create.png)
 
 ![transaction import sequence](docs/transaction-import.png)
 
