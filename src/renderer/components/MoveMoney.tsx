@@ -7,6 +7,8 @@ import { isValidCurrencyString, isBlank, filterOnlyAccountType } from '@/util/Fi
 import { Account, AccountType } from '@/models/Account';
 
 export interface MoveMoneyProps {
+    showFrom?: boolean;
+    showTo?: boolean;
     fromId?: string;
     toId?: string;
     amount?: Currency;
@@ -46,6 +48,13 @@ class Component extends React.Component<MoveMoneyProps, State> {
             amount: props.amount?.toString()
         };
 
+        if (props.showFrom === false && !props.fromId) {
+            throw new Error('Cannot set showFrom false without a fromId');
+        }
+        if (props.showTo === false && !props.toId) {
+            throw new Error('Cannot set showTo false without a toId');
+        }
+
         this.dropDownChoices = [
             { key: (this.props.unallocatedAccount!)._id, text: (this.props.unallocatedAccount!).name.trim(), data: { icon: 'Money' } },
             { key: 'divider_1', text: '-', itemType: DropdownMenuItemType.Divider },
@@ -68,22 +77,22 @@ class Component extends React.Component<MoveMoneyProps, State> {
 
     render() {
         return <form onSubmit={e => this.onSubmit(e)}>
-            <Dropdown
+            {this.props.showFrom !== false && <Dropdown
                 label="Move From"
                 selectedKey={this.state.fromId}
                 onChange={(e, option?) => this.setState({ fromId: option?.key as string })}
                 placeholder="Take money from..."
                 options={this.dropDownChoices}
                 onRenderOption={onRenderOption}
-            />
-            <Dropdown
+            />}
+            {this.props.showTo !== false && <Dropdown
                 label="Move To"
                 selectedKey={this.state.toId}
                 onChange={(e, option?) => this.setState({ toId: option?.key as string })}
-                placeholder="Add money to..."
+                placeholder="Move money to..."
                 options={this.dropDownChoices}
                 onRenderOption={onRenderOption}
-            />
+            />}
             <TextField
                 label="Amount"
                 prefix={CURRENCY_SYMBOL}

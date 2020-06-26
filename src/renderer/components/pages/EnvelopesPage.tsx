@@ -37,7 +37,7 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
                 <Box heading="Available">
                     <p><Text variant={'xxLarge'}>{this.props.unallocatedAccount?.balance.toFormattedString()}</Text></p>
 
-                    <MoveMoney/>
+                    <MoveMoney fromId={this.props.unallocatedAccount?._id} showFrom={false}/>
                 </Box>
             </Layout>
             
