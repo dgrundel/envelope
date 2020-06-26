@@ -38,7 +38,7 @@ export class TransactionDataStoreClient extends DataStoreClient<TransactionData,
                     }
                 })
                 .then(() => this.getTransactionById(linkTo._id))
-                .then(updated => [created, updated]);
+                .then((updated: Transaction) => [created, updated]);
             });
     }
 

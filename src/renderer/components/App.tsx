@@ -77,38 +77,14 @@ class Component extends React.Component<AppProps, AppState> implements ModalApi,
         const loadTransactions = this.props.loadTransactions!;
 
         const accountsDataStore = new AccountDataStoreClient();
-        const accountsPromise = accountsDataStore.getAllAccounts()
-            .then(accounts => {
-                const unallocatedAccountExists = accounts.some(filterOnlyAccountType(AccountType.Unallocated));
-                if (unallocatedAccountExists) {
-                    return accounts;
-                } else {
-                    Log.debug('No unallocated account exists. Creating.');
-
-                    // leading slashes in name are a dumb 
-                    // performance optimization, as we expect:
-                    // - returned records to be sorted by name
-                    // - `find` to search in order
-                    const accountData: AccountData = {
-                        name: '__Unallocated',
-                        type: AccountType.Unallocated,
-                        balance: Currency.ZERO,
-                        linkedAccountIds: []
-                    };
-                    return accountsDataStore.addAccount(accountData)
-                        .then(created => {
-                            Log.debug('Created "unallocated" account', created);
-                            return accountsDataStore.getAllAccounts()
-                        });
-                }
-            })
-            .then(accounts => loadAccounts(accounts));
-        const transactionsPromise = new TransactionDataStoreClient().getAllTransactions()
-            .then(transactions => loadTransactions(transactions));
+        const transactionsDataStore = new TransactionDataStoreClient();
         
         Promise.all([
-            accountsPromise,
-            transactionsPromise
+            accountsDataStore.getOrCreateUnallocatedAccount()
+                .then(() => accountsDataStore.getAllAccounts())
+                .then(accounts => loadAccounts(accounts)),
+            transactionsDataStore.getAllTransactions()
+                .then(transactions => loadTransactions(transactions))
         ]).then(() => this.setState({ ready: true }));
     }
 

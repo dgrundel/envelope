@@ -221,9 +221,9 @@ export abstract class DataStoreClient<D, R extends D> extends BaseDataStore<D, R
             .then((items: R[]) => items.map(item => this.convertFields(item)));
     }
 
-    protected findOne(query: any = {}): Promise<R> {
+    protected findOne(query: any = {}): Promise<R | null> {
         return this.invoke(DataStoreEvent.FindOne, query)
-            .then((item: R) => this.convertFields(item));
+            .then((item: R | null) => item ? this.convertFields(item) : null);
     }
 
     onChange(callback: (change: DataStoreChange) => void) {
