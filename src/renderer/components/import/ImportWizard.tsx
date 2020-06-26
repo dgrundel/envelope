@@ -1,4 +1,4 @@
-import { Transaction, TransactionData } from '@/models/Transaction';
+import { Transaction, TransactionData, TransactionType } from '@/models/Transaction';
 import { getAppContext } from '@/renderer/AppContext';
 import { insertTransactions } from '@/renderer/store/actions/Transaction';
 import { CombinedState } from '@/renderer/store/store';
@@ -58,6 +58,7 @@ const convertToTransactions = (rows: Row[], invert: boolean, dateColumn: string,
             .join(' ');
 
         return {
+            type: TransactionType.Imported,
             accountId,
             date,
             amount,

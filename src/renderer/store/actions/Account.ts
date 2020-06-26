@@ -1,5 +1,5 @@
 import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
-import { Transaction } from '@/models/Transaction';
+import { Transaction, TransactionType } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { isBlank } from '@/util/Filters';
 import { Account, AccountData, AccountType, isBankAccountType, isDepositAccountType } from '@models/Account';
@@ -130,7 +130,7 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
                  * Positive transactions on Checking and Savings accounts
                  * go directly to the unallocated envelope to be distributed later.
                  */
-                if (isDepositAccountType(account.type)) {
+                if (transaction.type !== TransactionType.Transfer && isDepositAccountType(account.type)) {
                     if (transaction.amount.isPositive()) {
                         const unallocatedId = getState().accounts.unallocatedId;
                         if (!unallocatedId) {
@@ -139,6 +139,7 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
                         }
                         
                         return dispatch(addLinkedTransaction({
+                            type: transaction.type,
                             accountId: unallocatedId!,
                             date: new Date(),
                             description: `Inflow from account ${account._id} (${account.name})`,

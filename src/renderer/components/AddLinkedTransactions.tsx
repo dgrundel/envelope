@@ -1,4 +1,4 @@
-import { Transaction, TransactionData } from '@/models/Transaction';
+import { Transaction, TransactionData, TransactionType } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { Log } from '@/util/Logger';
 import { Dropdown, MessageBar, MessageBarType, PrimaryButton, TextField } from '@fluentui/react';

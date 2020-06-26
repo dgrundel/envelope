@@ -10,6 +10,8 @@ https://en.wikipedia.org/wiki/Envelope_system
 
 ![transaction import sequence](docs/transaction-import.png)
 
+![funds transfer sequence](docs/funds-transfer.png)
+
 ## Run/Build
 
 _Note:_ This project is based on [**electron-react-typescript-webpack-boilerplate**](https://github.com/Devtography/electron-react-typescript-webpack-boilerplate), so much of the 

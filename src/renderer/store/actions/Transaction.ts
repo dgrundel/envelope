@@ -1,7 +1,10 @@
 import { TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
 import { Log } from '@/util/Logger';
-import { Transaction, TransactionData } from '@models/Transaction';
+import { Transaction, TransactionData, TransactionType } from '@models/Transaction';
+import { Account } from '@models/Account';
 import { applyTransactionsToAccount, applyTransactionToAccount } from './Account';
+import { Currency } from '@/util/Currency';
+import { transactions } from '../reducers/Transactions';
 
 const database = new TransactionDataStoreClient();
 
@@ -39,4 +42,38 @@ export const insertTransactions = (transactionData: TransactionData[]) => (dispa
         })
         .then(() => database.getAllTransactions())
         .then(transactions => dispatch(loadTransactions(transactions)));
+};
+
+export const transferFunds = (amount: Currency, fromAccount: Account, toAccount: Account) => (dispatch: any) => {
+    const type = TransactionType.Transfer;
+    const date = new Date();
+    const description = `Transfer from "${fromAccount.name}" to "${toAccount.name}"`;
+    
+    const fromTransaction: TransactionData = {
+        accountId: fromAccount._id,
+        type,
+        date,
+        description,
+        amount: amount.getInverse(),
+        linkedTransactionIds: []
+    };
+
+    return database.addTransaction(fromTransaction)
+        .then(inserted => {
+            Log.debug('addTransaction (fromTransaction)', inserted);
+            return dispatch(applyTransactionToAccount(inserted))
+                .then(() => {
+
+                    const toTransaction: TransactionData = {
+                        accountId: toAccount._id,
+                        type,
+                        date,
+                        description,
+                        amount,
+                        linkedTransactionIds: [inserted._id]
+                    };
+
+                    return dispatch(addLinkedTransaction(toTransaction, inserted));
+                });
+        });
 };
