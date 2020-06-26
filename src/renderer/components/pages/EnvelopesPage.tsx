@@ -9,6 +9,7 @@ import { EnvelopeCreate } from '../EnvelopeCreate';
 import { filterOnlyAccountType } from '@/util/Filters';
 import { Text } from '@fluentui/react';
 import { Layout } from '../Layout';
+import { MoveMoney } from '../MoveMoney';
 
 export interface EnvelopesPageProps {
     userEnvelopes?: Account[];
@@ -35,6 +36,8 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
                 </Box>
                 <Box heading="Available">
                     <p><Text variant={'xxLarge'}>{this.props.unallocatedAccount?.balance.toFormattedString()}</Text></p>
+
+                    <MoveMoney/>
                 </Box>
             </Layout>
             

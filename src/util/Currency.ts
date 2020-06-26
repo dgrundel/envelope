@@ -4,6 +4,7 @@ const PRECISION_DIGITS = 3; // thousandths
 const PRECISION = Math.pow(10, PRECISION_DIGITS);
 const CENTS_PRECISION = 100;
 
+export const CURRENCY_SYMBOL = '$';
 const NEGATIVE_SYMBOL = '-';
 const THOUSANDS_SEPARATOR = ',';
 const DECIMAL_SEPARATOR = '.';
@@ -99,7 +100,7 @@ export class Currency {
         const cents = Math.round(Math.abs(this.fractionalAmount) / centsDivisor).toFixed(0);
         const formattedCents = leftPad(cents, 2, '0');        
 
-        return `${sign}$${formattedWhole}${DECIMAL_SEPARATOR}${formattedCents}`;
+        return `${sign}${CURRENCY_SYMBOL}${formattedWhole}${DECIMAL_SEPARATOR}${formattedCents}`;
     }
 
     toString() {
