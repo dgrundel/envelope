@@ -7,7 +7,7 @@ import { Box } from '../Box';
 import { DataTable } from '../DataTable';
 import { EnvelopeCreate } from '../EnvelopeCreate';
 import { filterOnlyAccountType } from '@/util/Filters';
-import { Stack } from '@fluentui/react';
+import { Text } from '@fluentui/react';
 import { Layout } from '../Layout';
 
 export interface EnvelopesPageProps {
@@ -34,7 +34,7 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
                     <EnvelopeCreate/>
                 </Box>
                 <Box heading="Available">
-                    {this.props.unallocatedAccount?.balance.toFormattedString()}
+                    <p><Text variant={'xxLarge'}>{this.props.unallocatedAccount?.balance.toFormattedString()}</Text></p>
                 </Box>
             </Layout>
             
@@ -49,20 +49,11 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
             return null;
         }
 
-        return <Box heading="My Envelopes">
-            <DataTable<Account>
-                rows={envelopes}
-                fields={[{
-                    name: 'name',
-                    label: 'Envelope Name'
-                },{
-                    name: 'balance',
-                    label: 'Available',
-                    formatter: (value: Currency) => value.toFormattedString()
-                }]}
-                keyField={'_id'}
-            />
-        </Box>;
+        return <Layout cols={4}>
+            {envelopes.map(envelope => <Box key={envelope._id} heading={envelope.name}>
+                <p><Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text></p>
+            </Box>)}
+        </Layout>
     }
 
     renderCreditCardEnvelopes() {
