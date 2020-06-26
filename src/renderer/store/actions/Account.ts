@@ -2,10 +2,10 @@ import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { Transaction } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { isBlank } from '@/util/Filters';
-import { Account, AccountData, AccountType, isBankAccountType } from '@models/Account';
+import { Account, AccountData, AccountType, isBankAccountType, isDepositAccountType } from '@models/Account';
 import { CombinedState } from '../store';
 import { Log } from '@/util/Logger';
-import { addLinkedTransaction } from './Transaction';
+import { addLinkedTransaction, insertTransactions } from './Transaction';
 
 const database = new AccountDataStoreClient();
 
@@ -51,7 +51,7 @@ export const createEnvelope = (name: string) => (dispatch: any) => {
         .then(accounts =>  dispatch(loadAccounts(accounts)));
 };
 
-export const createBankAccount = (name: string, type: AccountType, balance: Currency) => (dispatch: any) => {
+export const createBankAccount = (name: string, type: AccountType, balance: Currency) => (dispatch: any, getState: () => CombinedState) => {
     if (isBlank(name)) {
         throw new Error('Name cannot be blank.');
     }
@@ -70,8 +70,33 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
     };
     
     return database.addAccount(accountData)
-        .then(() => database.getAllAccounts())
-        .then(accounts => dispatch(loadAccounts(accounts)));
+        .then(created => {
+            return database.getAllAccounts()
+            .then(accounts => dispatch(loadAccounts(accounts)))
+            .then(() => {
+                const createdAccount = created[0];
+                
+                /**
+                 * When adding a new deposit account, the funds (or lack thereof) 
+                 * should be applied to the "unallocated" (i.e. ready-to-budget) budget.
+                 */
+                if (createdAccount && isDepositAccountType(createdAccount.type)) {
+                    const unallocatedId = getState().accounts.unallocatedId;
+                    if (!unallocatedId) {
+                        Log.error('No unallocated account exists');
+                        return;
+                    }
+                    
+                    return dispatch(insertTransactions([{
+                        accountId: unallocatedId!,
+                        date: new Date(),
+                        description: `Initial balance from account ${createdAccount._id} (${createdAccount.name})`,
+                        amount: createdAccount.balance,
+                        linkedTransactionIds: []
+                    }]));
+                }
+            });
+        });
 }
 
 export const applyTransactionToAccount = (transaction: Transaction) => (dispatch: any) => {
@@ -105,7 +130,7 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
                  * Positive transactions on Checking and Savings accounts
                  * go directly to the unallocated envelope to be distributed later.
                  */
-                if (account.type === AccountType.Checking || account.type === AccountType.Savings) {
+                if (isDepositAccountType(account.type)) {
                     if (transaction.amount.isPositive()) {
                         const unallocatedId = getState().accounts.unallocatedId;
                         if (!unallocatedId) {
@@ -117,7 +142,7 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
                             accountId: unallocatedId!,
                             date: new Date(),
                             description: `Inflow from account ${account._id} (${account.name})`,
-                            amount: transaction.amount.clone(),
+                            amount: transaction.amount,
                             linkedTransactionIds: [transaction._id]
                         }, transaction));
                     }

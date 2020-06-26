@@ -26,13 +26,13 @@ export class Currency {
     isZero() {
         return this.toPrecisionInt() === 0;
     }
-
+    
     isNegative() {
-        return this.wholeAmount < 0 || this.fractionalAmount < 0;
+        return (this.wholeAmount < 0 || this.fractionalAmount < 0);
     }
 
     isPositive() {
-        return !this.isNegative();
+        return !(this.isNegative() || this.isZero());
     }
 
     or(other: Currency) {
