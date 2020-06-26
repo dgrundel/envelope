@@ -1,0 +1,11 @@
+@import '../config.scss';
+
+.layout-component {
+    display: grid;
+    gap: $fat-margin;
+    margin: $fat-margin;
+    
+    > * {
+        margin: 0;
+    }
+}

@@ -8,6 +8,7 @@ import { DataTable } from '../DataTable';
 import { EnvelopeCreate } from '../EnvelopeCreate';
 import { filterOnlyAccountType } from '@/util/Filters';
 import { Stack } from '@fluentui/react';
+import { Layout } from '../Layout';
 
 export interface EnvelopesPageProps {
     userEnvelopes?: Account[];
@@ -28,18 +29,14 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
     
     render() {
         return <>
-            <Stack horizontal>
-                <Stack.Item grow>
-                    <Box heading="Create an Envelope">
-                        <EnvelopeCreate/>
-                    </Box>        
-                </Stack.Item>
-                <Stack.Item grow verticalFill={true}>
-                    <Box heading="Available">
-                        {this.props.unallocatedAccount?.balance.toFormattedString()}
-                    </Box>
-                </Stack.Item>
-            </Stack>
+            <Layout cols={2}>
+                <Box heading="Create an Envelope">
+                    <EnvelopeCreate/>
+                </Box>
+                <Box heading="Available">
+                    {this.props.unallocatedAccount?.balance.toFormattedString()}
+                </Box>
+            </Layout>
             
             {this.renderCreditCardEnvelopes()}
             {this.renderUserEnvelopes()}

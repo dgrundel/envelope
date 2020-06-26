@@ -3,8 +3,8 @@
 
 .box {
   background-color: $color-white;
-  margin: 1.5rem;
-  padding: 1rem;
+  margin: $fat-margin;
+  padding: $fat-padding;
   overflow-x: auto;
   @include rounded();
   @include shadow();
@@ -12,7 +12,7 @@
 
 .box-heading {
   font-weight: 400;
-  margin: 0 -1rem 1rem;
-  padding: 0 1rem 1rem;
+  margin: 0 (-$fat-padding) $fat-padding;
+  padding: 0 $fat-padding $fat-padding;
   border-bottom: $border-width solid $color-lt-gray;
 }
