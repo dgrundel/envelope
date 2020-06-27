@@ -41,45 +41,24 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
                 </Box>
             </Layout>
             
-            {this.renderCreditCardEnvelopes()}
-            {this.renderUserEnvelopes()}
+            <Layout cols={3}>
+                {this.renderCreditCardEnvelopes()}
+                {this.renderUserEnvelopes()}
+            </Layout>
+            
         </>;
-    }
-    renderUserEnvelopes() {
-        const envelopes = this.props.userEnvelopes || [];
-
-        if (envelopes.length === 0) {
-            return null;
-        }
-
-        return <Layout cols={4}>
-            {envelopes.map(envelope => <Box key={envelope._id} heading={envelope.name}>
-                <p><Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text></p>
-            </Box>)}
-        </Layout>
     }
 
     renderCreditCardEnvelopes() {
-        const envelopes = this.props.creditCardEnvelopes || [];
-
-        if (envelopes.length === 0) {
-            return null;
-        }
-        
-        return <Box heading="My Credit Card Payments">
-            <DataTable<Account>
-                rows={envelopes}
-                fields={[{
-                    name: 'name',
-                    label: 'Envelope Name'
-                },{
-                    name: 'balance',
-                    label: 'Available',
-                    formatter: (value: Currency) => value.toFormattedString()
-                }]}
-                keyField={'_id'}
-            />
-        </Box>
+        return this.props.creditCardEnvelopes!.map(envelope => <Box key={envelope._id} heading={envelope.name}>
+            <p><Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text></p>
+        </Box>);
+    }
+    
+    renderUserEnvelopes() {
+        return this.props.userEnvelopes!.map(envelope => <Box key={envelope._id} heading={envelope.name}>
+            <p><Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text></p>
+        </Box>)
     }
 }
 
