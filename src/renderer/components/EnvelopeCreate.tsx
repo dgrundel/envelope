@@ -34,8 +34,7 @@ class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState
     render() {
         return <form onSubmit={e => this.onSubmit(e)}>
             <TextField
-                name="name"
-                label="Account Name"
+                label="Name"
                 value={this.state.values.name || ''}
                 errorMessage={this.state.errors.name}
                 onChange={(e, value?) => this.validator.setValue('name', value)}
