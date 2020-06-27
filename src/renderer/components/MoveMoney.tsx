@@ -1,11 +1,12 @@
-import * as React from "react";
-import { CombinedState } from '../store/store';
-import { connect } from 'react-redux';
-import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
-import { Text, TextField, Dropdown, IDropdownOption, DropdownMenuItemType, PrimaryButton, Icon, mergeStyles, MessageBar, MessageBarType } from '@fluentui/react';
-import { isValidCurrencyString, isBlank, filterOnlyAccountType } from '@/util/Filters';
 import { Account, AccountType } from '@/models/Account';
+import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
+import { filterOnlyAccountType, isValidCurrencyString } from '@/util/Filters';
 import { Log } from "@/util/Logger";
+import { Dropdown, DropdownMenuItemType, Icon, IDropdownOption, mergeStyles, MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';
+import memoizeOne from 'memoize-one';
+import * as React from "react";
+import { connect } from 'react-redux';
+import { CombinedState } from '../store/store';
 
 export interface MoveMoneyProps {
     showFrom?: boolean;
@@ -41,21 +42,10 @@ const onRenderOption = (option: IDropdownOption): JSX.Element => {
 };
 
 class Component extends React.Component<MoveMoneyProps, State> {
-    private dropDownChoices: IDropdownOption[];
-    private readonly initialState: State;
-
+    
     constructor(props: MoveMoneyProps) {
         super(props);
         
-        this.initialState = {
-            fromId: this.props.fromId,
-            toId: this.props.toId,
-            amount: props.amount?.toString(),
-            messages: undefined,
-        };
-        
-        this.state = this.initialState;
-
         if (props.showFrom === false && !props.fromId) {
             throw new Error('Cannot set showFrom false without a fromId');
         }
@@ -63,27 +53,22 @@ class Component extends React.Component<MoveMoneyProps, State> {
             throw new Error('Cannot set showTo false without a toId');
         }
 
-        this.dropDownChoices = [
-            { key: (this.props.unallocatedAccount!)._id, text: (this.props.unallocatedAccount!).name.trim(), data: { icon: 'Money' } },
-            { key: 'divider_1', text: '-', itemType: DropdownMenuItemType.Divider },
-        ];
-
-        if (this.props.userEnvelopes && this.props.userEnvelopes.length > 0) {
-            this.dropDownChoices = this.dropDownChoices.concat(
-                { key: 'myEnvelopesHeader', text: 'My Envelopes', itemType: DropdownMenuItemType.Header },
-                this.props.userEnvelopes.map(envelope => ({ key: envelope._id, text: envelope.name, data: { icon: 'Mail' } }))
-            )
-        }
-        
-        if (this.props.paymentEnvelopes && this.props.paymentEnvelopes.length > 0) {
-            this.dropDownChoices = this.dropDownChoices.concat(
-                { key: 'paymentEnvelopesHeader', text: 'Payment Envelopes', itemType: DropdownMenuItemType.Header },
-                this.props.paymentEnvelopes.map(envelope => ({ key: envelope._id, text: envelope.name, data: { icon: 'PaymentCard' } }))
-            );
-        }
+        this.computeDropdownChoices = memoizeOne(this.computeDropdownChoices.bind(this));
+        this.state = {
+            fromId: this.props.fromId,
+            toId: this.props.toId,
+            amount: this.props.amount?.toString(),
+            messages: undefined,
+        };
     }
 
     render() {
+        const dropdownChoices = this.computeDropdownChoices(
+            this.props.unallocatedAccount!,
+            this.props.userEnvelopes,
+            this.props.paymentEnvelopes
+        );
+
         return <form onSubmit={e => this.onSubmit(e)}>
             {this.state.messages}
             {this.props.showFrom !== false && <Dropdown
@@ -91,7 +76,7 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 selectedKey={this.state.fromId}
                 onChange={(e, option?) => this.setState({ fromId: option?.key as string })}
                 placeholder="Take money from..."
-                options={this.dropDownChoices}
+                options={dropdownChoices}
                 onRenderOption={onRenderOption}
             />}
             {this.props.showTo !== false && <Dropdown
@@ -99,7 +84,7 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 selectedKey={this.state.toId}
                 onChange={(e, option?) => this.setState({ toId: option?.key as string })}
                 placeholder="Move money to..."
-                options={this.dropDownChoices}
+                options={dropdownChoices}
                 onRenderOption={onRenderOption}
             />}
             <TextField
@@ -114,6 +99,29 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 <PrimaryButton type="submit" text="Move" />
             </p>
         </form>;
+    }
+
+    computeDropdownChoices(unallocatedAccount: Account, userEnvelopes?: Account[], paymentEnvelopes?: Account[]) {
+        let dropdownChoices = [
+            { key: unallocatedAccount._id, text: unallocatedAccount.name.trim(), data: { icon: 'Money' } },
+            { key: 'divider_1', text: '-', itemType: DropdownMenuItemType.Divider },
+        ];
+
+        if (userEnvelopes && userEnvelopes.length > 0) {
+            dropdownChoices = dropdownChoices.concat(
+                { key: 'myEnvelopesHeader', text: 'My Envelopes', itemType: DropdownMenuItemType.Header },
+                userEnvelopes.map(envelope => ({ key: envelope._id, text: envelope.name, data: { icon: 'Mail' } }))
+            )
+        }
+        
+        if (paymentEnvelopes && paymentEnvelopes.length > 0) {
+            dropdownChoices = dropdownChoices.concat(
+                { key: 'paymentEnvelopesHeader', text: 'Payment Envelopes', itemType: DropdownMenuItemType.Header },
+                paymentEnvelopes.map(envelope => ({ key: envelope._id, text: envelope.name, data: { icon: 'PaymentCard' } }))
+            );
+        }
+
+        return dropdownChoices;
     }
 
     getAmountErrorMessage(value?: string): string {
@@ -154,18 +162,21 @@ class Component extends React.Component<MoveMoneyProps, State> {
             return;
         }
 
+        // clear messages
+        this.setState({
+            messages: []
+        });
+
         // do the transfer
         const amount = Currency.parse(this.state.amount!);
         Log.debug('Transfer funds from', fromAccount, 'to', toAccount, amount)
-
-        // reset the form
-        this.setState(this.initialState);
     }
 }
 
 const mapStateToProps = (state: CombinedState, ownProps: MoveMoneyProps): MoveMoneyProps => {
     const allAccounts = state.accounts.sortedIds.map(id => state.accounts.accounts[id]);
     const unallocatedId = state.accounts.unallocatedId;
+
     return {
         ...ownProps,
         accounts: state.accounts.accounts,
