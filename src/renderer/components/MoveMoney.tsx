@@ -7,6 +7,7 @@ import memoizeOne from 'memoize-one';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { CombinedState } from '../store/store';
+import { transferFunds } from '../store/actions/Transaction';
 
 export interface MoveMoneyProps {
     showFrom?: boolean;
@@ -19,6 +20,9 @@ export interface MoveMoneyProps {
     unallocatedAccount?: Account;
     paymentEnvelopes?: Account[];
     userEnvelopes?: Account[];
+
+    //store actions
+    transferFunds?: (amount: Currency, fromAccount: Account, toAccount: Account) => Promise<void>;
 }
 
 interface State {
@@ -169,7 +173,11 @@ class Component extends React.Component<MoveMoneyProps, State> {
 
         // do the transfer
         const amount = Currency.parse(this.state.amount!);
-        Log.debug('Transfer funds from', fromAccount, 'to', toAccount, amount)
+        Log.debug('Transferring funds from', fromAccount, 'to', toAccount, amount);
+
+        this.props.transferFunds!(amount, fromAccount, toAccount).then(() => {
+            Log.debug('Transfer complete.');
+        });
     }
 }
 
@@ -186,4 +194,4 @@ const mapStateToProps = (state: CombinedState, ownProps: MoveMoneyProps): MoveMo
     };
 }
 
-export const MoveMoney = connect(mapStateToProps, {})(Component);
+export const MoveMoney = connect(mapStateToProps, { transferFunds })(Component);
