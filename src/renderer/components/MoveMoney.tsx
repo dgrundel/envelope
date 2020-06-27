@@ -2,9 +2,10 @@ import * as React from "react";
 import { CombinedState } from '../store/store';
 import { connect } from 'react-redux';
 import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
-import { TextField, Dropdown, IDropdownOption, DropdownMenuItemType, PrimaryButton, Icon, mergeStyles } from '@fluentui/react';
+import { Text, TextField, Dropdown, IDropdownOption, DropdownMenuItemType, PrimaryButton, Icon, mergeStyles, MessageBar, MessageBarType } from '@fluentui/react';
 import { isValidCurrencyString, isBlank, filterOnlyAccountType } from '@/util/Filters';
 import { Account, AccountType } from '@/models/Account';
+import { Log } from "@/util/Logger";
 
 export interface MoveMoneyProps {
     showFrom?: boolean;
@@ -23,6 +24,7 @@ interface State {
     fromId?: string;
     toId?: string;
     amount?: string;
+    messages?: any;
 }
 
 const iconStyle = mergeStyles({
@@ -40,13 +42,19 @@ const onRenderOption = (option: IDropdownOption): JSX.Element => {
 
 class Component extends React.Component<MoveMoneyProps, State> {
     private dropDownChoices: IDropdownOption[];
+    private readonly initialState: State;
 
     constructor(props: MoveMoneyProps) {
         super(props);
-        this.state = {
-            ...props,
-            amount: props.amount?.toString()
+        
+        this.initialState = {
+            fromId: this.props.fromId,
+            toId: this.props.toId,
+            amount: props.amount?.toString(),
+            messages: undefined,
         };
+        
+        this.state = this.initialState;
 
         if (props.showFrom === false && !props.fromId) {
             throw new Error('Cannot set showFrom false without a fromId');
@@ -77,6 +85,7 @@ class Component extends React.Component<MoveMoneyProps, State> {
 
     render() {
         return <form onSubmit={e => this.onSubmit(e)}>
+            {this.state.messages}
             {this.props.showFrom !== false && <Dropdown
                 label="Move From"
                 selectedKey={this.state.fromId}
@@ -97,8 +106,9 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 label="Amount"
                 prefix={CURRENCY_SYMBOL}
                 value={this.state.amount}
-                errorMessage={(isBlank(this.state.amount) || isValidCurrencyString(this.state.amount)) ? '' : 'Hmm, that doesn\'t look like a number.'}
+                onGetErrorMessage={this.getAmountErrorMessage}
                 onChange={(e, amount?) => this.setState({ amount })}
+                validateOnLoad={false}
             />
             <p style={({ textAlign: 'right' })}>
                 <PrimaryButton type="submit" text="Move" />
@@ -106,8 +116,50 @@ class Component extends React.Component<MoveMoneyProps, State> {
         </form>;
     }
 
+    getAmountErrorMessage(value?: string): string {
+        return isValidCurrencyString(value)
+            ? ''
+            : 'Hmm, that doesn\'t look like a number.';
+    }
+
     onSubmit(e: React.FormEvent<HTMLFormElement>): void {
         e.preventDefault();
+
+        const errors = [];
+        if(!isValidCurrencyString(this.state.amount)) {
+            errors.push('Please enter a valid amount.');
+        }
+        const fromId = (this.state.fromId!);
+        const fromAccount = this.props.accounts![fromId];
+        if (!fromAccount) {
+            errors.push('Please select an account to move from.');
+        }
+        const toId = (this.state.toId!);
+        const toAccount = this.props.accounts![toId];
+        if (!toAccount) {
+            errors.push('Please select an account to move to.');
+        }
+        
+        if ((fromAccount || toAccount) && fromId === toId) {
+            errors.push('Cannot transfer money to the same account.');
+        }
+
+        if (errors.length > 0) {
+            const messages = <MessageBar
+                messageBarType={MessageBarType.error}
+                isMultiline={true}
+            >{errors.map(s => <Text key={s} block>{s}</Text>)}</MessageBar>;
+
+            this.setState({ messages });
+            return;
+        }
+
+        // do the transfer
+        const amount = Currency.parse(this.state.amount!);
+        Log.debug('Transfer funds from', fromAccount, 'to', toAccount, amount)
+
+        // reset the form
+        this.setState(this.initialState);
     }
 }
 
