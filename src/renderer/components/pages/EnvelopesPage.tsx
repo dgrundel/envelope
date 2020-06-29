@@ -7,9 +7,11 @@ import { Box } from '../Box';
 import { DataTable } from '../DataTable';
 import { EnvelopeCreate } from '../EnvelopeCreate';
 import { filterOnlyAccountType } from '@/util/Filters';
-import { Text } from '@fluentui/react';
+import { Text, IconButton } from '@fluentui/react';
 import { Layout } from '../Layout';
 import { MoveMoney } from '../MoveMoney';
+import { BaseModal } from '../Modal';
+import { getAppContext } from '@/renderer/AppContext';
 
 export interface EnvelopesPageProps {
     userEnvelopes?: Account[];
@@ -42,23 +44,45 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
             </Layout>
             
             <Layout cols={3}>
-                {this.renderCreditCardEnvelopes()}
-                {this.renderUserEnvelopes()}
+                {this.props.creditCardEnvelopes!.map(e => this.renderEnvelope(e))}
+                {this.props.userEnvelopes!.map(e => this.renderEnvelope(e))}
             </Layout>
             
         </>;
     }
 
-    renderCreditCardEnvelopes() {
-        return this.props.creditCardEnvelopes!.map(envelope => <Box key={envelope._id} heading={envelope.name}>
+    renderEnvelope(envelope: Account) {
+        return <Box key={envelope._id} heading={envelope.name}>
             <p><Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text></p>
-        </Box>);
+            <p>
+                <IconButton iconProps={({ iconName: 'CalculatorAddition' })} title="Add" onClick={() => this.showAddMoneyModal(envelope)} />
+                <IconButton iconProps={({ iconName: 'CalculatorSubtract' })} title="Remove" onClick={() => this.showRemoveMoneyModal(envelope)} />
+            </p>
+        </Box>;
     }
-    
-    renderUserEnvelopes() {
-        return this.props.userEnvelopes!.map(envelope => <Box key={envelope._id} heading={envelope.name}>
-            <p><Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text></p>
-        </Box>)
+
+    showRemoveMoneyModal(envelope: Account) {
+        const dismiss = () => {
+            getAppContext().modalApi.dismissModal();
+        };
+
+        const modal = <BaseModal heading={`Remove money from ${envelope.name}`} closeButtonHandler={dismiss}>
+            <MoveMoney fromId={envelope._id} showFrom={false} onComplete={dismiss}/>
+        </BaseModal>;
+
+        getAppContext().modalApi.queueModal(modal);
+    }
+
+    showAddMoneyModal(envelope: Account) {
+        const dismiss = () => {
+            getAppContext().modalApi.dismissModal();
+        };
+
+        const modal = <BaseModal heading={`Add money to ${envelope.name}`} closeButtonHandler={dismiss}>
+            <MoveMoney toId={envelope._id} showTo={false} onComplete={dismiss}/>
+        </BaseModal>;
+
+        getAppContext().modalApi.queueModal(modal);
     }
 }
 

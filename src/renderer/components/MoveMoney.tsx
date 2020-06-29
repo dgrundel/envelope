@@ -15,6 +15,7 @@ export interface MoveMoneyProps {
     fromId?: string;
     toId?: string;
     amount?: Currency;
+    onComplete?: () => void;
 
     accounts?: Record<string, Account>;
     unallocatedAccount?: Account;
@@ -177,6 +178,7 @@ class Component extends React.Component<MoveMoneyProps, State> {
 
         this.props.transferFunds!(amount, fromAccount, toAccount).then(() => {
             Log.debug('Transfer complete.');
+            this.props.onComplete && this.props.onComplete();
         });
     }
 }
