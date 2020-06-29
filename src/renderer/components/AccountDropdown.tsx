@@ -11,6 +11,7 @@ export interface AccountDropdownProps {
     onChange: (e: React.FormEvent<HTMLDivElement>, selected?: IDropdownOption) => void;
     placeholder?: string;
     selectedKey?: string | number | string[] | number[];
+    filter?: (account: Account) => boolean;
     groupedAccounts?: GroupedAccounts;
 }
 
@@ -82,14 +83,16 @@ class Component extends React.Component<AccountDropdownProps, {}> {
     }
 }
 
-const groupAccounts = memoizeOne((sortedIds: string[], accounts: Record<string, Account>): GroupedAccounts => {
+const groupAccounts = memoizeOne((sortedIds: string[], accounts: Record<string, Account>, filter?: (account: Account) => boolean): GroupedAccounts => {
     return sortedIds.reduce(
         (grouped: GroupedAccounts, id: string) => {
             const account = accounts[id];
-            if (!grouped[account.type]) {
-                grouped[account.type] = [];
+            if (!filter || filter(account)) {
+                if (!grouped[account.type]) {
+                    grouped[account.type] = [];
+                }
+                grouped[account.type].push(account);    
             }
-            grouped[account.type].push(account);
             return grouped;
         },
         {} as GroupedAccounts
@@ -99,7 +102,7 @@ const groupAccounts = memoizeOne((sortedIds: string[], accounts: Record<string, 
 const mapStateToProps = (state: CombinedState, ownProps: AccountDropdownProps): AccountDropdownProps => {
     return {
         ...ownProps,
-        groupedAccounts: groupAccounts(state.accounts.sortedIds, state.accounts.accounts),
+        groupedAccounts: groupAccounts(state.accounts.sortedIds, state.accounts.accounts, ownProps.filter),
     };
 }
 
