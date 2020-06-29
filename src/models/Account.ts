@@ -46,6 +46,17 @@ const typeLabels = {
 
 export const getAccountTypeLabel = (t: AccountType) => typeLabels[t];
 
+const typeIcons = {
+    [AccountType.Checking]: 'Bank',
+    [AccountType.Savings]: 'Bank',
+    [AccountType.CreditCard]: 'PaymentCard',
+    [AccountType.Unallocated]: 'Money',
+    [AccountType.UserEnvelope]: 'Mail',  
+    [AccountType.PaymentEnvelope]: 'PaymentCard',
+};
+
+export const getAccountTypeIcon = (t: AccountType) => typeIcons[t];
+
 /**
  * _Bank accounts_ are accounts that exist in the 
  * "real" world. 
