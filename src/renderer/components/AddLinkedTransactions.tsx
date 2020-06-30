@@ -152,9 +152,9 @@ class Component extends React.Component<AddLinkedTransactionsProps, AddLinkedTra
                     errorMessage={this.state.formErrors.amount}
                     onChange={(e, value?) => this.validator.setValue('amount', value)}
                 />
-                <div>
+                <p>
                     <PrimaryButton type="submit" text="Add" />
-                </div>
+                </p>
             </form>
         </Section>;
     }
