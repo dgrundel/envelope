@@ -36,7 +36,7 @@ const typeLabels = {
 
     // A "bucket" to hold funds that are earmarked for spending
     // on a certain category of expense.
-    [AccountType.UserEnvelope]: 'User-Defined Envelope',
+    [AccountType.UserEnvelope]: 'Envelope',
     
     // A special type of envelope that is created and managed by
     // this application to automatically set aside funds for

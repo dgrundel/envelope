@@ -1,4 +1,4 @@
-import { Account, AccountType, getAccountTypeLabel } from '@/models/Account';
+import { Account, AccountType, getAccountTypeLabel, getAccountTypeIcon } from '@/models/Account';
 import { Dropdown, DropdownMenuItemType, Icon, IDropdownOption, mergeStyles } from '@fluentui/react';
 import memoizeOne from 'memoize-one';
 import * as React from "react";
@@ -6,16 +6,18 @@ import { connect } from 'react-redux';
 import { transferFunds } from '../store/actions/Transaction';
 import { CombinedState } from '../store/store';
 
+type GroupedAccounts = Record<AccountType, Account[]>;
+
 export interface AccountDropdownProps {
     label: string;
     onChange: (e: React.FormEvent<HTMLDivElement>, selected?: IDropdownOption) => void;
     placeholder?: string;
     selectedKey?: string | number | string[] | number[];
     filter?: (account: Account) => boolean;
+
+    // mapped from store
     groupedAccounts?: GroupedAccounts;
 }
-
-type GroupedAccounts = Record<AccountType, Account[]>;
 
 const iconStyle = mergeStyles({
     verticalAlign: 'middle',
@@ -73,8 +75,16 @@ class Component extends React.Component<AccountDropdownProps, {}> {
 
             if (accounts && accounts.length > 0) {
                 dropdownOptions = dropdownOptions.concat(
-                    { key: `${type}-header`, text: getAccountTypeLabel(type), itemType: DropdownMenuItemType.Header },
-                    accounts.map(account => ({ key: account._id, text: account.name, data: { icon: getAccountTypeIcon(account.type) } }))
+                    { 
+                        key: `${type}-header`, 
+                        text: getAccountTypeLabel(type), 
+                        itemType: DropdownMenuItemType.Header 
+                    },
+                    accounts.map(account => ({ 
+                        key: account._id, 
+                        text: account.name, 
+                        data: { icon: getAccountTypeIcon(account.type) } 
+                    }))
                 )
             }
         });
