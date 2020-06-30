@@ -3,8 +3,8 @@ import { Dropdown, DropdownMenuItemType, Icon, IDropdownOption, mergeStyles } fr
 import memoizeOne from 'memoize-one';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { transferFunds } from '../store/actions/Transaction';
-import { CombinedState } from '../store/store';
+import { transferFunds } from '../../store/actions/Transaction';
+import { CombinedState } from '../../store/store';
 
 type GroupedAccounts = Record<AccountType, Account[]>;
 

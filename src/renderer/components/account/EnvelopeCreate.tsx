@@ -1,8 +1,8 @@
 import { PrimaryButton, TextField } from '@fluentui/react';
 import * as React from "react";
 import { connect } from "react-redux";
-import { createEnvelope } from "../store/actions/Account";
-import { CommonValidators, FieldValue, FormValidator } from '../../util/FormValidator';
+import { createEnvelope } from "../../store/actions/Account";
+import { CommonValidators, FieldValue, FormValidator } from '../../../util/FormValidator';
 
 export interface EnvelopeCreateProps {
     createEnvelope?: (name: string) => Promise<void>;

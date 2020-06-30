@@ -3,14 +3,14 @@ import { Currency } from '@/util/Currency';
 import { Account, AccountType } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { Box } from '../Box';
-import { DataTable } from '../DataTable';
-import { EnvelopeCreate } from '../EnvelopeCreate';
+import { Box } from '../uiElements/Box';
+import { DataTable } from '../uiElements/DataTable';
+import { EnvelopeCreate } from './EnvelopeCreate';
 import { filterOnlyAccountType } from '@/util/Filters';
 import { Text, IconButton } from '@fluentui/react';
-import { Layout } from '../Layout';
-import { MoveMoney } from '../MoveMoney';
-import { BaseModal } from '../Modal';
+import { Layout } from '../uiElements/Layout';
+import { MoveMoney } from '../transaction/MoveMoney';
+import { BaseModal } from '../uiElements/Modal';
 import { getAppContext } from '@/renderer/AppContext';
 
 export interface EnvelopesPageProps {

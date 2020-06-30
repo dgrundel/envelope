@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Modal, BaseModal } from "./Modal";
+import { Modal, BaseModal } from "./uiElements/Modal";
 
 export interface SpinnerModalProps {
     text?: string;

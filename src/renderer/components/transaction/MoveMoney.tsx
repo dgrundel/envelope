@@ -6,9 +6,9 @@ import { Dropdown, DropdownMenuItemType, Icon, IDropdownOption, mergeStyles, Mes
 import memoizeOne from 'memoize-one';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { CombinedState } from '../store/store';
-import { transferFunds } from '../store/actions/Transaction';
-import { AccountDropdown } from './AccountDropdown';
+import { CombinedState } from '../../store/store';
+import { transferFunds } from '../../store/actions/Transaction';
+import { AccountDropdown } from '../account/AccountDropdown';
 
 export interface MoveMoneyProps {
     showFrom?: boolean;

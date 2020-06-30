@@ -2,7 +2,7 @@ import * as React from "react";
 
 import '@public/components/import/ImportRowSelect.scss';
 import { Row } from './ImportWizard';
-import { RowSelect } from '../RowSelect';
+import { RowSelect } from '../uiElements/RowSelect';
 
 export type ColumnFilter = (key: string, value: string) => boolean;
 export type KeyFormatter = (key: string) => string;

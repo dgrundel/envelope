@@ -3,8 +3,8 @@ import { ChoiceGroup, PrimaryButton, TextField, MessageBar, MessageBarType } fro
 import { AccountType, getAccountTypeLabel, getBankAccountTypes } from '@models/Account';
 import * as React from "react";
 import { connect } from "react-redux";
-import { createBankAccount } from "../store/actions/Account";
-import { CommonValidators, FieldValue, FormValidator } from '../../util/FormValidator';
+import { createBankAccount } from "../../store/actions/Account";
+import { CommonValidators, FieldValue, FormValidator } from '../../../util/FormValidator';
 
 export interface AccountCreateProps {
     createBankAccount?: (name: string, type: AccountType, balance: Currency) => Promise<void>;

@@ -1,7 +1,7 @@
 import { getAppContext } from '@/renderer/AppContext';
 import { Log } from '@/util/Logger';
 import * as React from "react";
-import { BaseModal, Modal, ModalButton } from '../Modal';
+import { BaseModal, Modal, ModalButton } from './Modal';
 
 export interface WizardApi<S> {
     getState: () => S;

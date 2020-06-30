@@ -10,9 +10,9 @@ import '@public/components/import/ImportWizard.scss';
 import * as moment from "moment";
 import * as React from "react";
 import { connect } from 'react-redux';
-import { RowSelect } from '../RowSelect';
+import { RowSelect } from '../uiElements/RowSelect';
 import { SpinnerModal } from '../SpinnerModal';
-import { Wizard, WizardApi, WizardStep } from '../wizard/Wizard';
+import { Wizard, WizardApi, WizardStep } from '../uiElements/Wizard';
 import { ImportRowSelect } from './ImportRowSelect';
 import { AppPage } from '../App';
 

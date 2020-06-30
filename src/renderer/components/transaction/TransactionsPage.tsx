@@ -6,9 +6,9 @@ import { Log } from '@/util/Logger';
 import { Account } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { AddLinkedTransactions } from '../AddLinkedTransactions';
-import { Box } from "../Box";
-import { DataTable } from '../DataTable';
+import { AddLinkedTransactions } from './AddLinkedTransactions';
+import { Box } from "../uiElements/Box";
+import { DataTable } from '../uiElements/DataTable';
 import { filterOnlyImportedTransactions } from '@/util/Filters';
 import { FontIcon } from '@fluentui/react';
 

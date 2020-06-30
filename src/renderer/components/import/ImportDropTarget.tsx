@@ -3,7 +3,7 @@ import { Log } from "@/util/Logger";
 import '@public/components/import/ImportDropTarget.scss';
 import * as csv from 'neat-csv';
 import * as React from "react";
-import { DropTarget } from "../DropTarget";
+import { DropTarget } from "../uiElements/DropTarget";
 import { ImportWizard } from './ImportWizard';
 import { FontIcon } from '@fluentui/react';
 

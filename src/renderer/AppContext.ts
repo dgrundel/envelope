@@ -1,4 +1,4 @@
-import { ModalApi } from './components/Modal';
+import { ModalApi } from './components/uiElements/Modal';
 import { PageApi } from './components/App';
 
 export interface AppContext {

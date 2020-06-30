@@ -1,7 +1,7 @@
 import { DefaultButton, FontIcon } from '@fluentui/react';
 import '@public/components/Modal.scss';
 import * as React from "react";
-import { getAppContext } from '../AppContext';
+import { getAppContext } from '../../AppContext';
 
 
 export interface Modal {

@@ -5,13 +5,13 @@ import { Dropdown, MessageBar, MessageBarType, PrimaryButton, TextField } from '
 import { Account, getAssignableAccountTypes } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { getAppContext } from '../AppContext';
-import { addLinkedTransaction } from '../store/actions/Transaction';
-import { CombinedState } from '../store/store';
-import { DataTable } from './DataTable';
-import { CommonValidators, FieldValue, FormValidator } from '../../util/FormValidator';
-import { BaseModal, Modal, ModalButton } from './Modal';
-import { Section } from './Section';
+import { getAppContext } from '../../AppContext';
+import { addLinkedTransaction } from '../../store/actions/Transaction';
+import { CombinedState } from '../../store/store';
+import { DataTable } from '../uiElements/DataTable';
+import { CommonValidators, FieldValue, FormValidator } from '../../../util/FormValidator';
+import { BaseModal, Modal, ModalButton } from '../uiElements/Modal';
+import { Section } from '../uiElements/Section';
 
 
 export interface AddLinkedTransactionsProps {

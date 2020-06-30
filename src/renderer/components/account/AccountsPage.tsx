@@ -1,8 +1,8 @@
 import { Account, AccountType, getAccountTypeLabel, getBankAccountTypes } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { AccountCreate } from '../AccountCreate';
-import { Box } from "../Box";
+import { AccountCreate } from './AccountCreate';
+import { Box } from "../uiElements/Box";
 import { AccountState } from '@/renderer/store/reducers/Accounts';
 import { CombinedState } from '@/renderer/store/store';
 import { filterOnlyBankAccounts } from '@/util/Filters';
