@@ -78,8 +78,11 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
             getAppContext().modalApi.dismissModal();
         };
 
+        // if the envelope is negative, suggest getting it back to zero
+        const suggestedAmount = envelope.balance.isNegative() ? envelope.balance.getInverse() : undefined;
+
         const modal = <BaseModal heading={`Add money to ${envelope.name}`} closeButtonHandler={dismiss}>
-            <MoveMoney toId={envelope._id} showTo={false} onComplete={dismiss}/>
+            <MoveMoney toId={envelope._id} showTo={false} onComplete={dismiss} amount={suggestedAmount} />
         </BaseModal>;
 
         getAppContext().modalApi.queueModal(modal);
