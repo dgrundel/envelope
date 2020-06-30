@@ -23,15 +23,21 @@ export const loadTransactions = (transactions: Transaction[]): LoadTransactionAc
 });
 
 export const addLinkedTransaction = (transaction: TransactionData, linkTo: Transaction) => (dispatch: any) => {
-    return database.addLinkedTransaction(transaction, linkTo)
+    const transactionData = {
+        ...transaction,
+        linkedTransactionIds: [linkTo._id]
+    };
+    
+    return database.addLinkedTransaction(transactionData, linkTo)
         .then(createdAndUpdated => {
             Log.debug('addLinkedTransaction', createdAndUpdated);
 
             const created = createdAndUpdated[0];
-            return dispatch(applyTransactionToAccount(created));
-        })
-        .then(() => database.getAllTransactions())
-        .then(transactions => dispatch(loadTransactions(transactions)));
+            return dispatch(applyTransactionToAccount(created))
+                .then(() => database.getAllTransactions())
+                .then((transactions: Transaction[]) => dispatch(loadTransactions(transactions)))
+                .then(() => createdAndUpdated);
+        });
 };
 
 export const insertTransactions = (transactionData: TransactionData[]) => (dispatch: any) => {

@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import { CombinedState } from '../../store/store';
 import { transferFunds } from '../../store/actions/Transaction';
 import { AccountDropdown } from '../account/AccountDropdown';
+import { getRequiredCurrencyError } from '@/util/ErrorGenerators';
 
 export interface MoveMoneyProps {
     showFrom?: boolean;
@@ -21,7 +22,7 @@ export interface MoveMoneyProps {
     // mapped props from store
     accounts?: Record<string, Account>;
 
-    //store actions
+    // store actions
     transferFunds?: (amount: Currency, fromAccount: Account, toAccount: Account) => Promise<void>;
 }
 
@@ -75,7 +76,7 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 label="Amount"
                 prefix={CURRENCY_SYMBOL}
                 value={this.state.amount}
-                onGetErrorMessage={this.getAmountErrorMessage}
+                onGetErrorMessage={getRequiredCurrencyError}
                 onChange={(e, amount?) => this.setState({ amount })}
                 validateOnLoad={false}
             />
@@ -83,12 +84,6 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 <PrimaryButton type="submit" text="Move" />
             </p>
         </form>;
-    }
-
-    getAmountErrorMessage(value?: string): string {
-        return isValidCurrencyString(value)
-            ? ''
-            : 'Hmm, that doesn\'t look like a number.';
     }
 
     onSubmit(e: React.FormEvent<HTMLFormElement>): void {
@@ -125,7 +120,7 @@ class Component extends React.Component<MoveMoneyProps, State> {
 
         // clear messages
         this.setState({
-            messages: []
+            messages: undefined
         });
 
         // do the transfer

@@ -6,7 +6,7 @@ import { Log } from '@/util/Logger';
 import { Account } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { AddLinkedTransactions } from './AddLinkedTransactions';
+import { LinkedTransactionsModal } from './LinkedTransactionsModal';
 import { Box } from "../uiElements/Box";
 import { DataTable } from '../uiElements/DataTable';
 import { filterOnlyImportedTransactions } from '@/util/Filters';
@@ -89,7 +89,7 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
         const clickHander = (e: React.MouseEvent) => {
             e.preventDefault();
 
-            const modal = <AddLinkedTransactions transaction={transaction} suggestedValue={balance} maxValue={balance} />;
+            const modal = <LinkedTransactionsModal transaction={transaction} unlinkedBalance={balance} />;
             
             getAppContext().modalApi.queueModal(modal);
         };
