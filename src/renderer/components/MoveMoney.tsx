@@ -32,6 +32,8 @@ interface State {
     messages?: any;
 }
 
+const accountDropdownFilter = filterOnlyAccountTypeIn([AccountType.UserEnvelope, AccountType.PaymentEnvelope, AccountType.Unallocated]);
+
 class Component extends React.Component<MoveMoneyProps, State> {
     
     constructor(props: MoveMoneyProps) {
@@ -60,14 +62,14 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 selectedKey={this.state.fromId}
                 onChange={(e, option?) => this.setState({ fromId: option?.key as string })}
                 placeholder="Take money from..."
-                filter={filterOnlyAccountTypeIn([AccountType.UserEnvelope, AccountType.PaymentEnvelope, AccountType.Unallocated])}
+                filter={accountDropdownFilter}
             />}
             {this.props.showTo !== false && <AccountDropdown
                 label="Move To"
                 selectedKey={this.state.toId}
                 onChange={(e, option?) => this.setState({ toId: option?.key as string })}
                 placeholder="Move money to..."
-                filter={filterOnlyAccountTypeIn([AccountType.UserEnvelope, AccountType.PaymentEnvelope, AccountType.Unallocated])}
+                filter={accountDropdownFilter}
             />}
             <TextField
                 label="Amount"
