@@ -1,5 +1,5 @@
 import * as React from "react";
-import { CombinedState } from '../store/store';
+import { CombinedState } from '@/renderer/store/store';
 import { connect } from 'react-redux';
 
 export interface __templateProps {
