@@ -3,7 +3,7 @@ import * as windowStateKeeper from 'electron-window-state';
 import * as path from 'path';
 import * as url from 'url';
 import { dataStoreManager } from './dataStores';
-import { StorageHost } from '@/storage/StorageHost';
+import { StorageHost } from '@/storage/StorageApi';
 import { Log } from '@/util/Logger';
 
 const dataStores = dataStoreManager;
