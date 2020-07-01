@@ -6,6 +6,10 @@ import { Box } from "../uiElements/Box";
 import { AccountState } from '@/renderer/store/reducers/Accounts';
 import { CombinedState } from '@/renderer/store/store';
 import { filterOnlyBankAccounts } from '@/util/Filters';
+import { IconButton, mergeStyles } from '@fluentui/react';
+import { getAppContext } from '@/renderer/AppContext';
+import { BaseModal } from '../uiElements/Modal';
+import { AdjustBalance } from '../transaction/AdjustBalance';
 
 // import '@public/components/AccountsPage.scss';
 
@@ -17,6 +21,11 @@ export interface AccountsPageState {
     newAccountName?: string;
     newAccountType?: AccountType;
 }
+
+const actionCellStyle = mergeStyles({
+    textAlign: 'right',
+    padding: '0',
+});
 
 class Component extends React.Component<AccountsPageProps, AccountsPageState> {
 
@@ -46,6 +55,7 @@ class Component extends React.Component<AccountsPageProps, AccountsPageState> {
                         <th>Name</th>
                         <th>Type</th>
                         <th>Balance</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,12 +63,27 @@ class Component extends React.Component<AccountsPageProps, AccountsPageState> {
                         <td>{account.name}</td>
                         <td>{getAccountTypeLabel(account.type)}</td>
                         <td>{account.balance.toFormattedString()}</td>
+                        <td className={actionCellStyle}>
+                            <IconButton iconProps={({ iconName: 'Edit' })} title="Adjust Balance" onClick={() => this.showAdjustBalanceModal(account)} />
+                        </td>
                     </tr>)}
                 </tbody>
             </table>;
         }
 
         return 'No accounts yet!';
+    }
+
+    showAdjustBalanceModal(account: Account) {
+        const dismiss = () => {
+            getAppContext().modalApi.dismissModal();
+        };
+
+        const modal = <BaseModal heading={`Adjust balance of ${account.name}`} closeButtonHandler={dismiss}>
+            <AdjustBalance account={account} onComplete={dismiss}/>
+        </BaseModal>;
+
+        getAppContext().modalApi.queueModal(modal);
     }
 }
 

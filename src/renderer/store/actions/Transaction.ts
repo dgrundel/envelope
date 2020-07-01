@@ -44,10 +44,11 @@ export const insertTransactions = (transactionData: TransactionData[]) => (dispa
     return database.addTransactions(transactionData)
         .then(inserted => {
             Log.debug('addTransactions', inserted);
-            return dispatch(applyTransactionsToAccount(inserted));
-        })
-        .then(() => database.getAllTransactions())
-        .then(transactions => dispatch(loadTransactions(transactions)));
+            return dispatch(applyTransactionsToAccount(inserted))
+                .then(() => database.getAllTransactions())
+                .then((transactions: Transaction[]) => dispatch(loadTransactions(transactions)))
+                .then(() => inserted);
+        });
 };
 
 export const transferFunds = (amount: Currency, fromAccount: Account, toAccount: Account) => (dispatch: any) => {
