@@ -1,13 +1,12 @@
+import { getAppStorageHost } from '@/storage/StorageApi';
 import { app, BrowserWindow } from 'electron';
 import * as windowStateKeeper from 'electron-window-state';
 import * as path from 'path';
 import * as url from 'url';
 import { dataStoreManager } from './dataStores';
-import { StorageHost } from '@/storage/StorageApi';
-import { Log } from '@/util/Logger';
 
 const dataStores = dataStoreManager;
-const storageHost = new StorageHost('envelope-data');
+const storageHost = getAppStorageHost();
 
 function createWindow(): void {
     const mainWindowState = windowStateKeeper({

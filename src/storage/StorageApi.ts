@@ -6,16 +6,20 @@ import * as path from 'path';
 const ENCODING = 'utf8';
 
 export interface StorageApi {
-    get: (key: string) => Promise<string>;
-    set: (key: string, value: string) => Promise<void>;
-    remove: (key: string) => Promise<void>;
+    getItem: (key: string) => Promise<string>;
+    setItem: (key: string, value: string) => Promise<void>;
+    removeItem: (key: string) => Promise<void>;
+}
+
+export interface StorageHostApi extends StorageApi {
+    save: () => Promise<void>;
 }
 
 enum StorageEvent {
     Get = 'storage-event:get',
     Set = 'storage-event:set',
     Remove = 'storage-event:remove',
-};
+}
 
 interface IPCResult {
     success: boolean;
@@ -30,36 +34,41 @@ const getSerializableError = (err: Error) => Object.getOwnPropertyNames(err)
         return serializable;
     }, {});
 
-export class StorageHost implements StorageApi {
+class StorageHost implements StorageHostApi {
     private readonly name: string;
     private readonly filePath: string;
     private data: any;
+    private ready: Promise<void>;
     
     constructor(name: string) {
         this.name = name;
         this.filePath = path.join(app.getPath('userData'), `${name}.json`);
-        this.data = this.load();
-
+        this.ready = this.load();
         this.listen();
     }
 
-    private load(): any {
-        let fileExists = true;
-        try {
-            fs.accessSync(this.filePath, fs.constants.F_OK);
-        } catch (e) {
-            fileExists = false;
-        }
-        
-        if (fileExists) {
+    private load(): Promise<void> {
+        return new Promise(resolve => {
+            let data = {};
+            let fileExists = true;
             try {
-                const json = fs.readFileSync(this.filePath, { encoding: ENCODING });
-                return JSON.parse(json);
+                fs.accessSync(this.filePath, fs.constants.F_OK);
             } catch (e) {
-                Log.error('Error while loading data file', this.filePath, e);
+                fileExists = false;
             }
-        }
-        return {};        
+            
+            if (fileExists) {
+                try {
+                    const json = fs.readFileSync(this.filePath, { encoding: ENCODING });
+                    data = JSON.parse(json);
+                } catch (e) {
+                    Log.error('Error while loading data file', this.filePath, e);
+                }
+            }
+            resolve(data);
+        }).then(data => {
+            this.data = data;
+        });
     }
 
     private handle(event: StorageEvent, callback: (...args: any) => Promise<any>) {
@@ -78,9 +87,9 @@ export class StorageHost implements StorageApi {
     }
 
     private listen() {
-        this.handle(StorageEvent.Get, this.get);
-        this.handle(StorageEvent.Set, this.set);
-        this.handle(StorageEvent.Remove, this.remove);
+        this.handle(StorageEvent.Get, this.getItem.bind(this));
+        this.handle(StorageEvent.Set, this.setItem.bind(this));
+        this.handle(StorageEvent.Remove, this.removeItem.bind(this));
     }
 
     save(): Promise<void> {
@@ -88,26 +97,24 @@ export class StorageHost implements StorageApi {
         return fs.promises.writeFile(this.filePath, json, { encoding: ENCODING });
     }
 
-    get(key: string): Promise<string> {
-        return Promise.resolve(this.data[key]);
+    getItem(key: string): Promise<string> {
+        return this.ready.then(() => this.data[key]);
     }
 
-    set(key: string, value: string): Promise<void> {
-        return new Promise(resolve => {
+    setItem(key: string, value: string): Promise<void> {
+        return this.ready.then(() => {
             this.data[key] = value;
-            resolve();
         });
     }
 
-    remove(key: string): Promise<void> {
-        return new Promise(resolve => {
+    removeItem(key: string): Promise<void> {
+        return this.ready.then(() => {
             delete this.data[key];
-            resolve();
         });
     }
 }
 
-export class StorageClient implements StorageApi {
+class StorageClient implements StorageApi {
     private readonly name: string;
     
     constructor(name: string) {
@@ -119,15 +126,19 @@ export class StorageClient implements StorageApi {
             .then((result: IPCResult) => result.success ? Promise.resolve(result.data) : Promise.reject(result.data));
     }
 
-    get(key: string): Promise<string> {
+    getItem(key: string): Promise<string> {
         return this.invoke(StorageEvent.Get, key);
     }
 
-    set(key: string, value: string): Promise<void> {
+    setItem(key: string, value: string): Promise<void> {
         return this.invoke(StorageEvent.Set, key, value);
     }
 
-    remove(key: string): Promise<void> {
+    removeItem(key: string): Promise<void> {
         return this.invoke(StorageEvent.Remove, key);
     }
 }
+
+const DATA_FILE_NAME = 'envelope-app-data';
+export const getAppStorageHost = (): StorageHostApi => new StorageHost(DATA_FILE_NAME);
+export const getAppStorageClient = (): StorageApi => new StorageClient(DATA_FILE_NAME)
