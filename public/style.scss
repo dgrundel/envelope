@@ -57,8 +57,18 @@ h3 {
   margin-bottom: 1em;
 }
 
-p {
+p, ul, ol {
   margin: .8em 0;
+  @include firstLastVerticalMargin();
+}
+
+ol {
+  list-style-type: decimal;
+  list-style-position: inside;
+}
+
+li {
+  margin: .4em 0;
   @include firstLastVerticalMargin();
 }
 
