@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Box } from './uiElements/Box';
+import { TestWizard } from "./uiElements/Wiz";
+import { getAppContext } from "../AppContext";
 
 
 export interface DashboardPageProps {
@@ -19,6 +21,11 @@ export class DashboardPage extends React.Component<DashboardPageProps, {}> {
                 </ol>
             </Box>
             
+            <Box heading="Test Wizard">
+                <button onClick={() => {
+                    getAppContext().modalApi.queueModal(<TestWizard/>);
+                }}>Pop it</button>
+            </Box>
         </>;
     }
 }
