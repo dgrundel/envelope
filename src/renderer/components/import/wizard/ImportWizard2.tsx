@@ -1,4 +1,4 @@
-import { WizardStepApi, createWizard } from "../../uiElements/Wiz";
+import { WizardStepApi, createWizard } from "../../uiElements/WizardFactory";
 import { AccountSelect } from './AccountSelect';
 import { DateFieldSelect } from './DateFieldSelect';
 import { Log } from '@/util/Logger';

@@ -1,11 +1,10 @@
 import { getAppContext } from '@/renderer/AppContext';
 import { Log } from "@/util/Logger";
+import { FontIcon } from '@fluentui/react';
 import '@public/components/import/ImportDropTarget.scss';
 import * as csv from 'neat-csv';
 import * as React from "react";
 import { DropTarget } from "../uiElements/DropTarget";
-import { ImportWizard } from './ImportWizard';
-import { FontIcon } from '@fluentui/react';
 import { createImportWizard } from './wizard/ImportWizard2';
 
 

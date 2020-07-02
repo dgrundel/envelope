@@ -65,7 +65,7 @@ class Component extends React.Component<ImportWizardStepProps> {
 
     validateState(state: ImportWizardStepProps) {
         if (isBlank(state.dateColumn)) {
-            return 'Please select a field.';
+            return 'Please select the field that contains the transaction date.';
         }
     }
     

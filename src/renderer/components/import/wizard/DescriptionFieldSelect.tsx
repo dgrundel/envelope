@@ -63,6 +63,8 @@ class Component extends React.Component<ImportWizardStepProps> {
         return <div>
             <h3>Select any items that should be included in the <strong>description</strong> of the transaction.</h3>
 
+            <p>You can select multiple items using the <strong>Ctrl</strong> or <strong>Cmd</strong> key.</p>
+
             <DetailsList
                 items={this.items}
                 columns={columns}

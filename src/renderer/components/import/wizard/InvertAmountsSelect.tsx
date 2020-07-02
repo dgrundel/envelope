@@ -25,8 +25,6 @@ class Component extends React.Component<InvertAmountsSelectProps> {
 
         this.state = {};
 
-        props.setStepValidator(this.validateState);
-
         const rowsAsTransactions: TransactionData[] = rowsToTransactions(
             this.props.rows, 
             false, 
@@ -52,12 +50,6 @@ class Component extends React.Component<InvertAmountsSelectProps> {
         }
 
         this.sampleTransaction = transaction;
-    }
-
-    validateState(state: ImportWizardStepProps) {
-        // if (isBlank(state.accountId)) {
-            // return 'Please select an account.';
-        // }
     }
     
     render() {
