@@ -1,65 +1,123 @@
-import * as React from "react";
-import { CombinedState } from '@/renderer/store/store';
-import { connect } from 'react-redux';
-import { BaseModal, ModalButton } from "./Modal";
-import { toUnicode } from "punycode";
-import { Log } from "@/util/Logger";
 import { getAppContext } from "@/renderer/AppContext";
+import { Log } from "@/util/Logger";
+import { MessageBar, MessageBarType } from "@fluentui/react";
+import * as React from "react";
+import { BaseModal, ModalButton } from "./Modal";
 
-export type WizardStateValidator<P> = (state: P) => boolean | undefined | void;
+export type WizardStateValidatorResult = string | string[] | undefined | void;
+export type WizardStateValidator<P> = (state: P) => WizardStateValidatorResult;
 
 export interface WizardStepApi<P> {
+    setStepValidator: (validator: WizardStateValidator<P>) => void;
     setState: (state: P) => void;
     nextStep: () => void;
     prevStep: () => void;
 }
 
 export interface WizardProps<P> {
+    // modal title
     title?: string;
+    // validator to run on cancel
+    // returning an error message prevents dismissal
     onCancel?: WizardStateValidator<P>;
+    // validator to run on finish
+    // returning an error message prevents dismissal
     onFinish?: WizardStateValidator<P>;
+    // run validators when clicking the "back" button
+    // defaults to false
+    // if true, returning an error prevents going backward
+    validateOnStepBack?: boolean;
 }
 
 interface InternalState {
     step: number;
+    errorMessages: string[];
 }
 
+const validate = <P extends object>(state: P, validator?: WizardStateValidator<P>): string[] => {
+    const result = validator && validator(state);
+    return result
+        ? Array.isArray(result) ? result : [result]
+        : [];
+};
+
 export const createWizard = <P extends object>(props: WizardProps<P>, initialProps: P, ...steps: React.ComponentType<P & WizardStepApi<P>>[]) => {
+    
+    const stepValidators: WizardStateValidator<P>[] = [];
+    
     const WizardComponent = () => {
         const [stepState, setStepState] = React.useState<P>(initialProps);
         const [internalState, setInternalState] = React.useState<InternalState>({
             step: 0,
+            errorMessages: [],
         });
 
         const isFirstStep = internalState.step === 0;
         const isLastStep = internalState.step === steps.length - 1;
 
+        const setStepValidator = (validator: WizardStateValidator<P>) => {
+            stepValidators[internalState.step] = validator;
+        };
+
         const setStep = (i: number) => {
             if (i < 0 || i >= steps.length) {
                 throw new Error('Step index out of bounds.');
             }
-            setInternalState({ step: i });
+            setInternalState({
+                ...internalState,
+                errorMessages: [],
+                step: i,
+            });
         }
 
         const nextStep = () => {
-            setStep(internalState.step + 1);
+            const errorMessages = validate(stepState, stepValidators[internalState.step]);
+            if (errorMessages.length === 0) {
+                setStep(internalState.step + 1);
+            } else {
+                setInternalState({
+                    ...internalState,
+                    errorMessages,
+                })
+            }
         };
         
         const prevStep = () => {
-            setStep(internalState.step - 1);
+            // by default, do not validate when going backward
+            const errorMessages = props.validateOnStepBack === true
+                ? validate(stepState, stepValidators[internalState.step])
+                : [];
+            if (errorMessages.length === 0) {
+                setStep(internalState.step - 1);
+            } else {
+                setInternalState({
+                    ...internalState,
+                    errorMessages,
+                })
+            }
         };
 
         const cancel = () => {
-            const handlerResult = props.onCancel && props.onCancel(stepState);
-            if (handlerResult !== false) {
+            const errorMessages = validate(stepState, props.onCancel);
+            if (errorMessages.length === 0) {
                 getAppContext().modalApi.dismissModal();
+            } else {
+                setInternalState({
+                    ...internalState,
+                    errorMessages,
+                })
             }
         };
 
         const finish = () => {
-            const handlerResult = props.onFinish && props.onFinish(stepState);
-            if (handlerResult !== false) {
+            const errorMessages = validate(stepState, props.onFinish);
+            if (errorMessages.length === 0) {
                 getAppContext().modalApi.dismissModal();
+            } else {
+                setInternalState({
+                    ...internalState,
+                    errorMessages,
+                })
             }
         };
 
@@ -82,6 +140,7 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
         }];
 
         const stepApi = {
+            setStepValidator,
             setState: setStepState,
             nextStep,
             prevStep,
@@ -90,6 +149,9 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
         const StepComponent = steps[internalState.step];
 
         return <BaseModal heading={props.title} buttons={buttons} closeButtonHandler={cancel}>
+            {internalState.errorMessages.length > 0 && <MessageBar messageBarType={MessageBarType.error} isMultiline={true}>
+                {internalState.errorMessages.map(message => <p key={message}>{message}</p>)}
+            </MessageBar>}
             <StepComponent {...stepState} {...stepApi} />
         </BaseModal>;
     }
@@ -115,6 +177,17 @@ export const TestWizard = createWizard(
         value: 'test'
     }, 
     class Foo extends React.Component<TestWizProps & WizardStepApi<TestWizProps>> {
+        
+        constructor(props: TestWizProps & WizardStepApi<TestWizProps>) {
+            super(props);
+
+            props.setStepValidator((s: TestWizProps) => {
+                if (s.value !== 'valid') {
+                    return 'value must be "valid"';
+                }
+            });
+        }
+        
         render() {
             return <div>
                 <p>Step 1: {this.props.value}</p>
