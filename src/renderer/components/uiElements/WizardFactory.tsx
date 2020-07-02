@@ -13,6 +13,8 @@ export interface WizardStepApi<P> {
     setState: <K extends keyof P>(state: Pick<P, K>) => void;
     nextStep: () => void;
     prevStep: () => void;
+    cancel: () => void;
+    finish: () => void;
 }
 
 export interface WizardProps<P> {
@@ -48,6 +50,29 @@ const validate = <P extends object>(state: P, validator?: WizardStateValidator<P
     return asArray.filter(isNotBlank);
 };
 
+const createModalButtons = <P extends object>(currentStep: number, numSteps: number, stepApi: WizardStepApi<P>) => {
+    const isFirstStep = currentStep === 0;
+    const isLastStep = currentStep === numSteps - 1;
+    const buttons: ModalButton[] = [{
+        buttonText: 'Cancel',
+        onClick: stepApi.cancel,
+        className: isFirstStep ? '' : 'hide'
+    }, {
+        buttonText: 'Back',
+        onClick: stepApi.prevStep,
+        className: isFirstStep ? 'hide' : ''
+    }, {
+        buttonText: 'Next',
+        onClick: stepApi.nextStep,
+        className: isLastStep ? 'hide' : ''
+    }, {
+        buttonText: 'Finish',
+        onClick: stepApi.finish,
+        className: isLastStep ? '' : 'hide'
+    }];
+    return buttons;
+};
+
 export const createWizard = <P extends object>(props: WizardProps<P>, initialProps: P, steps: React.ComponentType<P & WizardStepApi<P>>[]) => {
     
     const stepValidators: WizardStateValidator<P>[] = [];
@@ -58,9 +83,6 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
             step: 0,
             errorMessages: [],
         });
-
-        const isFirstStep = internalState.step === 0;
-        const isLastStep = internalState.step === steps.length - 1;
 
         const setStepValidator = (validator: WizardStateValidator<P>) => {
             stepValidators[internalState.step] = validator;
@@ -149,34 +171,19 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
             }
         };
 
-        const buttons: ModalButton[] = [{
-            buttonText: 'Cancel',
-            onClick: cancel,
-            className: isFirstStep ? '' : 'hide'
-        },{
-            buttonText: 'Back',
-            onClick: prevStep,
-            className: isFirstStep ? 'hide' : ''
-        },{
-            buttonText: 'Next',
-            onClick: nextStep,
-            className: isLastStep ? 'hide' : ''
-        },{
-            buttonText: 'Finish',
-            onClick: finish,
-            className: isLastStep ? '' : 'hide'
-        }];
-
-        const stepApi = {
+        const stepApi: WizardStepApi<P> = {
             setStepValidator,
             setState,
             nextStep,
             prevStep,
+            cancel,
+            finish
         };
 
+        const buttons: ModalButton[] = createModalButtons(internalState.step, steps.length, stepApi);
         const StepComponent = steps[internalState.step];
 
-        return <BaseModal heading={props.title} buttons={buttons} closeButtonHandler={cancel}>
+        return <BaseModal heading={props.title} buttons={buttons} closeButtonHandler={stepApi.cancel}>
             {internalState.errorMessages.length > 0 && <MessageBar messageBarType={MessageBarType.error} isMultiline={true}>
                 {internalState.errorMessages.map(message => <p key={message}>{message}</p>)}
             </MessageBar>}
