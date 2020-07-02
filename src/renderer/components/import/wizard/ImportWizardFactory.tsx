@@ -1,4 +1,4 @@
-import { TransactionData, TransactionType } from "@/models/Transaction";
+import { TransactionData, TransactionType, getAccountTransactionType } from "@/models/Transaction";
 import { getAppContext } from "@/renderer/AppContext";
 import { insertTransactions } from "@/renderer/store/actions/Transaction";
 import { Currency } from "@/util/Currency";
@@ -13,6 +13,8 @@ import { DateFieldSelect } from './steps/DateFieldSelect';
 import { DescriptionFieldSelect } from "./steps/DescriptionFieldSelect";
 import { DuplicatesSelect } from './steps/DuplicatesSelect';
 import { InvertAmountsSelect } from "./steps/InvertAmountsSelect";
+import { Account } from "@/models/Account";
+import { CombinedState } from "@/renderer/store/store";
 
 
 export interface Row {
@@ -39,17 +41,19 @@ export const rowToTransactionData = (
     dateColumn: string,
     amountColumn: string,
     descriptionColumns: string[],
-    accountId: string
+    account: Account
 ): TransactionData => {
-    const date = new Date(row[dateColumn]);
     const currency = Currency.parse(row[amountColumn]);
     const amount = invert ? currency.getInverse() : currency;
+    const type = getAccountTransactionType(account, amount.isNegative());
+    const accountId = account._id;
+    const date = new Date(row[dateColumn]);
     const description = descriptionColumns
         .map(col => row[col])
         .join(' ');
 
     return {
-        type: TransactionType.Imported,
+        type,
         accountId,
         date,
         amount,
@@ -65,10 +69,9 @@ export const rowsToTransactions = (
     dateColumn: string,
     amountColumn: string,
     descriptionColumns: string[],
-    accountId: string
+    account: Account
 ): TransactionData[] => {
-
-    return rows.map(row => rowToTransactionData(row, invert, dateColumn, amountColumn, descriptionColumns, accountId));
+    return rows.map(row => rowToTransactionData(row, invert, dateColumn, amountColumn, descriptionColumns, account));
 };
 
 export const createImportWizard = (rows: Row[]) => {
@@ -78,6 +81,10 @@ export const createImportWizard = (rows: Row[]) => {
     }
 
     interface Props {
+        // mapped from store
+        accounts?: Record<string, Account>;
+
+        // store actions
         insertTransactions?: (transactionData: TransactionData[]) => Promise<void>;
     }
 
@@ -110,6 +117,8 @@ export const createImportWizard = (rows: Row[]) => {
         onFinish(state: ImportWizardState) {
             Log.debug('Import Wizard Finish', state);
 
+            const selectedAccount = this.props.accounts![state.accountId!];
+
             const rowsToImport = state.selectedForImport
                 ? state.selectedForImport.map(i => state.rows[i])
                 : state.rows;
@@ -120,7 +129,7 @@ export const createImportWizard = (rows: Row[]) => {
                 state.dateColumn!,
                 state.amountColumn!,
                 state.descriptionColumns!,
-                state.accountId!,
+                selectedAccount,
             );
 
             this.props.insertTransactions!(rowsAsTransactions).then(() => {
@@ -134,6 +143,13 @@ export const createImportWizard = (rows: Row[]) => {
         render() {
             return <this.InnerComponent/>;
         }
+    }
+
+    const mapStateToProps = (state: CombinedState, ownProps: Props): Props => {
+        return {
+            ...ownProps,
+            accounts: state.accounts.accounts,
+        };
     }
 
     return connect(null, { insertTransactions })(Component);

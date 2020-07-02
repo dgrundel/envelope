@@ -2,7 +2,7 @@ import { TransactionData } from '@/models/Transaction';
 import { CombinedState } from '@/renderer/store/store';
 import { Log } from '@/util/Logger';
 import { ChoiceGroup } from '@fluentui/react';
-import { Account, AccountType } from '@models/Account';
+import { Account, AccountType, isCreditCardAccountType } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { ImportWizardStepProps, rowsToTransactions } from "../ImportWizardFactory";
@@ -11,10 +11,10 @@ export interface InvertAmountsSelectProps extends ImportWizardStepProps {
     selectedAccount?: Account;
 }
 
-const CREDIT_CARD_PURCHASE_DESC = 'purchase, fee, or other charge';
-const CREDIT_CARD_PAYMENT_DESC = 'payment or credit';
-const BANK_ACCOUNT_DEPOSIT_DESC = 'deposit or credit';
-const BANK_ACCOUNT_PURCHASE_DESC = 'purchase, bill payment, fee, or other type of debit';
+const CREDIT_CARD_DEBIT_DESC = 'purchase, fee, or other charge';
+const CREDIT_CARD_CREDIT_DESC = 'payment or credit';
+const BANK_ACCOUNT_CREDIT_DESC = 'deposit or credit';
+const BANK_ACCOUNT_DEBIT_DESC = 'purchase, bill payment, fee, or other type of debit';
 
 class Component extends React.Component<InvertAmountsSelectProps> {
     private readonly sampleTransaction: TransactionData | undefined;
@@ -26,11 +26,11 @@ class Component extends React.Component<InvertAmountsSelectProps> {
 
         const rowsAsTransactions: TransactionData[] = rowsToTransactions(
             this.props.rows, 
-            this.props.invertTransactions, 
+            false, // this must be false to get an accurate result from user 
             this.props.dateColumn!,
             this.props.amountColumn!,
             this.props.descriptionColumns!,
-            this.props.accountId!
+            this.props.selectedAccount!
         );
 
         // find a sample positive transaction
@@ -62,23 +62,20 @@ class Component extends React.Component<InvertAmountsSelectProps> {
         let expectedDescription;
         let invertedDescription;
         if (transaction.amount.isPositive()) {
-            if (account.type === AccountType.CreditCard) {
-                // expect positive transactions on a credit card to be a payment
-                expectedDescription = CREDIT_CARD_PURCHASE_DESC;
-                invertedDescription = CREDIT_CARD_PAYMENT_DESC;
+            if (isCreditCardAccountType(account.type)) {
+                expectedDescription = CREDIT_CARD_DEBIT_DESC;
+                invertedDescription = CREDIT_CARD_CREDIT_DESC;
             } else {
-                // expect positive transactions on checking/savings to be a deposit
-                expectedDescription = BANK_ACCOUNT_DEPOSIT_DESC;
-                invertedDescription = BANK_ACCOUNT_PURCHASE_DESC;
+                expectedDescription = BANK_ACCOUNT_CREDIT_DESC;
+                invertedDescription = BANK_ACCOUNT_DEBIT_DESC;
             }
         } else {
-            // expect negative transactions on credit card/checking/savings to be a purchase or fee
-            if (account.type === AccountType.CreditCard) {
-                expectedDescription = CREDIT_CARD_PAYMENT_DESC;
-                invertedDescription = CREDIT_CARD_PURCHASE_DESC;
+            if (isCreditCardAccountType(account.type)) {
+                expectedDescription = CREDIT_CARD_CREDIT_DESC;
+                invertedDescription = CREDIT_CARD_DEBIT_DESC;
             } else {
-                expectedDescription = BANK_ACCOUNT_PURCHASE_DESC;
-                invertedDescription = BANK_ACCOUNT_DEPOSIT_DESC;
+                expectedDescription = BANK_ACCOUNT_DEBIT_DESC;
+                invertedDescription = BANK_ACCOUNT_CREDIT_DESC;
             }
         }
 

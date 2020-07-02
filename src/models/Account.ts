@@ -93,6 +93,12 @@ export const getDepositAccountTypes = () => depositAccountTypes;
 export const isDepositAccountType = (type: AccountType) => depositAccountTypes.some(t => t === type);
 
 /**
+ * _Credit card accounts_ are ...uh... credit cards. Yep.
+ */
+
+export const isCreditCardAccountType = (type: AccountType) => type === AccountType.CreditCard;
+
+/**
  * _Assignable accounts_ refers to account types
  * to which a user may associate a "spending"-type
  * transactions. Generally, this refers to envelopes.

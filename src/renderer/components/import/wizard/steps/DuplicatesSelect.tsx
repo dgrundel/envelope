@@ -37,7 +37,7 @@ class Component extends React.Component<InvertAmountsSelectProps> {
                 this.props.dateColumn!,
                 this.props.amountColumn!,
                 this.props.descriptionColumns!,
-                this.props.accountId!
+                this.props.selectedAccount!
             );
 
             const isDuplicate = props.duplicateTransactions!.some(t => isEqual(t.importData, row));
