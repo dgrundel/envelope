@@ -1,5 +1,6 @@
 import { WizardStepApi, createWizard } from "../../uiElements/Wiz";
 import { AccountSelect } from './AccountSelect';
+import { DateFieldSelect } from './DateFieldSelect';
 import { Log } from '@/util/Logger';
 
 export interface Row {
@@ -19,6 +20,11 @@ export interface ImportWizardState {
 export type ImportWizardStepProps = ImportWizardState & WizardStepApi<ImportWizardState>;
 
 export const createImportWizard = (rows: Row[]) => {
+
+    if (rows.length === 0) {
+        throw new Error('Rows cannot be empty.');
+    }
+
     return createWizard(
         {
             title: `Importing ${rows.length} Transactions`,
@@ -35,6 +41,7 @@ export const createImportWizard = (rows: Row[]) => {
         },
         [
             AccountSelect,
+            DateFieldSelect,
         ]
     );
 }
