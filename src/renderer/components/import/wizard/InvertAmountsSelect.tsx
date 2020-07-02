@@ -1,12 +1,11 @@
+import { TransactionData } from '@/models/Transaction';
 import { CombinedState } from '@/renderer/store/store';
-import { filterOnlyImportableAccounts, isBlank } from "@/util/Filters";
+import { Log } from '@/util/Logger';
 import { ChoiceGroup } from '@fluentui/react';
 import { Account, AccountType } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { ImportWizardStepProps, rowsToTransactions } from "./ImportWizard2";
-import { TransactionData } from '@/models/Transaction';
-import { Log } from '@/util/Logger';
 
 export interface InvertAmountsSelectProps extends ImportWizardStepProps {
     selectedAccount?: Account;
