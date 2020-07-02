@@ -6,6 +6,7 @@ export const filterOnlyAccountType = (type: AccountType) => (account: AccountDat
 export const filterOnlyAccountTypeIn = (types: AccountType[]) => (account: AccountData) => types.some(type => type === account.type);
 
 export const filterOnlyBankAccounts = filterOnlyAccountTypeIn(getBankAccountTypes());
+export const filterOnlyImportableAccounts = filterOnlyBankAccounts;
 export const filterOnlyAssignableAccounts = filterOnlyAccountTypeIn(getAssignableAccountTypes());
 
 export const filterOnlyImportedTransactions = (transaction: TransactionData) => !!transaction.originalRecord;

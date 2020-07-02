@@ -3,13 +3,14 @@ import { Log } from "@/util/Logger";
 import { MessageBar, MessageBarType } from "@fluentui/react";
 import * as React from "react";
 import { BaseModal, ModalButton } from "./Modal";
+import { isNotBlank } from "@/util/Filters";
 
 export type WizardStateValidatorResult = string | string[] | undefined | void;
 export type WizardStateValidator<P> = (state: P) => WizardStateValidatorResult;
 
 export interface WizardStepApi<P> {
     setStepValidator: (validator: WizardStateValidator<P>) => void;
-    setState: (state: P) => void;
+    setState: <K extends keyof P>(state: Pick<P, K>) => void;
     nextStep: () => void;
     prevStep: () => void;
 }
@@ -27,6 +28,11 @@ export interface WizardProps<P> {
     // defaults to false
     // if true, returning an error prevents going backward
     validateOnStepBack?: boolean;
+    // run validator for the current step when canceling
+    // defaults to false
+    // if true, returning an error in the step validator
+    // for the current step prevents dismissal
+    validateCurrentStepOnCancel?: boolean;
 }
 
 interface InternalState {
@@ -36,9 +42,10 @@ interface InternalState {
 
 const validate = <P extends object>(state: P, validator?: WizardStateValidator<P>): string[] => {
     const result = validator && validator(state);
-    return result
+    const asArray = result
         ? Array.isArray(result) ? result : [result]
         : [];
+    return asArray.filter(isNotBlank);
 };
 
 export const createWizard = <P extends object>(props: WizardProps<P>, initialProps: P, ...steps: React.ComponentType<P & WizardStepApi<P>>[]) => {
@@ -57,6 +64,13 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
 
         const setStepValidator = (validator: WizardStateValidator<P>) => {
             stepValidators[internalState.step] = validator;
+        };
+
+        const setState = (updates: any) => {
+            setStepState({
+                ...stepState,
+                ...updates
+            });
         };
 
         const setStep = (i: number) => {
@@ -98,7 +112,15 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
         };
 
         const cancel = () => {
-            const errorMessages = validate(stepState, props.onCancel);
+            let errorMessages = props.validateCurrentStepOnCancel === true
+                ? validate(stepState, stepValidators[internalState.step])
+                : [];
+            
+            // only run cancel error handler if the step handler was successful
+            if (errorMessages.length === 0) {
+                errorMessages = validate(stepState, props.onCancel);
+            }
+
             if (errorMessages.length === 0) {
                 getAppContext().modalApi.dismissModal();
             } else {
@@ -110,7 +132,13 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
         };
 
         const finish = () => {
-            const errorMessages = validate(stepState, props.onFinish);
+            let errorMessages = validate(stepState, stepValidators[internalState.step])
+            
+            // only run the finish validator if the step validates
+            if (errorMessages.length === 0) {
+                errorMessages = validate(stepState, props.onFinish);
+            }
+            
             if (errorMessages.length === 0) {
                 getAppContext().modalApi.dismissModal();
             } else {
@@ -141,7 +169,7 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
 
         const stepApi = {
             setStepValidator,
-            setState: setStepState,
+            setState,
             nextStep,
             prevStep,
         };
