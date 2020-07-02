@@ -152,5 +152,5 @@ export const createImportWizard = (rows: Row[]) => {
         };
     }
 
-    return connect(null, { insertTransactions })(Component);
+    return connect(mapStateToProps, { insertTransactions })(Component);
 }

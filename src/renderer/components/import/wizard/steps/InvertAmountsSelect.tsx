@@ -69,7 +69,7 @@ class Component extends React.Component<InvertAmountsSelectProps> {
         }];
 
         return <div>
-            <h3>Is this a <strong>{expectedDescription}</strong>?</h3>
+            <h3>Is this <strong>{expectedDescription}</strong>?</h3>
             <p>To be sure your transactions are imported correctly, we need to understand
                 how positive and negative values should be handled.</p>
 
