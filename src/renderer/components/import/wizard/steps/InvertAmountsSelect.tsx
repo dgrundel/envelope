@@ -1,4 +1,4 @@
-import { TransactionData } from '@/models/Transaction';
+import { TransactionData, getTransactionTypeDescription, TransactionType, getAccountTransactionType } from '@/models/Transaction';
 import { CombinedState } from '@/renderer/store/store';
 import { Log } from '@/util/Logger';
 import { ChoiceGroup } from '@fluentui/react';
@@ -10,11 +10,6 @@ import { ImportWizardStepProps, rowsToTransactions } from "../ImportWizardFactor
 export interface InvertAmountsSelectProps extends ImportWizardStepProps {
     selectedAccount?: Account;
 }
-
-const CREDIT_CARD_DEBIT_DESC = 'purchase, fee, or other charge';
-const CREDIT_CARD_CREDIT_DESC = 'payment or credit';
-const BANK_ACCOUNT_CREDIT_DESC = 'deposit or credit';
-const BANK_ACCOUNT_DEBIT_DESC = 'purchase, bill payment, fee, or other type of debit';
 
 class Component extends React.Component<InvertAmountsSelectProps> {
     private readonly sampleTransaction: TransactionData | undefined;
@@ -59,32 +54,18 @@ class Component extends React.Component<InvertAmountsSelectProps> {
         const account = this.props.selectedAccount!;
         const transaction = this.sampleTransaction;
 
-        let expectedDescription;
-        let invertedDescription;
-        if (transaction.amount.isPositive()) {
-            if (isCreditCardAccountType(account.type)) {
-                expectedDescription = CREDIT_CARD_DEBIT_DESC;
-                invertedDescription = CREDIT_CARD_CREDIT_DESC;
-            } else {
-                expectedDescription = BANK_ACCOUNT_CREDIT_DESC;
-                invertedDescription = BANK_ACCOUNT_DEBIT_DESC;
-            }
-        } else {
-            if (isCreditCardAccountType(account.type)) {
-                expectedDescription = CREDIT_CARD_CREDIT_DESC;
-                invertedDescription = CREDIT_CARD_DEBIT_DESC;
-            } else {
-                expectedDescription = BANK_ACCOUNT_DEBIT_DESC;
-                invertedDescription = BANK_ACCOUNT_CREDIT_DESC;
-            }
-        }
+        const expectedType = getAccountTransactionType(account, transaction.amount.isNegative());
+        const invertedType = getAccountTransactionType(account, transaction.amount.isPositive());
+
+        const expectedDescription = getTransactionTypeDescription(expectedType);
+        const invertedDescription = getTransactionTypeDescription(invertedType);
 
         const options = [{
-            key: 'false', // false means we leave amounts as-is.
-            text: `Yes, this is a ${expectedDescription}.`,
+            key: 'false', // false means we leave amounts as-is. (i.e. do not invert)
+            text: `Yes, this is ${expectedDescription}.`,
         },{
             key: 'true', // true means we need to invert the amounts (positive <=> negative)
-            text: `No, this is a ${invertedDescription}.`,
+            text: `No, this is ${invertedDescription}.`,
         }];
 
         return <div>

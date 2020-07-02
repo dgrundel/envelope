@@ -31,7 +31,18 @@ export enum TransactionType {
     Transfer = 'transfer-transaction',
 }
 
-export const getAccountTransactionType = (account: Account, isAmountNegative: boolean) => {
+const transactionTypeDescriptions = {
+    [TransactionType.Adjustment]: 'a balance adjustment',
+    [TransactionType.BankCredit]: 'a deposit, refund, or other credit',
+    [TransactionType.BankDebit]: 'a purchase, bill payment, fee, or other type of debit',
+    [TransactionType.CreditAccountCredit]: 'a payment, refund, or other credit',
+    [TransactionType.CreditAccountDebit]: 'a purchase, fee, or other charge',
+    [TransactionType.Transfer]: 'a transfer of funds between accounts and/or envelopes',
+};
+
+export const getTransactionTypeDescription = (t: TransactionType): string => transactionTypeDescriptions[t];
+
+export const getAccountTransactionType = (account: Account, isAmountNegative: boolean): TransactionType => {
     if (isDepositAccountType(account.type)) {
         // checking, savings, other deposit accounts
         return isAmountNegative
