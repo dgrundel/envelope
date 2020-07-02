@@ -1,7 +1,7 @@
 import { CombinedState } from '@/renderer/store/store';
 import { filterOnlyImportableAccounts, isBlank } from "@/util/Filters";
 import { ChoiceGroup } from '@fluentui/react';
-import { Account } from '@models/Account';
+import { Account, AccountType } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { ImportWizardStepProps, rowsToTransactions } from "./ImportWizard2";
@@ -9,20 +9,49 @@ import { TransactionData } from '@/models/Transaction';
 import { Log } from '@/util/Logger';
 
 export interface InvertAmountsSelectProps extends ImportWizardStepProps {
-    accountMap?: Record<string, Account>;
+    selectedAccount?: Account;
 }
 
-interface State {
+const CREDIT_CARD_PURCHASE_DESC = 'purchase, fee, or other charge';
+const CREDIT_CARD_PAYMENT_DESC = 'payment or credit';
+const BANK_ACCOUNT_DEPOSIT_DESC = 'deposit or credit';
+const BANK_ACCOUNT_PURCHASE_DESC = 'purchase, bill payment, fee, or other type of debit';
 
-}
+class Component extends React.Component<InvertAmountsSelectProps> {
+    private readonly sampleTransaction: TransactionData | undefined;
 
-class Component extends React.Component<InvertAmountsSelectProps, State> {
     constructor(props: InvertAmountsSelectProps) {
         super(props);
 
         this.state = {};
 
         props.setStepValidator(this.validateState);
+
+        const rowsAsTransactions: TransactionData[] = rowsToTransactions(
+            this.props.rows, 
+            false, 
+            this.props.dateColumn!,
+            this.props.amountColumn!,
+            this.props.descriptionColumns!,
+            this.props.accountId!
+        );
+
+        // find a sample positive transaction
+        let transaction = rowsAsTransactions.find(transaction => !transaction.amount.isNegative());
+        let hasPositive = !!transaction;
+        if (!hasPositive) {
+            // if we didn't find a positive transaction, grab a negative one.
+            transaction = rowsAsTransactions.find(transaction => transaction.amount.isNegative());
+        }
+
+        if (!transaction) {
+            // No non-zero transactions in the import.
+            // This is fine, we can skip this step since we can't invert zero.
+            Log.debug('No non-zero transactions present.', rowsAsTransactions);
+            props.nextStep();
+        }
+
+        this.sampleTransaction = transaction;
     }
 
     validateState(state: ImportWizardStepProps) {
@@ -32,58 +61,43 @@ class Component extends React.Component<InvertAmountsSelectProps, State> {
     }
     
     render() {
-        const selectedAccount = this.props.accountMap![this.props.accountId!];
-        const transactions: TransactionData[] = rowsToTransactions(
-            this.props.rows, 
-            false, 
-            this.props.dateColumn!,
-            this.props.amountColumn!,
-            this.props.descriptionColumns!,
-            this.props.accountId!
-        );
-
-        let transaction = transactions.find(transaction => !transaction.amount.isNegative());
-        let hasPositive = !!transaction;
-        if (!hasPositive) {
-            // if we didn't find a positive transaction, grab a negative one.
-            transaction = transactions.find(transaction => transaction.amount.isNegative());
-        }
-
-        if (!transaction) {
-            Log.debug('No non-zero transactions present.', transactions);
-            api.nextStep();
+        if (!this.sampleTransaction) {
             return null;
         }
 
-        const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-            const value = e.target.value;
-            const state = api.getState();
-            state.invertTransactions = value === 'true';
-            api.updateState(state);
-        };
+        const account = this.props.selectedAccount!;
+        const transaction = this.sampleTransaction;
 
         let expectedDescription;
         let invertedDescription;
-        if (hasPositive) {
+        if (transaction.amount.isPositive()) {
             if (account.type === AccountType.CreditCard) {
                 // expect positive transactions on a credit card to be a payment
-                expectedDescription = 'purchase, fee, or other charge';
-                invertedDescription = 'payment or credit';
+                expectedDescription = CREDIT_CARD_PURCHASE_DESC;
+                invertedDescription = CREDIT_CARD_PAYMENT_DESC;
             } else {
                 // expect positive transactions on checking/savings to be a deposit
-                expectedDescription = 'deposit or credit';
-                invertedDescription = 'purchase, bill payment, fee, or other type of debit';
+                expectedDescription = BANK_ACCOUNT_DEPOSIT_DESC;
+                invertedDescription = BANK_ACCOUNT_PURCHASE_DESC;
             }
         } else {
             // expect negative transactions on credit card/checking/savings to be a purchase or fee
             if (account.type === AccountType.CreditCard) {
-                expectedDescription = 'payment or credit';
-                invertedDescription = 'purchase, fee, or other charge';
+                expectedDescription = CREDIT_CARD_PAYMENT_DESC;
+                invertedDescription = CREDIT_CARD_PURCHASE_DESC;
             } else {
-                expectedDescription = 'purchase, bill payment, fee, or other type of debit';
-                invertedDescription = 'deposit or credit';
+                expectedDescription = BANK_ACCOUNT_PURCHASE_DESC;
+                invertedDescription = BANK_ACCOUNT_DEPOSIT_DESC;
             }
         }
+
+        const options = [{
+            key: 'false', // false means we leave amounts as-is.
+            text: `Yes, this is a ${expectedDescription}.`,
+        },{
+            key: 'true', // true means we need to invert the amounts (positive <=> negative)
+            text: `No, this is a ${invertedDescription}.`,
+        }];
 
         return <div>
             <h3>Is this a <strong>{expectedDescription}</strong>?</h3>
@@ -107,30 +121,24 @@ class Component extends React.Component<InvertAmountsSelectProps, State> {
                 </tbody>
             </table>
 
-            <RowSelect
-                type="radio"
-                options={[{
-                    value: 'false', // false means we leave amounts as-is.
-                    label: <>
-                        <strong>Yes</strong>, this is a {expectedDescription}.
-                    </>
-                },{
-                    value: 'true', // true means we need to invert the amounts (positive <=> negative)
-                    label: <>
-                        <strong>No</strong>, this is a {invertedDescription}.
-                    </>
-                }]}
-                onChange={onChange}
-                value={state.invertTransactions.toString()}
+            <ChoiceGroup 
+                selectedKey={this.props.invertTransactions ? 'true' : 'false'} 
+                options={options}
+                onChange={(e, option) => this.props.setState({
+                    invertTransactions: option?.key === 'true',
+                })}
             />
         </div>;
     }
 }
 
 const mapStateToProps = (state: CombinedState, ownProps: InvertAmountsSelectProps): InvertAmountsSelectProps => {
+    const id = ownProps.accountId;
+    const selectedAccount = id ? state.accounts.accounts[id] : undefined;
+
     return {
         ...ownProps,
-        accountMap: state.accounts.accounts
+        selectedAccount,
     };
 }
 

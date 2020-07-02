@@ -7,7 +7,7 @@ import { DescriptionFieldSelect } from "./DescriptionFieldSelect";
 import { InvertAmountsSelect } from "./InvertAmountsSelect";
 import { ImportSummary } from "./ImportSummary";
 import { Currency } from "@/util/Currency";
-import { TransactionType } from "@/models/Transaction";
+import { TransactionType, TransactionData } from "@/models/Transaction";
 
 export interface Row {
     [header: string]: string;
@@ -25,9 +25,17 @@ export interface ImportWizardState {
 
 export type ImportWizardStepProps = ImportWizardState & WizardStepApi<ImportWizardState>;
 
-export const rowsToTransactions = (rows: Row[], invert: boolean, dateColumn: string, amountColumn: string, descriptionColumns: string[], accountId: string): TransactionData[] => {
+export const rowsToTransactions = (
+    rows: Row[],
+    invert: boolean,
+    dateColumn: string,
+    amountColumn: string,
+    descriptionColumns: string[],
+    accountId: string
+): TransactionData[] => {
+
     return rows.map(row => {
-        const date = new Date(row[dateColumn];
+        const date = new Date(row[dateColumn]);
         const currency = Currency.parse(row[amountColumn]);
         const amount = invert ? currency.getInverse() : currency;
         const description = descriptionColumns
