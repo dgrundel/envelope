@@ -9,12 +9,15 @@ export type WizardStateValidatorResult = string | string[] | undefined | void;
 export type WizardStateValidator<P> = (state: P) => WizardStateValidatorResult;
 
 export interface WizardStepApi<P> {
-    setStepValidator: (validator: WizardStateValidator<P>) => void;
     setState: <K extends keyof P>(state: Pick<P, K>) => void;
     nextStep: () => void;
     prevStep: () => void;
     cancel: () => void;
     finish: () => void;
+    // pass in a validator that should be called before allowing
+    // user to progres to next step (or finish)
+    // should be called in constructor of component
+    setStepValidator: (validator: WizardStateValidator<P>) => void;
 }
 
 export interface WizardProps<P> {
@@ -37,9 +40,10 @@ export interface WizardProps<P> {
     validateCurrentStepOnCancel?: boolean;
 }
 
-interface InternalState {
+interface InternalState<P> {
     step: number;
     errorMessages: string[];
+    stepValidator?: WizardStateValidator<P>;
 }
 
 const validate = <P extends object>(state: P, validator?: WizardStateValidator<P>): string[] => {
@@ -75,17 +79,18 @@ const createModalButtons = <P extends object>(currentStep: number, numSteps: num
 
 export const createWizard = <P extends object>(props: WizardProps<P>, initialProps: P, steps: React.ComponentType<P & WizardStepApi<P>>[]) => {
     
-    const stepValidators: WizardStateValidator<P>[] = [];
-    
     const WizardComponent = () => {
         const [stepState, setStepState] = React.useState<P>(initialProps);
-        const [internalState, setInternalState] = React.useState<InternalState>({
+        const [internalState, setInternalState] = React.useState<InternalState<P>>({
             step: 0,
             errorMessages: [],
         });
 
-        const setStepValidator = (validator: WizardStateValidator<P>) => {
-            stepValidators[internalState.step] = validator;
+        const setStepValidator = (stepValidator: WizardStateValidator<P>) => {
+            setInternalState({
+                ...internalState,
+                stepValidator
+            });
         };
 
         const setState = (updates: any) => {
@@ -99,15 +104,17 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
             if (i < 0 || i >= steps.length) {
                 throw new Error('Step index out of bounds.');
             }
+            // any values that should be cleared between step transitions go here
             setInternalState({
                 ...internalState,
                 errorMessages: [],
+                stepValidator: undefined,
                 step: i,
             });
         }
 
         const nextStep = () => {
-            const errorMessages = validate(stepState, stepValidators[internalState.step]);
+            const errorMessages = validate(stepState, internalState.stepValidator);
             if (errorMessages.length === 0) {
                 setStep(internalState.step + 1);
             } else {
@@ -121,7 +128,7 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
         const prevStep = () => {
             // by default, do not validate when going backward
             const errorMessages = props.validateOnStepBack === true
-                ? validate(stepState, stepValidators[internalState.step])
+                ? validate(stepState, internalState.stepValidator)
                 : [];
             if (errorMessages.length === 0) {
                 setStep(internalState.step - 1);
@@ -135,7 +142,7 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
 
         const cancel = () => {
             let errorMessages = props.validateCurrentStepOnCancel === true
-                ? validate(stepState, stepValidators[internalState.step])
+                ? validate(stepState, internalState.stepValidator)
                 : [];
             
             // only run cancel error handler if the step handler was successful
@@ -154,7 +161,7 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
         };
 
         const finish = () => {
-            let errorMessages = validate(stepState, stepValidators[internalState.step])
+            let errorMessages = validate(stepState, internalState.stepValidator)
             
             // only run the finish validator if the step validates
             if (errorMessages.length === 0) {
