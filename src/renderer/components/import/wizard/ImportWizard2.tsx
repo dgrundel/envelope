@@ -8,6 +8,13 @@ import { InvertAmountsSelect } from "./InvertAmountsSelect";
 import { ImportSummary } from "./ImportSummary";
 import { Currency } from "@/util/Currency";
 import { TransactionType, TransactionData } from "@/models/Transaction";
+import * as React from "react";
+import { CombinedState } from "@/renderer/store/store";
+import { connect } from "react-redux";
+import { insertTransactions } from "@/renderer/store/actions/Transaction";
+import { getAppContext } from "@/renderer/AppContext";
+import { AppPage } from "../../App";
+
 
 export interface Row {
     [header: string]: string;
@@ -60,27 +67,60 @@ export const createImportWizard = (rows: Row[]) => {
         throw new Error('Rows cannot be empty.');
     }
 
-    return createWizard(
-        {
-            title: `Importing ${rows.length} Transactions`,
-            onFinish: (state: ImportWizardState) => {
-                Log.debug('finish', state);
-            },
-            onCancel: (state: ImportWizardState) => {
-                Log.debug('cancel', state);
-            },
-        },
-        {
-            rows,
-            invertTransactions: false
-        },
-        [
-            AccountSelect,
-            DateFieldSelect,
-            AmountFieldSelect,
-            DescriptionFieldSelect,
-            InvertAmountsSelect,
-            ImportSummary,
-        ]
-    );
+    interface Props {
+        insertTransactions?: (transactionData: TransactionData[]) => Promise<void>;
+    }
+
+    class Component extends React.Component<Props> {
+        InnerComponent: () => JSX.Element;
+        
+        constructor(props: Props) {
+            super(props);
+
+            this.InnerComponent = createWizard(
+                {
+                    title: `Importing ${rows.length} Transactions`,
+                    onFinish: this.onFinish.bind(this),
+                },
+                {
+                    rows,
+                    invertTransactions: false,
+                },
+                [
+                    AccountSelect,
+                    DateFieldSelect,
+                    AmountFieldSelect,
+                    DescriptionFieldSelect,
+                    InvertAmountsSelect,
+                    ImportSummary,
+                ]
+            );
+        }
+
+        onFinish(state: ImportWizardState) {
+            Log.debug('Import Wizard Finish', state);
+
+            const rowsAsTransactions = rowsToTransactions(
+                state.rows, 
+                state.invertTransactions, 
+                state.dateColumn!,
+                state.amountColumn!,
+                state.descriptionColumns!,
+                state.accountId!,
+            );
+
+            this.props.insertTransactions!(rowsAsTransactions).then(() => {
+                const appContext = getAppContext();
+                // dismiss import modal
+                appContext.modalApi.dismissModal();
+                appContext.pageApi.setPage(AppPage.Transactions);
+            });
+        }
+
+        render() {
+            return <this.InnerComponent/>;
+        }
+    }
+
+    return connect(null, { insertTransactions })(Component);
 }
