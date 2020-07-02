@@ -48,7 +48,7 @@ const validate = <P extends object>(state: P, validator?: WizardStateValidator<P
     return asArray.filter(isNotBlank);
 };
 
-export const createWizard = <P extends object>(props: WizardProps<P>, initialProps: P, ...steps: React.ComponentType<P & WizardStepApi<P>>[]) => {
+export const createWizard = <P extends object>(props: WizardProps<P>, initialProps: P, steps: React.ComponentType<P & WizardStepApi<P>>[]) => {
     
     const stepValidators: WizardStateValidator<P>[] = [];
     
@@ -204,33 +204,35 @@ export const TestWizard = createWizard(
     {
         value: 'test'
     }, 
-    class Foo extends React.Component<TestWizProps & WizardStepApi<TestWizProps>> {
-        
-        constructor(props: TestWizProps & WizardStepApi<TestWizProps>) {
-            super(props);
+    [
+        class Foo extends React.Component<TestWizProps & WizardStepApi<TestWizProps>> {
+            
+            constructor(props: TestWizProps & WizardStepApi<TestWizProps>) {
+                super(props);
 
-            props.setStepValidator((s: TestWizProps) => {
-                if (s.value !== 'valid') {
-                    return 'value must be "valid"';
-                }
-            });
+                props.setStepValidator((s: TestWizProps) => {
+                    if (s.value !== 'valid') {
+                        return 'value must be "valid"';
+                    }
+                });
+            }
+            
+            render() {
+                return <div>
+                    <p>Step 1: {this.props.value}</p>
+                    <input onChange={(e) => { this.props.setState({ value: e.target.value }) }} value={this.props.value} />
+                    <button onClick={() => this.props.nextStep()}>Next</button>
+                </div>;
+            }
+        },
+        class Bar extends React.Component<TestWizProps & WizardStepApi<TestWizProps>> {
+            render() {
+                return <div>
+                    <p>Step 2: {this.props.value}</p>
+                    <input onChange={(e) => { this.props.setState({ value: e.target.value }) }} value={this.props.value} />
+                    <button onClick={() => this.props.prevStep()}>Prev</button>
+                </div>;
+            }
         }
-        
-        render() {
-            return <div>
-                <p>Step 1: {this.props.value}</p>
-                <input onChange={(e) => { this.props.setState({ value: e.target.value }) }} value={this.props.value} />
-                <button onClick={() => this.props.nextStep()}>Next</button>
-            </div>;
-        }
-    },
-    class Bar extends React.Component<TestWizProps & WizardStepApi<TestWizProps>> {
-        render() {
-            return <div>
-                <p>Step 2: {this.props.value}</p>
-                <input onChange={(e) => { this.props.setState({ value: e.target.value }) }} value={this.props.value} />
-                <button onClick={() => this.props.prevStep()}>Prev</button>
-            </div>;
-        }
-    }
+    ]
 );

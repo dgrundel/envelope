@@ -2,6 +2,7 @@ import * as React from "react";
 import { Box } from './uiElements/Box';
 import { TestWizard } from "./uiElements/Wiz";
 import { getAppContext } from "../AppContext";
+import { createImportWizard } from './import/wizard/ImportWizard2';
 
 
 export interface DashboardPageProps {
@@ -25,6 +26,19 @@ export class DashboardPage extends React.Component<DashboardPageProps, {}> {
                 <button onClick={() => {
                     getAppContext().modalApi.queueModal(<TestWizard/>);
                 }}>Pop it</button>
+
+                <button onClick={() => {
+                    const Component = createImportWizard([{
+                        'desc': 'foo',
+                        'amount': '12.34',
+                        'date': '7/1/2020'
+                    },{
+                        'desc': 'something else',
+                        'amount': '1.47',
+                        'date': '7/1/2020'
+                    }]);
+                    getAppContext().modalApi.queueModal(<Component/>);
+                }}>createImportWizard</button>
             </Box>
         </>;
     }
