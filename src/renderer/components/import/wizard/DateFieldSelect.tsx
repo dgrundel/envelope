@@ -2,6 +2,7 @@ import { DetailsList, DetailsListLayoutMode, IColumn, IObjectWithKey, mergeStyle
 import * as React from "react";
 import { ImportWizardStepProps } from "./ImportWizard2";
 import { isBlank } from '@/util/Filters';
+import { Log } from '@/util/Logger';
 
 const iconStyle = mergeStyles({
     verticalAlign: 'middle',
@@ -24,13 +25,27 @@ class Component extends React.Component<ImportWizardStepProps> {
 
         const rows = this.props.rows;
         const first = rows[0];
-        const fieldNames = Object.keys(first);
+        
+        this.items = Object.keys(first)
+            .filter(fieldName => {
+                const value = first[fieldName];
+                return !isNaN(Date.parse(value));
+            })
+            .map(fieldName => ({
+                key: fieldName,
+                name: fieldName,
+                sample: first[fieldName],
+            }));
 
-        this.items = fieldNames.map(fieldName => ({
-            key: fieldName,
-            name: fieldName,
-            sample: first[fieldName],
-        }));
+        if (this.items.length === 0) {
+            Log.error('No columns with usable date values.');
+        // } else if (this.items.length === 1) {
+            // Log.debug('Only one column with a usable date value. Skipping step.');
+            // props.setState({
+                // dateColumn: this.items[0].key as string
+            // });
+            // props.nextStep();
+        }
 
         this.selection = new Selection({
             items: this.items,
