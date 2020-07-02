@@ -1,6 +1,7 @@
 import { DetailsList, DetailsListLayoutMode, IColumn, IObjectWithKey, mergeStyles, Selection, SelectionMode } from '@fluentui/react';
 import * as React from "react";
 import { ImportWizardStepProps } from "./ImportWizard2";
+import { isBlank } from '@/util/Filters';
 
 const iconStyle = mergeStyles({
     verticalAlign: 'middle',
@@ -18,6 +19,8 @@ class Component extends React.Component<ImportWizardStepProps> {
     
     constructor(props: ImportWizardStepProps) {
         super(props);
+
+        props.setStepValidator(this.validateState);
 
         const rows = this.props.rows;
         const first = rows[0];
@@ -44,9 +47,17 @@ class Component extends React.Component<ImportWizardStepProps> {
             this.selection.setKeySelected(this.props.dateColumn, true, false);
         }
     }
+
+    validateState(state: ImportWizardStepProps) {
+        if (isBlank(state.dateColumn)) {
+            return 'Please select a field.';
+        }
+    }
     
     render() {
         return <div>
+            <h3>Which one of these contains the <strong>date</strong> of the transaction?</h3>
+
             <DetailsList
                 items={this.items}
                 columns={columns}

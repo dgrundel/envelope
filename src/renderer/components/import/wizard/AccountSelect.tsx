@@ -10,11 +10,7 @@ export interface AccountSelectProps extends ImportWizardStepProps {
     importableAccounts?: Account[];
 }
 
-interface State {
-
-}
-
-class Component extends React.Component<AccountSelectProps, State> {
+class Component extends React.Component<AccountSelectProps, {}> {
     constructor(props: AccountSelectProps) {
         super(props);
 
@@ -30,14 +26,18 @@ class Component extends React.Component<AccountSelectProps, State> {
     }
     
     render() {
+        const options = this.props.importableAccounts!.map(account => ({
+            key: account._id,
+            text: account.name
+        }));
+        
         return <div>
+            <h3>Into which <strong>account</strong> should we import the transactions?</h3>
+
             <ChoiceGroup 
                 label="Account" 
                 selectedKey={this.props.accountId} 
-                options={this.props.importableAccounts!.map(account => ({
-                    key: account._id,
-                    text: account.name
-                }))}
+                options={options}
                 onChange={(e, option) => this.props.setState({
                     accountId: option?.key,
                 })}
