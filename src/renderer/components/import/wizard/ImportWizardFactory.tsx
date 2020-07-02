@@ -54,7 +54,7 @@ export const rowToTransactionData = (
         date,
         amount,
         description,
-        originalRecord: row,
+        importData: row,
         linkedTransactionIds: []
     };
 };

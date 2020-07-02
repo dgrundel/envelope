@@ -18,7 +18,7 @@ export interface TransactionData {
     description: string;
     amount: Currency;
     linkedTransactionIds: string[];
-    originalRecord?: Record<string, string>;
+    importData?: Record<string, string>;
     type?: TransactionType;
 }
 

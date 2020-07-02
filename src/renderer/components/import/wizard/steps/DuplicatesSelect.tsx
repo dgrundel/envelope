@@ -6,6 +6,7 @@ import { isEqual } from 'lodash';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { ImportWizardStepProps, rowToTransactionData } from "../ImportWizardFactory";
+import { filterOnlyImportedTransactions } from '@/util/Filters';
 
 export interface InvertAmountsSelectProps extends ImportWizardStepProps {
     duplicateTransactions?: Transaction[];
@@ -39,7 +40,7 @@ class Component extends React.Component<InvertAmountsSelectProps> {
                 this.props.accountId!
             );
 
-            const isDuplicate = props.duplicateTransactions!.some(t => isEqual(t.originalRecord, row));
+            const isDuplicate = props.duplicateTransactions!.some(t => isEqual(t.importData, row));
 
             return {
                 key: i.toString(),
@@ -115,10 +116,10 @@ const mapStateToProps = (state: CombinedState, ownProps: InvertAmountsSelectProp
     const selectedAccount = accountId ? state.accounts.accounts[accountId] : undefined;
     const duplicateTransactions = state.transactions.sortedIds
         .map(id => state.transactions.transactions[id])
+        .filter(filterOnlyImportedTransactions)
         .filter(transaction => transaction.accountId === accountId
-            && transaction.type === TransactionType.Imported
-            && transaction.originalRecord 
-            && ownProps.rows.some(row => isEqual(row, transaction.originalRecord)))
+            && transaction.importData 
+            && ownProps.rows.some(row => isEqual(row, transaction.importData)))
 
     return {
         ...ownProps,
