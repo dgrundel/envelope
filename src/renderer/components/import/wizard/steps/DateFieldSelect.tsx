@@ -39,12 +39,12 @@ class Component extends React.Component<ImportWizardStepProps> {
 
         if (this.items.length === 0) {
             Log.error('No columns with usable date values.');
-        // } else if (this.items.length === 1) {
-            // Log.debug('Only one column with a usable date value. Skipping step.');
-            // props.setState({
-                // dateColumn: this.items[0].key as string
-            // });
-            // props.nextStep();
+        } else if (this.items.length === 1) {
+            Log.debug('Only one column with a usable date value. Skipping step.');
+            props.setState({
+                dateColumn: this.items[0].key as string
+            });
+            props.nextStep();
         }
 
         this.selection = new Selection({
