@@ -19,6 +19,10 @@ export interface ModalProps {
     children: any;
     closeButtonHandler?: () => void;
     buttons?: ModalButton[];
+    // CSS class name for the modal
+    className?: string;
+    // CSS rules for the modal
+    style?: React.CSSProperties;
 }
 
 export interface ModalApi {
@@ -65,7 +69,7 @@ export const ButtonSets = {
 export class BaseModal extends React.Component<ModalProps, {}> implements Modal {
     render() {
         return <div className="modal-overlay">
-            <div className="modal-content">
+            <div className={`modal-content ${this.props.className || ''}`} style={this.props.style}>
                 {this.renderHeading()}
                 <div className="modal-body">
                     {this.props.children}

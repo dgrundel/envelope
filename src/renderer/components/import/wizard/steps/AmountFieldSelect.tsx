@@ -1,18 +1,13 @@
-import { DetailsList, DetailsListLayoutMode, IColumn, IObjectWithKey, mergeStyles, Selection, SelectionMode } from '@fluentui/react';
+import { Currency } from '@/util/Currency';
+import { isBlank } from '@/util/Filters';
+import { Log } from '@/util/Logger';
+import { DetailsList, DetailsListLayoutMode, IColumn, IObjectWithKey, Selection, SelectionMode } from '@fluentui/react';
 import * as React from "react";
 import { ImportWizardStepProps } from "../ImportWizardFactory";
-import { isBlank } from '@/util/Filters';
-import { Currency } from '@/util/Currency';
-import { Log } from '@/util/Logger';
-
-const iconStyle = mergeStyles({
-    verticalAlign: 'middle',
-    fontSize: '1.4em',
-});
 
 const columns: IColumn[] = [
-    { key: 'column1', name: 'Field Name', fieldName: 'name', minWidth: 100, },
-    { key: 'column2', name: 'Sample Value', fieldName: 'sample', minWidth: 100, },
+    { key: 'column1', name: 'Field Name', fieldName: 'name', minWidth: 150, },
+    { key: 'column2', name: 'Sample Value', fieldName: 'sample', minWidth: 300, },
 ];
 
 class Component extends React.Component<ImportWizardStepProps> {
@@ -80,6 +75,7 @@ class Component extends React.Component<ImportWizardStepProps> {
                 layoutMode={DetailsListLayoutMode.justified}
                 selectionMode={SelectionMode.single}
                 selection={this.selection}
+                selectionPreservedOnEmptyClick={true}
             />
         </div>;
     }

@@ -1,19 +1,18 @@
-import { WizardStepApi, createWizard } from "../../uiElements/WizardFactory";
-import { AccountSelect } from './steps/AccountSelect';
-import { DateFieldSelect } from './steps/DateFieldSelect';
-import { Log } from '@/util/Logger';
-import { AmountFieldSelect } from "./steps/AmountFieldSelect";
-import { DescriptionFieldSelect } from "./steps/DescriptionFieldSelect";
-import { InvertAmountsSelect } from "./steps/InvertAmountsSelect";
-import { ImportSummary } from "./steps/ImportSummary";
-import { Currency } from "@/util/Currency";
-import { TransactionType, TransactionData } from "@/models/Transaction";
-import * as React from "react";
-import { CombinedState } from "@/renderer/store/store";
-import { connect } from "react-redux";
-import { insertTransactions } from "@/renderer/store/actions/Transaction";
+import { TransactionData, TransactionType } from "@/models/Transaction";
 import { getAppContext } from "@/renderer/AppContext";
+import { insertTransactions } from "@/renderer/store/actions/Transaction";
+import { Currency } from "@/util/Currency";
+import { Log } from '@/util/Logger';
+import * as React from "react";
+import { connect } from "react-redux";
 import { AppPage } from "../../App";
+import { createWizard, WizardStepApi } from "../../uiElements/WizardFactory";
+import { AccountSelect } from './steps/AccountSelect';
+import { AmountFieldSelect } from "./steps/AmountFieldSelect";
+import { DateFieldSelect } from './steps/DateFieldSelect';
+import { DescriptionFieldSelect } from "./steps/DescriptionFieldSelect";
+import { DuplicatesSelect } from './steps/DuplicatesSelect';
+import { InvertAmountsSelect } from "./steps/InvertAmountsSelect";
 
 
 export interface Row {
@@ -22,15 +21,43 @@ export interface Row {
 
 export interface ImportWizardState {
     rows: Row[];
-
+    invertTransactions: boolean;
+    
+    // indexes of the rows that will be imported
+    selectedForImport?: number[];
     accountId?: string;
     dateColumn?: string;
     amountColumn?: string;
     descriptionColumns?: string[];
-    invertTransactions: boolean;
 }
 
 export type ImportWizardStepProps = ImportWizardState & WizardStepApi<ImportWizardState>;
+
+export const rowToTransactionData = (
+    row: Row,
+    invert: boolean,
+    dateColumn: string,
+    amountColumn: string,
+    descriptionColumns: string[],
+    accountId: string
+): TransactionData => {
+    const date = new Date(row[dateColumn]);
+    const currency = Currency.parse(row[amountColumn]);
+    const amount = invert ? currency.getInverse() : currency;
+    const description = descriptionColumns
+        .map(col => row[col])
+        .join(' ');
+
+    return {
+        type: TransactionType.Imported,
+        accountId,
+        date,
+        amount,
+        description,
+        originalRecord: row,
+        linkedTransactionIds: []
+    };
+};
 
 export const rowsToTransactions = (
     rows: Row[],
@@ -41,24 +68,7 @@ export const rowsToTransactions = (
     accountId: string
 ): TransactionData[] => {
 
-    return rows.map(row => {
-        const date = new Date(row[dateColumn]);
-        const currency = Currency.parse(row[amountColumn]);
-        const amount = invert ? currency.getInverse() : currency;
-        const description = descriptionColumns
-            .map(col => row[col])
-            .join(' ');
-
-        return {
-            type: TransactionType.Imported,
-            accountId,
-            date,
-            amount,
-            description,
-            originalRecord: row,
-            linkedTransactionIds: []
-        };
-    });
+    return rows.map(row => rowToTransactionData(row, invert, dateColumn, amountColumn, descriptionColumns, accountId));
 };
 
 export const createImportWizard = (rows: Row[]) => {
@@ -92,7 +102,7 @@ export const createImportWizard = (rows: Row[]) => {
                     AmountFieldSelect,
                     DescriptionFieldSelect,
                     InvertAmountsSelect,
-                    ImportSummary,
+                    DuplicatesSelect,
                 ]
             );
         }
@@ -100,8 +110,12 @@ export const createImportWizard = (rows: Row[]) => {
         onFinish(state: ImportWizardState) {
             Log.debug('Import Wizard Finish', state);
 
+            const rowsToImport = state.selectedForImport
+                ? state.selectedForImport.map(i => state.rows[i])
+                : state.rows;
+
             const rowsAsTransactions = rowsToTransactions(
-                state.rows, 
+                rowsToImport, 
                 state.invertTransactions, 
                 state.dateColumn!,
                 state.amountColumn!,

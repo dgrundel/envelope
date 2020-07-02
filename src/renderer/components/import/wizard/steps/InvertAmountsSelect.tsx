@@ -26,7 +26,7 @@ class Component extends React.Component<InvertAmountsSelectProps> {
 
         const rowsAsTransactions: TransactionData[] = rowsToTransactions(
             this.props.rows, 
-            false, 
+            this.props.invertTransactions, 
             this.props.dateColumn!,
             this.props.amountColumn!,
             this.props.descriptionColumns!,
@@ -95,7 +95,7 @@ class Component extends React.Component<InvertAmountsSelectProps> {
             <p>To be sure your transactions are imported correctly, we need to understand
                 how positive and negative values should be handled.</p>
 
-            <table className="offset-table">
+            <table className="offset-table" style={({ width: '60vw' })}>
                 <tbody>
                     <tr>
                         <th>Date</th>

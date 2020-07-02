@@ -38,6 +38,10 @@ export interface WizardProps<P> {
     // if true, returning an error in the step validator
     // for the current step prevents dismissal
     validateCurrentStepOnCancel?: boolean;
+    // CSS class name for the modal
+    className?: string;
+    // CSS rules for the modal
+    style?: React.CSSProperties;
 }
 
 interface InternalState<P> {
@@ -190,7 +194,7 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
         const buttons: ModalButton[] = createModalButtons(internalState.step, steps.length, stepApi);
         const StepComponent = steps[internalState.step];
 
-        return <BaseModal heading={props.title} buttons={buttons} closeButtonHandler={stepApi.cancel}>
+        return <BaseModal heading={props.title} buttons={buttons} closeButtonHandler={stepApi.cancel} style={props.style} className={props.className}>
             {internalState.errorMessages.length > 0 && <MessageBar messageBarType={MessageBarType.error} isMultiline={true}>
                 {internalState.errorMessages.map(message => <p key={message}>{message}</p>)}
             </MessageBar>}
