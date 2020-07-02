@@ -8,7 +8,6 @@ const iconStyle = mergeStyles({
 });
 
 const columns: IColumn[] = [
-    // { key: 'column0', name: 'Selected', fieldName: 'icon', minWidth: 32, maxWidth: 32, isIconOnly: true, onRender: item => item.icon && <FontIcon iconName={item.icon} className={iconStyle} /> },
     { key: 'column1', name: 'Field Name', fieldName: 'name', minWidth: 100, },
     { key: 'column2', name: 'Sample Value', fieldName: 'sample', minWidth: 100, },
 ];
