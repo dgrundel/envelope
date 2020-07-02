@@ -5,7 +5,7 @@ import { ChoiceGroup } from '@fluentui/react';
 import { Account, AccountType } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { ImportWizardStepProps, rowsToTransactions } from "./ImportWizard2";
+import { ImportWizardStepProps, rowsToTransactions } from "../ImportWizardFactory";
 
 export interface InvertAmountsSelectProps extends ImportWizardStepProps {
     selectedAccount?: Account;

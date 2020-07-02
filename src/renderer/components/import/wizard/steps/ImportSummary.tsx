@@ -1,9 +1,9 @@
 import * as React from "react";
 import { CombinedState } from '@/renderer/store/store';
 import { connect } from 'react-redux';
-import { ImportWizardStepProps, rowsToTransactions } from "./ImportWizard2";
 import { TransactionData } from "@/models/Transaction";
 import { Account } from '@models/Account';
+import { ImportWizardStepProps, rowsToTransactions } from '../ImportWizardFactory';
 
 export interface ImportSummaryProps extends ImportWizardStepProps {
     selectedAccount?: Account;
@@ -18,7 +18,7 @@ class Component extends React.Component<ImportSummaryProps> {
         this.state = {};
 
         this.rowsAsTransactions = rowsToTransactions(
-            this.props.rows, 
+        this.props.rows, 
             false, 
             this.props.dateColumn!,
             this.props.amountColumn!,

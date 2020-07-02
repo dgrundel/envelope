@@ -4,7 +4,7 @@ import { ChoiceGroup } from '@fluentui/react';
 import { Account } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { ImportWizardStepProps } from "./ImportWizard2";
+import { ImportWizardStepProps } from "../ImportWizardFactory";
 
 export interface AccountSelectProps extends ImportWizardStepProps {
     importableAccounts?: Account[];

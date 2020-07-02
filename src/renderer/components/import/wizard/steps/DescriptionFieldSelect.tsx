@@ -1,6 +1,6 @@
 import { DetailsList, DetailsListLayoutMode, IColumn, IObjectWithKey, mergeStyles, Selection, SelectionMode } from '@fluentui/react';
 import * as React from "react";
-import { ImportWizardStepProps } from "./ImportWizard2";
+import { ImportWizardStepProps } from "../ImportWizardFactory";
 import { isNotBlank } from '@/util/Filters';
 
 const iconStyle = mergeStyles({

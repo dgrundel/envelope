@@ -1,11 +1,11 @@
 import { WizardStepApi, createWizard } from "../../uiElements/WizardFactory";
-import { AccountSelect } from './AccountSelect';
-import { DateFieldSelect } from './DateFieldSelect';
+import { AccountSelect } from './steps/AccountSelect';
+import { DateFieldSelect } from './steps/DateFieldSelect';
 import { Log } from '@/util/Logger';
-import { AmountFieldSelect } from "./AmountFieldSelect";
-import { DescriptionFieldSelect } from "./DescriptionFieldSelect";
-import { InvertAmountsSelect } from "./InvertAmountsSelect";
-import { ImportSummary } from "./ImportSummary";
+import { AmountFieldSelect } from "./steps/AmountFieldSelect";
+import { DescriptionFieldSelect } from "./steps/DescriptionFieldSelect";
+import { InvertAmountsSelect } from "./steps/InvertAmountsSelect";
+import { ImportSummary } from "./steps/ImportSummary";
 import { Currency } from "@/util/Currency";
 import { TransactionType, TransactionData } from "@/models/Transaction";
 import * as React from "react";

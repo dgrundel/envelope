@@ -5,7 +5,7 @@ import '@public/components/import/ImportDropTarget.scss';
 import * as csv from 'neat-csv';
 import * as React from "react";
 import { DropTarget } from "../uiElements/DropTarget";
-import { createImportWizard } from './wizard/ImportWizard2';
+import { createImportWizard } from './wizard/ImportWizardFactory';
 
 
 export interface ImportProps {

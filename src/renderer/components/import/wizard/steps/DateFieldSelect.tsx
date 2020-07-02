@@ -1,6 +1,6 @@
 import { DetailsList, DetailsListLayoutMode, IColumn, IObjectWithKey, mergeStyles, Selection, SelectionMode } from '@fluentui/react';
 import * as React from "react";
-import { ImportWizardStepProps } from "./ImportWizard2";
+import { ImportWizardStepProps } from "../ImportWizardFactory";
 import { isBlank } from '@/util/Filters';
 import { Log } from '@/util/Logger';
 
