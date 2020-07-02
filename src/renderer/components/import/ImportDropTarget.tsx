@@ -6,6 +6,7 @@ import * as React from "react";
 import { DropTarget } from "../uiElements/DropTarget";
 import { ImportWizard } from './ImportWizard';
 import { FontIcon } from '@fluentui/react';
+import { createImportWizard } from './wizard/ImportWizard2';
 
 
 export interface ImportProps {
@@ -52,8 +53,8 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
         .then(csvFiles => {
             csvFiles.forEach(csvRows => {
                 Log.debug('csvRows', csvRows);
-                const modal = <ImportWizard rows={csvRows}/>
-                getAppContext().modalApi.queueModal(modal);
+                const Component = createImportWizard(csvRows);
+                getAppContext().modalApi.queueModal(<Component/>);
             });
         })
         // if we got an error along the way, handle it.
