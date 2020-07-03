@@ -27,6 +27,7 @@ export interface ModalProps {
 
 export interface ModalApi {
     queueModal: (modal: Modal) => void;
+    replaceModal: (modal: Modal) => void;
     dismissModal: () => void;
 }
 

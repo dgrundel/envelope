@@ -3,7 +3,7 @@ import { getAccountAmountTransactionFlag, Transaction, TransactionData, Transact
 import { insertTransactions } from '@/renderer/store/actions/Transaction';
 import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
 import { getRequiredCurrencyError } from '@/util/ErrorGenerators';
-import { combineFlags } from '@/util/Flags';
+import { unionFlags } from '@/util/Flags';
 import { Log } from '@/util/Logger';
 import { MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';
 import * as React from "react";
@@ -96,7 +96,7 @@ class Component extends React.Component<AdjustBalanceProps, State> {
             amount: amount,
             description: 'Manual balance adjustment',
             linkedTransactionIds: [],
-            flags: combineFlags(amountFlag, TransactionFlag.Adjustment),
+            flags: unionFlags(amountFlag, TransactionFlag.Adjustment),
         };
 
         this.props.insertTransactions!([transactionData]).then(created => {

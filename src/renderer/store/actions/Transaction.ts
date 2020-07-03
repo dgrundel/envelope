@@ -1,6 +1,6 @@
 import { TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
 import { Currency } from '@/util/Currency';
-import { combineFlags } from '@/util/Flags';
+import { unionFlags } from '@/util/Flags';
 import { Log } from '@/util/Logger';
 import { Account } from '@models/Account';
 import { getAccountAmountTransactionFlag, Transaction, TransactionData, TransactionFlag } from '@models/Transaction';
@@ -56,7 +56,7 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
     const description = `Transfer from "${fromAccount.name}" to "${toAccount.name}"`;
     
     const inverseAmount = amount.getInverse();
-    const flags = combineFlags(
+    const flags = unionFlags(
         TransactionFlag.Transfer, 
         getAccountAmountTransactionFlag(fromAccount, inverseAmount)
     );
@@ -75,7 +75,7 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
             Log.debug('addTransaction (fromTransaction)', inserted);
             return dispatch(applyTransactionToAccount(inserted))
                 .then(() => {
-                    const flags = combineFlags(
+                    const flags = unionFlags(
                         TransactionFlag.Transfer, 
                         getAccountAmountTransactionFlag(toAccount, amount)
                     );

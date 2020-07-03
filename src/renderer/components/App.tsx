@@ -57,6 +57,7 @@ class Component extends React.Component<AppProps, AppState> implements ModalApi,
         // ModalApi
         this.dismissModal = this.dismissModal.bind(this);
         this.queueModal = this.queueModal.bind(this);
+        this.replaceModal = this.replaceModal.bind(this);
         
         // PageApi
         this.setPage = this.setPage.bind(this);
@@ -124,6 +125,12 @@ class Component extends React.Component<AppProps, AppState> implements ModalApi,
         }
     }
 
+    replaceModal(modal: Modal) {
+        this.setState({
+            modals: [modal]
+        });
+    }
+    
     queueModal(modal: Modal) {
         this.setState(prev => {
             return {

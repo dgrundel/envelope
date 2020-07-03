@@ -9,8 +9,8 @@ import { CombinedState } from '../../store/store';
 type GroupedAccounts = Record<AccountType, Account[]>;
 
 export interface AccountDropdownProps {
-    label: string;
     onChange: (e: React.FormEvent<HTMLDivElement>, selected?: IDropdownOption) => void;
+    label?: string;
     placeholder?: string;
     selectedKey?: string | number | string[] | number[];
     filter?: (account: Account) => boolean;

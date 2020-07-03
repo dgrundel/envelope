@@ -17,13 +17,11 @@ class Component extends React.Component<__templateProps, State> {
     }
     
     render() {
-        throw new Error('__template');
         return null;
     }
 }
 
 const mapStateToProps = (state: CombinedState, ownProps: __templateProps): __templateProps => {
-    throw new Error('__template');
     return {
         ...ownProps,
     };

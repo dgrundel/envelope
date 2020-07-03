@@ -1,4 +1,4 @@
-import { AccountData, getBankAccountTypes, getAssignableAccountTypes, AccountType } from '@/models/Account';
+import { AccountData, getBankAccountTypes, getAssignableAccountTypes, AccountType, getDepositAccountTypes } from '@/models/Account';
 import { TransactionData } from '@/models/Transaction';
 import { Currency } from './Currency';
 
@@ -6,6 +6,7 @@ export const filterOnlyAccountType = (type: AccountType) => (account: AccountDat
 export const filterOnlyAccountTypeIn = (types: AccountType[]) => (account: AccountData) => types.some(type => type === account.type);
 
 export const filterOnlyBankAccounts = filterOnlyAccountTypeIn(getBankAccountTypes());
+export const filterOnlyDepositAccounts = filterOnlyAccountTypeIn(getDepositAccountTypes());
 export const filterOnlyImportableAccounts = filterOnlyBankAccounts;
 export const filterOnlyAssignableAccounts = filterOnlyAccountTypeIn(getAssignableAccountTypes());
 
