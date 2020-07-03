@@ -24,6 +24,10 @@ const iconStyle = mergeStyles({
     marginRight: '1ex'
 });
 
+const containerStyle = mergeStyles({
+    padding: '1px 0',
+});
+
 const onRenderOption = (option: IDropdownOption): JSX.Element => {
     const icon = option.data && option.data.icon;
     return <div>
@@ -43,14 +47,16 @@ class Component extends React.Component<AccountDropdownProps, {}> {
     render() {
         const dropdownChoices = this.computeDropdownOptions(this.props.groupedAccounts!);
 
-        return <Dropdown
-            label={this.props.label}
-            selectedKey={this.props.selectedKey}
-            onChange={this.props.onChange}
-            placeholder={this.props.placeholder}
-            options={dropdownChoices}
-            onRenderOption={onRenderOption}
-        />;
+        return <div className={containerStyle}>
+            <Dropdown
+                label={this.props.label}
+                selectedKey={this.props.selectedKey}
+                onChange={this.props.onChange}
+                placeholder={this.props.placeholder}
+                options={dropdownChoices}
+                onRenderOption={onRenderOption}
+            />
+        </div>;
     }
 
     computeDropdownOptions(groupedAccounts: GroupedAccounts): IDropdownOption[] {

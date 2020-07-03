@@ -79,3 +79,18 @@ table.offset-table {
   width: calc(100% - #{$horizontal-margin * 2});
   border: $border-width solid $color-lt-gray;
 }
+
+::-webkit-scrollbar {
+  height: .3em;
+  width: .3em;
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $color-lt-gray;
+  -webkit-border-radius: 0.15em;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
