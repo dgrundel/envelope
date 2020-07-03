@@ -132,7 +132,8 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
                  * Positive transactions on Checking and Savings accounts
                  * go directly to the unallocated envelope to be distributed later.
                  */
-                if (containsFlag(TransactionFlag.Transfer, transaction.flags) && isDepositAccountType(account.type)) {
+                const isNotTransfer = !containsFlag(TransactionFlag.Transfer, transaction.flags);
+                if (isNotTransfer && isDepositAccountType(account.type)) {
                     if (transaction.amount.isPositive()) {
                         const unallocatedId = getState().accounts.unallocatedId;
                         if (!unallocatedId) {
