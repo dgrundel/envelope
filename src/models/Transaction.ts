@@ -1,5 +1,5 @@
 import { Currency } from '@/util/Currency';
-import { Account, AccountType, isDepositAccountType, isCreditCardAccountType } from './Account';
+import { Account, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
 
 export enum TransactionType {
     // A transaction used to adjust an account balance
@@ -33,10 +33,10 @@ export enum TransactionType {
 
 const transactionTypeDescriptions = {
     [TransactionType.Adjustment]: 'a balance adjustment',
-    [TransactionType.BankCredit]: 'a deposit, refund, or other credit',
-    [TransactionType.BankDebit]: 'a purchase, bill payment, fee, or other type of debit',
-    [TransactionType.CreditAccountCredit]: 'a payment, refund, or other credit',
-    [TransactionType.CreditAccountDebit]: 'a purchase, fee, or other charge',
+    [TransactionType.BankCredit]: 'a deposit, refund, or other credit that increases the account balance',
+    [TransactionType.BankDebit]: 'a purchase, bill payment, fee, or other type of debit that decreases the account balance',
+    [TransactionType.CreditAccountCredit]: 'a payment, refund, or other credit that decreases the account balance',
+    [TransactionType.CreditAccountDebit]: 'a purchase, fee, or other charge that increases the account balance',
     [TransactionType.Transfer]: 'a transfer of funds between accounts and/or envelopes',
 };
 
