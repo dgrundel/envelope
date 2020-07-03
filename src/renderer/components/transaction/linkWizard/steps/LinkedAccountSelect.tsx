@@ -2,10 +2,11 @@ import { Account } from '@/models/Account';
 import { TransactionFlag } from '@/models/Transaction';
 import { AccountDropdown } from '@/renderer/components/account/AccountDropdown';
 import { filterOnlyAssignableAccounts, filterOnlyDepositAccounts, isBlank } from '@/util/Filters';
-import { IDropdownOption, Separator } from '@fluentui/react';
+import { IDropdownOption, Separator, MessageBar, MessageBarType } from '@fluentui/react';
 import * as React from "react";
 import { LinkWizardStepProps } from '../LinkWizardFactory';
 import { TransactionCard } from '../../TransactionCard';
+import { LinkWizardStepFrame } from '../LinkWizardStepFrame';
 
 class Component extends React.Component<LinkWizardStepProps> {
     private readonly accountFilter: (account: Account) => boolean;
@@ -39,8 +40,20 @@ class Component extends React.Component<LinkWizardStepProps> {
 
     validateState(state: LinkWizardStepProps) {
         if (isBlank(state.selectedAccountId)) {
-            return 'Please select an option.';
+            return state.selectedTransactionFlag === TransactionFlag.Transfer
+                ? 'Please select an account.'
+                : 'Please select an envelope.';
         }
+    }
+
+    getNoAccountsError() {
+        const message = this.props.selectedTransactionFlag === TransactionFlag.Transfer
+            ? 'There are no eligible accounts for this transfer. Perhaps you need to create one?'
+            : 'There are no usable envelopes for this transaction. Perhaps you need to create one?';
+
+        return <MessageBar messageBarType={MessageBarType.error} isMultiline={true}>
+            {message} 
+        </MessageBar>;
     }
     
     render() {
@@ -51,15 +64,14 @@ class Component extends React.Component<LinkWizardStepProps> {
             });
         };
 
-        return <>
-            <TransactionCard transaction={this.props.transaction}/>
-            <Separator/>
+        return <LinkWizardStepFrame transaction={this.props.transaction}>
             <AccountDropdown
                 label={this.inputLabel}
                 onChange={onChange}
+                onRenderEmptyList={() => this.getNoAccountsError()}
                 filter={this.accountFilter}
             />
-        </>;
+        </LinkWizardStepFrame>;
     }
 }
 

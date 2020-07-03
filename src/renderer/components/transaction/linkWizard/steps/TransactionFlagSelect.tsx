@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { LinkWizardStepProps } from '../LinkWizardFactory';
 import { TransactionFlag } from '@/models/Transaction';
 import { TransactionCard } from '../../TransactionCard';
+import { LinkWizardStepFrame } from '../LinkWizardStepFrame';
 
 type TransactionFlagChoiceOption = IChoiceGroupOption & { flag: TransactionFlag };
 
@@ -72,9 +73,7 @@ class Component extends React.Component<LinkWizardStepProps> {
     }
     
     render() {
-        return <>
-            <TransactionCard transaction={this.props.transaction}/>
-            <Separator/>
+        return <LinkWizardStepFrame transaction={this.props.transaction}>
             <ChoiceGroup 
                 label="What kind of transaction is this?" 
                 selectedKey={this.props.selectedTransactionFlag?.toString()}
@@ -83,7 +82,7 @@ class Component extends React.Component<LinkWizardStepProps> {
                     selectedTransactionFlag: option.flag
                 })}
             />
-        </>;
+        </LinkWizardStepFrame>;
     }
 }
 

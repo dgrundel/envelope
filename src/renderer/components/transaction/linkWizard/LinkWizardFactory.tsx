@@ -7,6 +7,7 @@ import { createWizard, WizardStepApi } from "../../uiElements/WizardFactory";
 import { TransactionFlagSelect } from './steps/TransactionFlagSelect';
 import { intersectFlags, unionFlags } from '@/util/Flags';
 import { LinkedAccountSelect } from './steps/LinkedAccountSelect';
+import { LinkedTransactionSelect } from './steps/LinkedTransactionSelect';
 
 export interface LinkWizardState {
     transaction: Transaction;
@@ -14,6 +15,7 @@ export interface LinkWizardState {
 
     selectedTransactionFlag?: TransactionFlag;
     selectedAccountId?: string;
+    linkedTransactionId?: string;
 }
 
 export type LinkWizardStepProps = LinkWizardState & WizardStepApi<LinkWizardState>;
@@ -54,6 +56,7 @@ export const createLinkWizard = (transaction: Transaction) => {
                 [
                     TransactionFlagSelect,
                     LinkedAccountSelect,
+                    LinkedTransactionSelect,
                 ]
             );
         }

@@ -1,6 +1,6 @@
 import { getAppContext } from "@/renderer/AppContext";
 import { Log } from "@/util/Logger";
-import { MessageBar, MessageBarType } from "@fluentui/react";
+import { MessageBar, MessageBarType, mergeStyles } from "@fluentui/react";
 import * as React from "react";
 import { BaseModal, ModalButton } from "./Modal";
 import { isNotBlank } from "@/util/Filters";
@@ -81,6 +81,10 @@ const createModalButtons = <P extends object>(currentStep: number, numSteps: num
     return buttons;
 };
 
+const errorMessageBarStyle = mergeStyles({
+    marginBottom: '.8em'
+});
+
 export const createWizard = <P extends object>(props: WizardProps<P>, initialProps: P, steps: React.ComponentType<P & WizardStepApi<P>>[]) => {
     
     const WizardComponent = () => {
@@ -120,7 +124,10 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
         const nextStep = () => {
             const errorMessages = validate(stepState, internalState.stepValidator);
             if (errorMessages.length === 0) {
-                setStep(internalState.step + 1);
+                const isLastStep = internalState.step === steps.length - 1;
+                isLastStep
+                    ? finish()
+                    : setStep(internalState.step + 1);
             } else {
                 setInternalState({
                     ...internalState,
@@ -195,7 +202,7 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
         const StepComponent = steps[internalState.step];
 
         return <BaseModal heading={props.title} buttons={buttons} closeButtonHandler={stepApi.cancel} style={props.style} className={props.className}>
-            {internalState.errorMessages.length > 0 && <MessageBar messageBarType={MessageBarType.error} isMultiline={true}>
+            {internalState.errorMessages.length > 0 && <MessageBar messageBarType={MessageBarType.error} isMultiline={true} className={errorMessageBarStyle}>
                 {internalState.errorMessages.map(message => <p key={message}>{message}</p>)}
             </MessageBar>}
             <StepComponent {...stepState} {...stepApi} />

@@ -10,6 +10,7 @@ type GroupedAccounts = Record<AccountType, Account[]>;
 
 export interface AccountDropdownProps {
     onChange: (e: React.FormEvent<HTMLDivElement>, selected?: IDropdownOption) => void;
+    onRenderEmptyList?: () => any;
     label?: string;
     placeholder?: string;
     selectedKey?: string | number | string[] | number[];
@@ -47,15 +48,22 @@ class Component extends React.Component<AccountDropdownProps, {}> {
     render() {
         const dropdownChoices = this.computeDropdownOptions(this.props.groupedAccounts!);
 
-        return <div className={containerStyle}>
-            <Dropdown
+        let content;
+        if (dropdownChoices.length === 0) {
+            content = this.props.onRenderEmptyList && this.props.onRenderEmptyList();
+        } else {
+            content = <Dropdown
                 label={this.props.label}
                 selectedKey={this.props.selectedKey}
                 onChange={this.props.onChange}
                 placeholder={this.props.placeholder}
                 options={dropdownChoices}
                 onRenderOption={onRenderOption}
-            />
+            />;
+        }
+
+        return <div className={containerStyle}>
+            {content}
         </div>;
     }
 
