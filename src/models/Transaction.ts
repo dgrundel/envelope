@@ -1,59 +1,61 @@
 import { Currency } from '@/util/Currency';
 import { Account, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
 
-export enum TransactionType {
+export enum TransactionFlag {
     // A transaction used to adjust an account balance
     // so that it reconciles with the actual account.
-    Adjustment = 'adjustment-transaction',
+    Adjustment = 1,
+    
+    // A transfer of funds from one account to another
+    Transfer = 2,
     
     // Credit applied to a bank/deposit account
     // Increases account balance
     // For a checking account, this might be something like a paycheck deposit
     // For a savings account, this could be accured interest paid by the bank
-    BankCredit = 'bank-credit-transaction',
-
+    BankCredit = 4,
+    
     // Debit applied to a bank/deposit account
     // Decreases account balance
     // Generally this is from a purchase, or fees incurred from the bank
-    BankDebit = 'bank-debit-transaction',
-
+    BankDebit = 8,
+    
     // Credit applied to a credit card account
     // Decreases account balance
     // Generally this is from a payment or perhaps a refund issued by a merchant
-    CreditAccountCredit = 'credit-account-credit-transaction',
+    CreditAccountCredit = 16,
     
     // Debit applied to a credit card account
     // Increases account balance
     // This could be from a purchase, an interest charge, or other fees incurred
-    CreditAccountDebit = 'credit-account-debit-transaction',
-
-    // A transfer of funds from one account to another
-    Transfer = 'transfer-transaction',
-}
-
-const transactionTypeDescriptions = {
-    [TransactionType.Adjustment]: 'a balance adjustment',
-    [TransactionType.BankCredit]: 'a deposit, refund, or other credit that increases the account balance',
-    [TransactionType.BankDebit]: 'a purchase, bill payment, fee, or other type of debit that decreases the account balance',
-    [TransactionType.CreditAccountCredit]: 'a payment, refund, or other credit that decreases the account balance',
-    [TransactionType.CreditAccountDebit]: 'a purchase, fee, or other charge that increases the account balance',
-    [TransactionType.Transfer]: 'a transfer of funds between accounts and/or envelopes',
+    CreditAccountDebit = 32,
 };
 
-export const getTransactionTypeDescription = (t: TransactionType): string => transactionTypeDescriptions[t];
+const transactionFlagDescriptions = {
+    [TransactionFlag.Adjustment]: 'a balance adjustment',
+    [TransactionFlag.BankCredit]: 'a deposit, refund, or other credit that increases the account balance',
+    [TransactionFlag.BankDebit]: 'a purchase, bill payment, fee, or other type of debit that decreases the account balance',
+    [TransactionFlag.CreditAccountCredit]: 'a payment, refund, or other credit that decreases the account balance',
+    [TransactionFlag.CreditAccountDebit]: 'a purchase, fee, or other charge that increases the account balance',
+    [TransactionFlag.Transfer]: 'a transfer of funds between accounts and/or envelopes',
+};
 
-export const getAccountTransactionType = (account: Account, isAmountNegative: boolean): TransactionType => {
+export const getTransactionFlagDescription = (f: TransactionFlag): string => transactionFlagDescriptions[f];
+
+export const getAccountAmountTransactionFlag = (account: Account, amount: Currency): TransactionFlag => {
+    const isAmountNegative = amount.isNegative();
+    
     if (isDepositAccountType(account.type)) {
         // checking, savings, other deposit accounts
         return isAmountNegative
-            ? TransactionType.BankDebit
-            : TransactionType.BankCredit;
+            ? TransactionFlag.BankDebit
+            : TransactionFlag.BankCredit;
 
     } else if (isCreditCardAccountType(account.type)) {
         // credit cards
         return isAmountNegative 
-            ? TransactionType.CreditAccountCredit
-            : TransactionType.CreditAccountDebit;
+            ? TransactionFlag.CreditAccountCredit
+            : TransactionFlag.CreditAccountDebit;
 
     } else {
         // uh oh.
@@ -62,13 +64,13 @@ export const getAccountTransactionType = (account: Account, isAmountNegative: bo
 }
 
 export interface TransactionData {
+    flags: number;
     accountId: string;
     date: Date;
     description: string;
     amount: Currency;
     linkedTransactionIds: string[];
     importData?: Record<string, string>;
-    type?: TransactionType;
 }
 
 export interface Transaction extends TransactionData {

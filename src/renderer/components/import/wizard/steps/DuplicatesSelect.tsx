@@ -1,12 +1,12 @@
-import { Transaction, TransactionType } from '@/models/Transaction';
-import { Account } from '@models/Account';
+import { Transaction } from '@/models/Transaction';
 import { CombinedState } from '@/renderer/store/store';
-import { DetailsList, DetailsListLayoutMode, IColumn, Selection, SelectionMode, FontIcon, MessageBar, MessageBarType } from '@fluentui/react';
+import { filterOnlyImportedTransactions } from '@/util/Filters';
+import { DetailsList, DetailsListLayoutMode, FontIcon, IColumn, MessageBar, MessageBarType, Selection, SelectionMode } from '@fluentui/react';
+import { Account } from '@models/Account';
 import { isEqual } from 'lodash';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { ImportWizardStepProps, rowToTransactionData } from "../ImportWizardFactory";
-import { filterOnlyImportedTransactions } from '@/util/Filters';
 
 export interface InvertAmountsSelectProps extends ImportWizardStepProps {
     duplicateTransactions?: Transaction[];

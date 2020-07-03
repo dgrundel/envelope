@@ -1,13 +1,13 @@
 import { Account } from '@/models/Account';
-import { Transaction, TransactionData, TransactionType } from '@/models/Transaction';
+import { getAccountAmountTransactionFlag, Transaction, TransactionData, TransactionFlag } from '@/models/Transaction';
 import { insertTransactions } from '@/renderer/store/actions/Transaction';
 import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
 import { getRequiredCurrencyError } from '@/util/ErrorGenerators';
+import { combineFlags } from '@/util/Flags';
 import { Log } from '@/util/Logger';
 import { MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { CombinedState } from '../../store/store';
 
 export interface AdjustBalanceProps {
     account: Account;
@@ -88,13 +88,15 @@ class Component extends React.Component<AdjustBalanceProps, State> {
 
         Log.debug(`Adding adjustment transaction for ${amount.toFormattedString()} to account`, account);
 
+        const amountFlag = getAccountAmountTransactionFlag(account, amount);
+
         const transactionData: TransactionData = {
             accountId: account._id,
             date: new Date(),
             amount: amount,
             description: 'Manual balance adjustment',
-            type: TransactionType.Adjustment,
-            linkedTransactionIds: []
+            linkedTransactionIds: [],
+            flags: combineFlags(amountFlag, TransactionFlag.Adjustment),
         };
 
         this.props.insertTransactions!([transactionData]).then(created => {

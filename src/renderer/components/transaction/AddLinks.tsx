@@ -1,9 +1,9 @@
 import { Account } from '@/models/Account';
-import { Transaction, TransactionData } from '@/models/Transaction';
+import { Transaction, TransactionData, getAccountAmountTransactionFlag } from '@/models/Transaction';
 import { addLinkedTransaction } from '@/renderer/store/actions/Transaction';
 import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
-import { chainErrorGenerators, maxCurrencyErrorGenerator, minCurrencyErrorGenerator, ErrorGenerator } from '@/util/ErrorGenerators';
-import { filterOnlyAssignableAccounts, isValidCurrencyString } from '@/util/Filters';
+import { chainErrorGenerators, ErrorGenerator, maxCurrencyErrorGenerator, minCurrencyErrorGenerator } from '@/util/ErrorGenerators';
+import { filterOnlyAssignableAccounts } from '@/util/Filters';
 import { Log } from '@/util/Logger';
 import { MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';
 import * as React from "react";
@@ -112,7 +112,8 @@ class Component extends React.Component<AddLinksProps, State> {
         Log.debug(`Linking ${amount.toFormattedString} of transaction`, this.props.linkTo, 'to envelope', envelope);
 
         const transactionData: TransactionData = {
-            accountId: this.state.envelopeId!,
+            flags: getAccountAmountTransactionFlag(envelope, amount),
+            accountId: envelope._id,
             date: new Date(),
             amount: amount,
             description: `Linked from ${this.props.linkTo._id}`,

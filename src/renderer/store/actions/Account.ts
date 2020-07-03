@@ -1,10 +1,11 @@
 import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
-import { Transaction, TransactionType } from '@/models/Transaction';
+import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { isBlank } from '@/util/Filters';
+import { containsFlag } from '@/util/Flags';
+import { Log } from '@/util/Logger';
 import { Account, AccountData, AccountType, isBankAccountType, isDepositAccountType } from '@models/Account';
 import { CombinedState } from '../store';
-import { Log } from '@/util/Logger';
 import { addLinkedTransaction, insertTransactions } from './Transaction';
 
 const database = new AccountDataStoreClient();
@@ -66,7 +67,7 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
         name,
         type,
         balance,
-        linkedAccountIds: []
+        linkedAccountIds: [],
     };
     
     return database.addAccount(accountData)
@@ -88,11 +89,12 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
                     }
                     
                     return dispatch(insertTransactions([{
+                        flags: TransactionFlag.Adjustment,
                         accountId: unallocatedId!,
                         date: new Date(),
                         description: `Initial balance from account ${createdAccount._id} (${createdAccount.name})`,
                         amount: createdAccount.balance,
-                        linkedTransactionIds: []
+                        linkedTransactionIds: [],
                     }]));
                 }
             });
@@ -130,21 +132,21 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
                  * Positive transactions on Checking and Savings accounts
                  * go directly to the unallocated envelope to be distributed later.
                  */
-                if (transaction.type !== TransactionType.Transfer && isDepositAccountType(account.type)) {
+                if (containsFlag(TransactionFlag.Transfer, transaction.flags) && isDepositAccountType(account.type)) {
                     if (transaction.amount.isPositive()) {
                         const unallocatedId = getState().accounts.unallocatedId;
                         if (!unallocatedId) {
                             Log.error('No unallocated account exists');
                             return;
                         }
-                        
+
                         return dispatch(addLinkedTransaction({
-                            type: transaction.type,
+                            flags: TransactionFlag.Transfer,
                             accountId: unallocatedId!,
                             date: new Date(),
                             description: `Inflow from account ${account._id} (${account.name})`,
                             amount: transaction.amount,
-                            linkedTransactionIds: [transaction._id]
+                            linkedTransactionIds: [transaction._id],
                         }, transaction));
                     }
                 }

@@ -1,6 +1,8 @@
-import { TransactionData, TransactionType, getAccountTransactionType } from "@/models/Transaction";
+import { Account } from "@/models/Account";
+import { getAccountAmountTransactionFlag, TransactionData } from "@/models/Transaction";
 import { getAppContext } from "@/renderer/AppContext";
 import { insertTransactions } from "@/renderer/store/actions/Transaction";
+import { CombinedState } from "@/renderer/store/store";
 import { Currency } from "@/util/Currency";
 import { Log } from '@/util/Logger';
 import * as React from "react";
@@ -13,8 +15,6 @@ import { DateFieldSelect } from './steps/DateFieldSelect';
 import { DescriptionFieldSelect } from "./steps/DescriptionFieldSelect";
 import { DuplicatesSelect } from './steps/DuplicatesSelect';
 import { InvertAmountsSelect } from "./steps/InvertAmountsSelect";
-import { Account } from "@/models/Account";
-import { CombinedState } from "@/renderer/store/store";
 
 
 export interface Row {
@@ -45,7 +45,8 @@ export const rowToTransactionData = (
 ): TransactionData => {
     const currency = Currency.parse(row[amountColumn]);
     const amount = invert ? currency.getInverse() : currency;
-    const type = getAccountTransactionType(account, amount.isNegative());
+    const flags = getAccountAmountTransactionFlag(account, amount);
+    
     const accountId = account._id;
     const date = new Date(row[dateColumn]);
     const description = descriptionColumns
@@ -53,13 +54,13 @@ export const rowToTransactionData = (
         .join(' ');
 
     return {
-        type,
         accountId,
         date,
         amount,
         description,
         importData: row,
-        linkedTransactionIds: []
+        linkedTransactionIds: [],
+        flags
     };
 };
 

@@ -1,8 +1,8 @@
-import { TransactionData, getTransactionTypeDescription, TransactionType, getAccountTransactionType } from '@/models/Transaction';
+import { getAccountAmountTransactionFlag, getTransactionFlagDescription, TransactionData } from '@/models/Transaction';
 import { CombinedState } from '@/renderer/store/store';
 import { Log } from '@/util/Logger';
 import { ChoiceGroup } from '@fluentui/react';
-import { Account, AccountType, isCreditCardAccountType } from '@models/Account';
+import { Account } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { ImportWizardStepProps, rowsToTransactions } from "../ImportWizardFactory";
@@ -54,11 +54,11 @@ class Component extends React.Component<InvertAmountsSelectProps> {
         const account = this.props.selectedAccount!;
         const transaction = this.sampleTransaction;
 
-        const expectedType = getAccountTransactionType(account, transaction.amount.isNegative());
-        const invertedType = getAccountTransactionType(account, transaction.amount.isPositive());
+        const expectedType = getAccountAmountTransactionFlag(account, transaction.amount);
+        const invertedType = getAccountAmountTransactionFlag(account, transaction.amount.getInverse());
 
-        const expectedDescription = getTransactionTypeDescription(expectedType);
-        const invertedDescription = getTransactionTypeDescription(invertedType);
+        const expectedDescription = getTransactionFlagDescription(expectedType);
+        const invertedDescription = getTransactionFlagDescription(invertedType);
 
         const options = [{
             key: 'false', // false means we leave amounts as-is. (i.e. do not invert)

@@ -1,10 +1,10 @@
 import { TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
-import { Log } from '@/util/Logger';
-import { Transaction, TransactionData, TransactionType } from '@models/Transaction';
-import { Account } from '@models/Account';
-import { applyTransactionsToAccount, applyTransactionToAccount } from './Account';
 import { Currency } from '@/util/Currency';
-import { transactions } from '../reducers/Transactions';
+import { combineFlags } from '@/util/Flags';
+import { Log } from '@/util/Logger';
+import { Account } from '@models/Account';
+import { getAccountAmountTransactionFlag, Transaction, TransactionData, TransactionFlag } from '@models/Transaction';
+import { applyTransactionsToAccount, applyTransactionToAccount } from './Account';
 
 const database = new TransactionDataStoreClient();
 
@@ -52,17 +52,22 @@ export const insertTransactions = (transactionData: TransactionData[]) => (dispa
 };
 
 export const transferFunds = (amount: Currency, fromAccount: Account, toAccount: Account) => (dispatch: any) => {
-    const type = TransactionType.Transfer;
     const date = new Date();
     const description = `Transfer from "${fromAccount.name}" to "${toAccount.name}"`;
     
+    const inverseAmount = amount.getInverse();
+    const flags = combineFlags(
+        TransactionFlag.Transfer, 
+        getAccountAmountTransactionFlag(fromAccount, inverseAmount)
+    );
+
     const fromTransaction: TransactionData = {
         accountId: fromAccount._id,
-        type,
         date,
         description,
-        amount: amount.getInverse(),
-        linkedTransactionIds: []
+        amount: inverseAmount,
+        linkedTransactionIds: [],
+        flags,
     };
 
     return database.addTransaction(fromTransaction)
@@ -70,14 +75,18 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
             Log.debug('addTransaction (fromTransaction)', inserted);
             return dispatch(applyTransactionToAccount(inserted))
                 .then(() => {
+                    const flags = combineFlags(
+                        TransactionFlag.Transfer, 
+                        getAccountAmountTransactionFlag(toAccount, amount)
+                    );
 
                     const toTransaction: TransactionData = {
                         accountId: toAccount._id,
-                        type,
                         date,
                         description,
                         amount,
-                        linkedTransactionIds: [inserted._id]
+                        linkedTransactionIds: [inserted._id],
+                        flags,
                     };
 
                     return dispatch(addLinkedTransaction(toTransaction, inserted));
