@@ -1,5 +1,7 @@
 # Envelope
 
+_Please note:_ This is still experimental software. It is not complete nor in any way suitable for use.
+
 Budget your money using the envelope method.
 
 https://en.wikipedia.org/wiki/Envelope_system
