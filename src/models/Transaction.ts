@@ -2,6 +2,9 @@ import { Currency } from '@/util/Currency';
 import { Account, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
 
 export enum TransactionFlag {
+    // nothing
+    None = 0,
+
     // A transaction used to adjust an account balance
     // so that it reconciles with the actual account.
     Adjustment = 1,
@@ -32,6 +35,7 @@ export enum TransactionFlag {
 };
 
 const transactionFlagDescriptions = {
+    [TransactionFlag.None]: '',
     [TransactionFlag.Adjustment]: 'a balance adjustment',
     [TransactionFlag.BankCredit]: 'a deposit, refund, or other credit that increases the account balance',
     [TransactionFlag.BankDebit]: 'a purchase, bill payment, fee, or other type of debit that decreases the account balance',
@@ -59,7 +63,7 @@ export const getAccountAmountTransactionFlag = (account: Account, amount: Curren
 
     } else {
         // uh oh.
-        throw new Error('Invalid account type.');
+        return TransactionFlag.None;
     }
 }
 
