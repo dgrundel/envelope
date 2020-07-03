@@ -61,7 +61,7 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
                 formatter: (value: Currency, row) => value.toFormattedString()
             },{
                 name: 'linkedTransactions',
-                label: '',
+                label: <FontIcon iconName="Link"/>,
                 formatter: this.linkedTransactionsFormatter.bind(this)
             }]}
             keyField={'_id'}

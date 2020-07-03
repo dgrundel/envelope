@@ -27,12 +27,7 @@ class Component extends React.Component<AddLinkedTransactionsProps, {}> implemen
         const transaction = this.props.transaction;
         const accounts = this.props.accountMap || {};
 
-        const modalButtons: ModalButton[] = [{
-            buttonText: 'Close',
-            onClick: () => dismissModal()
-        }];
-
-        return <BaseModal heading="Add Linked Transactions" buttons={modalButtons} closeButtonHandler={() => dismissModal()}>
+        return <BaseModal heading="Add Linked Transactions" closeButtonHandler={() => dismissModal()}>
             <div className="add-linked-transactions">
 
                 <div className="add-linked-transactions-transaction">
