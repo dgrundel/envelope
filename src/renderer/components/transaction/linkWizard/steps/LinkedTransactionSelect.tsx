@@ -9,9 +9,11 @@ import { LinkWizardStepFrame } from '../LinkWizardStepFrame';
 import { Log } from '@/util/Logger';
 import { isBlank } from '@/util/Filters';
 import { unionFlags, intersectFlags } from '@/util/Flags';
+import { Account } from '@/models/Account';
 
 export interface LinkedTransactionSelectProps extends LinkWizardStepProps {
     linkableTransactions?: Transaction[];
+    selectedAccount?: Account;
 }
 
 const columns: IColumn[] = [
@@ -34,10 +36,6 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
             amount: t.amount.toFormattedString(),
         }));
 
-        if (this.items.length === 0) {
-            Log.error('No linkable transactions found.');
-        }
-
         this.selection = new Selection({
             items: this.items,
             onSelectionChanged: () => {
@@ -54,6 +52,10 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
         }
 
         if (props.selectedTransactionFlag === TransactionFlag.Transfer) {
+            if (this.items.length === 0) {
+                Log.error('No linkable transactions found.');
+            }
+
             props.setStepValidator(this.validateState);
 
         } else {
@@ -69,6 +71,8 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
     
     render() {
         return <LinkWizardStepFrame transaction={this.props.transaction}>
+            <p>Select the matching transaction from <strong>{this.props.selectedAccount!.name}</strong></p>
+
             <DetailsList
                 items={this.items}
                 columns={columns}
@@ -82,7 +86,8 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
 }
 
 const mapStateToProps = (state: CombinedState, ownProps: LinkedTransactionSelectProps): LinkedTransactionSelectProps => {
-    const accountId = ownProps.selectedAccountId;
+    const selectedAccountId = ownProps.selectedAccountId!;
+    const selectedAccount = state.accounts.accounts[selectedAccountId];
     const absAmount = ownProps.transaction.amount.getAbsolute();
 
     let flags = TransactionFlag.None;
@@ -103,7 +108,7 @@ const mapStateToProps = (state: CombinedState, ownProps: LinkedTransactionSelect
     
     const accountTransactions = state.transactions.sortedIds
         .map(id => state.transactions.transactions[id])
-        .filter(transaction => transaction.accountId === accountId
+        .filter(transaction => transaction.accountId === selectedAccountId
             && intersectFlags(transaction.flags, flags) > 0);
 
     const withSameAmount = accountTransactions.filter(transaction => transaction.amount.getAbsolute().eq(absAmount));
@@ -112,6 +117,7 @@ const mapStateToProps = (state: CombinedState, ownProps: LinkedTransactionSelect
     return {
         ...ownProps,
         linkableTransactions,
+        selectedAccount,
     };
 }
 

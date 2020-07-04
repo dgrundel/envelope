@@ -1,4 +1,4 @@
-import { Account } from '@/models/Account';
+import { Account, AccountType } from '@/models/Account';
 import { TransactionFlag } from '@/models/Transaction';
 import { AccountDropdown } from '@/renderer/components/account/AccountDropdown';
 import { filterOnlyAssignableAccounts, filterOnlyDepositAccounts, isBlank } from '@/util/Filters';
@@ -15,11 +15,19 @@ class Component extends React.Component<LinkWizardStepProps> {
     constructor(props: LinkWizardStepProps) {
         super(props);
 
-        this.accountFilter = props.selectedTransactionFlag === TransactionFlag.Transfer
-            ? (account: Account) => account._id !== this.props.transaction.accountId
-                && filterOnlyDepositAccounts(account)
-            : (account: Account) => account._id !== this.props.transaction.accountId
+        if (props.selectedTransactionFlag === TransactionFlag.Transfer) {
+            this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
+                && filterOnlyDepositAccounts(account);
+        } else if (props.accountAmountTypeFlag === TransactionFlag.BankCredit || props.accountAmountTypeFlag === TransactionFlag.BankDebit) {
+            this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
                 && filterOnlyAssignableAccounts(account);
+        } else if (props.accountAmountTypeFlag === TransactionFlag.CreditAccountCredit) {
+            this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
+                && filterOnlyAssignableAccounts(account);
+        } else if (props.accountAmountTypeFlag === TransactionFlag.CreditAccountDebit) {
+            this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
+                && account.type === AccountType.UserEnvelope;   
+        }
 
         if (props.selectedTransactionFlag === TransactionFlag.Transfer) {
             switch(this.props.accountAmountTypeFlag) {
