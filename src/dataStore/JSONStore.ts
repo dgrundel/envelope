@@ -9,9 +9,9 @@ export enum JsonStoreName {
 }
 
 enum JsonStoreEvent {
-    Get = 'json-store-get',
-    Set = 'json-store-set',
-    Remove = 'json-store-remove',
+    GetItem = 'json-store-get',
+    SetItem = 'json-store-set',
+    RemoveItem = 'json-store-remove',
 }
 
 interface IPCResult {
@@ -36,9 +36,9 @@ abstract class BaseJsonStore {
         return `${event}:${this.name}`;
     }
 
-    abstract get(key: string): Promise<any>;
-    abstract set(key: string, value: any): Promise<void>;
-    abstract remove(key: string): Promise<void>;
+    abstract getItem(key: string): Promise<any>;
+    abstract setItem(key: string, value: any): Promise<void>;
+    abstract removeItem(key: string): Promise<void>;
 }
 
 export class JsonStoreHost extends BaseJsonStore {
@@ -54,9 +54,9 @@ export class JsonStoreHost extends BaseJsonStore {
             name,
         });
 
-        this.handle(JsonStoreEvent.Get, (_event, key: string) => this.get(key));
-        this.handle(JsonStoreEvent.Set, (_event, key: string, value: any) => this.set(key, value));
-        this.handle(JsonStoreEvent.Remove, (_event, key: string) => this.remove(key));
+        this.handle(JsonStoreEvent.GetItem, (_event, key: string) => this.getItem(key));
+        this.handle(JsonStoreEvent.SetItem, (_event, key: string, value: any) => this.setItem(key, value));
+        this.handle(JsonStoreEvent.RemoveItem, (_event, key: string) => this.removeItem(key));
     }
 
     private handle(event: JsonStoreEvent, callback: (...args: any) => Promise<any>) {
@@ -74,20 +74,20 @@ export class JsonStoreHost extends BaseJsonStore {
         }));
     }
 
-    get(key: string): Promise<any> {
+    getItem(key: string): Promise<any> {
         return new Promise(resolve => {
             resolve(this.store.get(key));
         });
     }
 
-    set(key: string, value: any): Promise<void> {
+    setItem(key: string, value: any): Promise<void> {
         return new Promise(resolve => {
             this.store.set(key, value);
             resolve();
         });
     }
 
-    remove(key: string): Promise<void> {
+    removeItem(key: string): Promise<void> {
         return new Promise(resolve => {
             this.store.delete(key);
             resolve();
@@ -101,16 +101,16 @@ export class JsonStoreClient extends BaseJsonStore {
             .then((result: IPCResult) => result.success ? Promise.resolve(result.data) : Promise.reject(result.data));
     }
 
-    get(key: string): Promise<any> {
-        return this.invoke(JsonStoreEvent.Set, key);
+    getItem(key: string): Promise<any> {
+        return this.invoke(JsonStoreEvent.GetItem, key);
     }
 
-    set(key: string, value: any): Promise<void> {
-        return this.invoke(JsonStoreEvent.Set, key, value);
+    setItem(key: string, value: any): Promise<void> {
+        return this.invoke(JsonStoreEvent.SetItem, key, value);
     }
 
-    remove(key: string): Promise<void> {
-        return this.invoke(JsonStoreEvent.Remove, key);
+    removeItem(key: string): Promise<void> {
+        return this.invoke(JsonStoreEvent.RemoveItem, key);
     }
 }
 

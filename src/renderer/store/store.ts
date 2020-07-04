@@ -14,11 +14,7 @@ const jsonClient = new JsonStoreClient(JsonStoreName.EnvelopeUserDate);
 
 const persistConfig = {
     key: 'root',
-    storage: {
-        getItem: jsonClient.get.bind(jsonClient),
-        setItem: jsonClient.set.bind(jsonClient),
-        removeItem: jsonClient.remove.bind(jsonClient),
-    },
+    storage: jsonClient,
 }
 
 const rootReducer = combineReducers({
