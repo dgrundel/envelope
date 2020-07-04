@@ -67,36 +67,47 @@ export const createLinkWizard = (transaction: Transaction) => {
             if (state.accountAmountTypeFlag === TransactionFlag.BankCredit) {
                 if (state.selectedTransactionFlag === TransactionFlag.Transfer) {
                     // A transfer from another account
-                    TransactionFlag.Transfer
+                    // TransactionFlag.BankCredit
+                    // TransactionFlag.Transfer
 
                 } else {
                     // A deposit, refund, or other income
-                    TransactionFlag.None
+                    // TransactionFlag.BankCredit
+                    // TransactionFlag.None
                 }
 
             } else if (state.accountAmountTypeFlag === TransactionFlag.BankDebit) {
                 if (state.selectedTransactionFlag === TransactionFlag.Transfer) {
                     // A transfer to another account
-                    TransactionFlag.Transfer
+                    // TransactionFlag.BankDebit
+                    // TransactionFlag.Transfer
 
                 } else {
                     // A purchase, fee, outgoing payment, or other account withdrawl
-                    TransactionFlag.None
+                    // TransactionFlag.BankDebit
+                    // TransactionFlag.None
                 }
 
             } else if (state.accountAmountTypeFlag === TransactionFlag.CreditAccountCredit) {
                 if (state.selectedTransactionFlag === TransactionFlag.Transfer) {
                     // A payment from a checking or other account
-                    TransactionFlag.Transfer
+                    // TransactionFlag.CreditAccountCredit
+                    // TransactionFlag.Transfer
 
                 } else {
                     // A refund, promotional credit, or other type of credit
-                    TransactionFlag.None
+                    // TransactionFlag.CreditAccountCredit
+                    // TransactionFlag.None
                 }
 
             } else if (state.accountAmountTypeFlag === TransactionFlag.CreditAccountDebit) {
+                if (state.selectedTransactionFlag === TransactionFlag.Transfer) {
+                    throw new Error('TransactionFlag.CreditAccountDebit and TransactionFlag.Transfer are incompatible.');
+                }
+                
                 // A credit card purchase
-                TransactionFlag.None
+                // TransactionFlag.CreditAccountDebit
+                // TransactionFlag.None
                 
             } else {
                 throw new Error(`Unrecognized accountAmountTypeFlag: ${state.accountAmountTypeFlag}`);
