@@ -12,6 +12,7 @@ export enum TransactionAction {
     AddLinked = 'store:action:transaction:add-linked',
     AddMany = 'store:action:transaction:add-many',
     AddFlags = 'store:action:transaction:add-flags',
+    LinkExisting = 'store:action:transaction:link-existing',
 }
 
 export interface AddTransactionAction {
@@ -46,6 +47,16 @@ export const addTransactionFlags = (transaction: Transaction, flags: Transaction
     type: TransactionAction.AddFlags,
     transaction,
     flags,
+});
+
+export interface LinkExistingTransactionsAction {
+    type: TransactionAction.LinkExisting;
+    transactions: Transaction[];
+}
+
+export const linkExistingTransactions = (transactions: Transaction[]): LinkExistingTransactionsAction => ({
+    type: TransactionAction.LinkExisting,
+    transactions,
 });
 
 export const insertTransactions = (transactionData: TransactionData[]) => (dispatch: any) => {

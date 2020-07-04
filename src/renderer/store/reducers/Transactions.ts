@@ -1,8 +1,9 @@
 import { listToMap } from '@/util/Data';
 import { Transaction } from '@models/Transaction';
 import memoizeOne from 'memoize-one';
-import { AddManyTransactionAction, AddTransactionAction, TransactionAction, AddTransactionFlagsAction } from '../actions/Transaction';
+import { AddManyTransactionAction, AddTransactionAction, TransactionAction, AddTransactionFlagsAction, LinkExistingTransactionsAction } from '../actions/Transaction';
 import { unionFlags } from '@/util/Flags';
+import { uniq } from 'lodash';
 
 export interface TransactionState {
     transactions: Record<string, Transaction>;
@@ -81,6 +82,32 @@ const addFlags = (state: TransactionState, action: AddTransactionFlagsAction): T
     };
 }
 
+const linkExisting = (state: TransactionState, action: LinkExistingTransactionsAction): TransactionState => {
+    // [action.transaction._id]: {
+    //     ...action.transaction,
+    //     flags: unionFlags(action.transaction.flags, action.flags)
+    // }
+    const linkIds = action.transactions.map(t => t._id);
+    const updates = action.transactions.reduce((map: Record<string, Transaction>, transaction: Transaction) => {
+        map[transaction._id] = {
+            ...transaction,
+            linkedTransactionIds: uniq([
+                ...transaction.linkedTransactionIds,
+                ...linkIds.filter(id => id !== transaction._id),
+            ])
+        }
+        return map;
+    }, {});
+    
+    return {
+        ...state,
+        transactions: {
+            ...state.transactions,
+            ...updates,
+        }
+    };
+}
+
 export const transactions = (state: TransactionState = initialState, action: any): TransactionState => {
     switch(action.type as TransactionAction) {
         case TransactionAction.Add:
@@ -89,6 +116,8 @@ export const transactions = (state: TransactionState = initialState, action: any
             return addManyTransactions(state, action as AddManyTransactionAction);
         case TransactionAction.AddFlags:
             return addFlags(state, action as AddTransactionFlagsAction);
+        case TransactionAction.LinkExisting:
+            return linkExisting(state, action as LinkExistingTransactionsAction);
         default:
             return state;
     }
