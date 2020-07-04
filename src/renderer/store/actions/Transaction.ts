@@ -52,7 +52,7 @@ export const insertTransactions = (transactionData: TransactionData[]) => (dispa
         _id: nanoid(),
     }));
 
-    return dispatch(addManyTransactions(transactions))
+    return Promise.resolve(dispatch(addManyTransactions(transactions)))
         .then(() => {
             Log.debug('addTransactions', transactions);
             return dispatch(applyTransactionsToAccount(transactions))
@@ -67,7 +67,7 @@ export const addLinkedTransaction = (transactionData: TransactionData, linkTo: T
         linkedTransactionIds: [linkTo._id],
     };
     
-    return dispatch(addTransaction(transaction, linkTo))
+    return Promise.resolve(dispatch(addTransaction(transaction, linkTo)))
         .then(() => dispatch(applyTransactionToAccount(transaction)))
         .then(() => {
             const createdAndUpdated = [
@@ -99,7 +99,7 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
         flags,
     };
 
-    return dispatch(addTransaction(fromTransaction))
+    return Promise.resolve(dispatch(addTransaction(fromTransaction)))
         .then(() => {
             Log.debug('addTransaction (fromTransaction)', fromTransaction);
 

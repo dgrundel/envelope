@@ -2,6 +2,7 @@ import { Account, AccountType } from '@models/Account';
 import { AccountAction, AddAccountAction, UpdateAccountAction, UpdateAccountBalanceAction } from '../actions/Account';
 import { nanoid } from 'nanoid';
 import { Currency } from '@/util/Currency';
+import memoizeOne from 'memoize-one';
 
 export interface AccountState {
     accounts: Record<string, Account>;
@@ -28,7 +29,22 @@ const createInitialState = (): AccountState => {
 
 const initialState: AccountState = createInitialState();
 
-const getSortedIds = (accounts: Record<string, Account>): string[] => {
+const convertFields = memoizeOne((state: AccountState): AccountState => {
+    const accounts = Object.keys(state.accounts).reduce((map: Record<string, Account>, id: string) => {
+        map[id] = {
+            ...state.accounts[id],
+            balance: Currency.fromObject(state.accounts[id].balance)
+        }
+        return map;
+    }, {});
+
+    return {
+        ...state,
+        accounts,
+    };
+});
+
+const getSortedIds = memoizeOne((accounts: Record<string, Account>): string[] => {
     return Object.keys(accounts).sort((a, b) => {
         var nameA = accounts[a].name.toUpperCase();
         var nameB = accounts[b].name.toUpperCase();
@@ -37,7 +53,7 @@ const getSortedIds = (accounts: Record<string, Account>): string[] => {
         }
         return (nameA < nameB) ? -1 : 1;
     });
-}
+});
 
 const addAccount = (state: AccountState, action: AddAccountAction): AccountState => {
     const accounts = {
@@ -76,14 +92,16 @@ const updateAccountBalance = (state: AccountState, action: UpdateAccountBalanceA
 }
 
 export const accounts = (state: AccountState = initialState, action: any): AccountState => {
+    const converted = convertFields(state);
+
     switch(action.type as AccountAction) {
         case AccountAction.Add:
-            return addAccount(state, action as AddAccountAction);
+            return addAccount(converted, action as AddAccountAction);
         case AccountAction.Update:
-            return updateAccount(state, action as UpdateAccountAction);
+            return updateAccount(converted, action as UpdateAccountAction);
         case AccountAction.UpdateBalance:
-            return updateAccountBalance(state, action as UpdateAccountBalanceAction);
+            return updateAccountBalance(converted, action as UpdateAccountBalanceAction);
         default:
-            return state;
+            return converted;
     }
 }

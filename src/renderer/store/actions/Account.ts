@@ -81,7 +81,7 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
         linkedAccountIds: [],
     };
     
-    return dispatch(addAccount(account))
+    return Promise.resolve(dispatch(addAccount(account)))
         .then(() => {
             if (isDepositAccountType(type)) {
                 const unallocatedId = getState().accounts.unallocatedId;
@@ -135,7 +135,7 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
             `updated balance: ${newBalance.toString()}`,
         );
 
-        return dispatch(updateAccountBalance(account._id, newBalance))
+        return Promise.resolve(dispatch(updateAccountBalance(account._id, newBalance)))
             .then(() => next(transactions, i + 1))
             .then(() => {
                 /**
