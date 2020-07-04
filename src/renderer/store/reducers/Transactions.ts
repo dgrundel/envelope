@@ -14,21 +14,6 @@ const initialState: TransactionState = {
     sortedIds: []
 };
 
-const convertFields = memoizeOne((state: TransactionState): TransactionState => {
-    const transactions = Object.keys(state.transactions).reduce((map: Record<string, Transaction>, id: string) => {
-        map[id] = {
-            ...state.transactions[id],
-            amount: Currency.fromObject(state.transactions[id].amount)
-        }
-        return map;
-    }, {});
-
-    return {
-        ...state,
-        transactions,
-    };
-});
-
 const getSortedIds = memoizeOne((transactions: Record<string, Transaction>): string[] => {
     return Object.keys(transactions).sort((a, b) => {
         var dateA = transactions[a].date;
@@ -84,13 +69,11 @@ const addManyTransactions = (state: TransactionState, action: AddManyTransaction
 };
 
 export const transactions = (state: TransactionState = initialState, action: any): TransactionState => {
-    const converted = convertFields(state);
-    
     switch(action.type as TransactionAction) {
         case TransactionAction.Add:
-            return addTransaction(converted, action as AddTransactionAction);
+            return addTransaction(state, action as AddTransactionAction);
         case TransactionAction.AddMany:
-            return addManyTransactions(converted, action as AddManyTransactionAction);
+            return addManyTransactions(state, action as AddManyTransactionAction);
         case TransactionAction.Load:
             const loadAction = action as LoadTransactionAction;
             return {
@@ -98,6 +81,6 @@ export const transactions = (state: TransactionState = initialState, action: any
                 sortedIds: loadAction.transactions.map(a => a._id)
             };
         default:
-            return converted;
+            return state;
     }
 }

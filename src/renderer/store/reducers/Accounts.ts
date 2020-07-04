@@ -29,21 +29,6 @@ const createInitialState = (): AccountState => {
 
 const initialState: AccountState = createInitialState();
 
-const convertFields = memoizeOne((state: AccountState): AccountState => {
-    const accounts = Object.keys(state.accounts).reduce((map: Record<string, Account>, id: string) => {
-        map[id] = {
-            ...state.accounts[id],
-            balance: Currency.fromObject(state.accounts[id].balance)
-        }
-        return map;
-    }, {});
-
-    return {
-        ...state,
-        accounts,
-    };
-});
-
 const getSortedIds = memoizeOne((accounts: Record<string, Account>): string[] => {
     return Object.keys(accounts).sort((a, b) => {
         var nameA = accounts[a].name.toUpperCase();
@@ -92,16 +77,14 @@ const updateAccountBalance = (state: AccountState, action: UpdateAccountBalanceA
 }
 
 export const accounts = (state: AccountState = initialState, action: any): AccountState => {
-    const converted = convertFields(state);
-
     switch(action.type as AccountAction) {
         case AccountAction.Add:
-            return addAccount(converted, action as AddAccountAction);
+            return addAccount(state, action as AddAccountAction);
         case AccountAction.Update:
-            return updateAccount(converted, action as UpdateAccountAction);
+            return updateAccount(state, action as UpdateAccountAction);
         case AccountAction.UpdateBalance:
-            return updateAccountBalance(converted, action as UpdateAccountBalanceAction);
+            return updateAccountBalance(state, action as UpdateAccountBalanceAction);
         default:
-            return converted;
+            return state;
     }
 }

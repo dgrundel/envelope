@@ -1,8 +1,9 @@
 import { JsonStoreClient, JsonStoreName } from '@/dataStore/JSONStore';
 import { applyMiddleware, combineReducers, createStore } from "redux";
 import { persistReducer, persistStore } from 'redux-persist';
-import autoMergeLevel1 from 'redux-persist/es/stateReconciler/autoMergeLevel1';
 import thunk from 'redux-thunk';
+import { accountStatePreprocessor } from './preprocessors/Account';
+import { transactionStatePreprocessor } from './preprocessors/Transaction';
 import { accounts, AccountState } from './reducers/Accounts';
 import { transactions, TransactionState } from './reducers/Transactions';
 
@@ -13,11 +14,19 @@ export interface CombinedState {
 
 const jsonClient = new JsonStoreClient(JsonStoreName.EnvelopeUserDate);
 
+const reconciler = (inboundState: CombinedState): CombinedState => {
+    return {
+        ...inboundState,
+        accounts: accountStatePreprocessor(inboundState.accounts),
+        transactions: transactionStatePreprocessor(inboundState.transactions),
+    };
+};
+
 const persistConfig = {
     key: 'root',
     storage: jsonClient,
     debug: true,
-    stateReconciler: autoMergeLevel1
+    stateReconciler: reconciler,
 }
 
 const rootReducer = combineReducers({
