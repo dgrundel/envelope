@@ -1,8 +1,7 @@
 import { listToMap } from '@/util/Data';
 import { Transaction } from '@models/Transaction';
-import { TransactionAction, LoadTransactionAction, AddTransactionAction, AddManyTransactionAction } from '../actions/Transaction';
 import memoizeOne from 'memoize-one';
-import { Currency } from '@/util/Currency';
+import { AddManyTransactionAction, AddTransactionAction, TransactionAction } from '../actions/Transaction';
 
 export interface TransactionState {
     transactions: Record<string, Transaction>;
@@ -74,12 +73,6 @@ export const transactions = (state: TransactionState = initialState, action: any
             return addTransaction(state, action as AddTransactionAction);
         case TransactionAction.AddMany:
             return addManyTransactions(state, action as AddManyTransactionAction);
-        case TransactionAction.Load:
-            const loadAction = action as LoadTransactionAction;
-            return {
-                transactions: listToMap(loadAction.transactions),
-                sortedIds: loadAction.transactions.map(a => a._id)
-            };
         default:
             return state;
     }

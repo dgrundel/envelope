@@ -11,7 +11,6 @@ export enum TransactionAction {
     Add = 'store:action:transaction-add',
     AddLinked = 'store:action:transaction-add-linked',
     AddMany = 'store:action:transaction-add-many',
-    Load = 'store:action:transaction-load',
 }
 
 export interface AddTransactionAction {
@@ -33,16 +32,6 @@ export interface AddManyTransactionAction {
 
 export const addManyTransactions = (transactions: Transaction[]): AddManyTransactionAction => ({
     type: TransactionAction.AddMany,
-    transactions
-});
-
-export interface LoadTransactionAction {
-    type: TransactionAction.Load;
-    transactions: Transaction[];
-}
-
-export const loadTransactions = (transactions: Transaction[]): LoadTransactionAction => ({
-    type: TransactionAction.Load,
     transactions
 });
 
