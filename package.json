@@ -45,6 +45,7 @@
     "electron-window-state": "^5.0.3",
     "lodash": "^4.17.15",
     "memoize-one": "^5.1.1",
+    "nanoid": "^3.1.10",
     "neat-csv": "^5.2.0",
     "nedb": "^1.8.0",
     "notosans-fontface": "^1.2.1",

@@ -1,22 +1,14 @@
-import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
-import { TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
-import { Account, AccountType, AccountData } from '@/models/Account';
+import { Account } from '@/models/Account';
 import { Transaction } from '@/models/Transaction';
 import '@public/components/App.scss';
 import * as React from "react";
-import { connect } from 'react-redux';
 import { initAppContext } from '../AppContext';
-import { loadAccounts } from '../store/actions/Account';
-import { loadTransactions } from '../store/actions/Transaction';
-import { Modal, ModalApi } from "./uiElements/Modal";
 import { AccountsPage } from "./account/AccountsPage";
-import { DashboardPage } from './DashboardPage';
 import { EnvelopesPage } from './account/EnvelopesPage';
-import { TransactionsPage } from './transaction/TransactionsPage';
+import { DashboardPage } from './DashboardPage';
 import { Sidebar } from './Sidebar';
-import { filterOnlyAccountType } from '@/util/Filters';
-import { Currency } from '@/util/Currency';
-import { Log } from '@/util/Logger';
+import { TransactionsPage } from './transaction/TransactionsPage';
+import { Modal, ModalApi } from "./uiElements/Modal";
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
 
@@ -38,7 +30,6 @@ export interface AppProps {
 }
 
 export interface AppState {
-    ready: boolean;
     modals: Modal[];
     page: AppPage;
 }
@@ -49,7 +40,6 @@ class Component extends React.Component<AppProps, AppState> implements ModalApi,
         super(props);
 
         this.state = {
-            ready: false,
             modals: [],
             page: AppPage.Dashboard
         };
@@ -69,24 +59,6 @@ class Component extends React.Component<AppProps, AppState> implements ModalApi,
         //     const sampleModal = <BaseModal heading="Test modal" buttons={ButtonSets.ok(this)} closeButtonHandler={this.dismissModal}>Hello, modal.</BaseModal>;
         //     this.queueModal(sampleModal);
         // }, 2000);
-
-        this.initApp();
-    }
-
-    initApp() {
-        const loadAccounts = this.props.loadAccounts!;
-        const loadTransactions = this.props.loadTransactions!;
-
-        const accountsDataStore = new AccountDataStoreClient();
-        const transactionsDataStore = new TransactionDataStoreClient();
-        
-        Promise.all([
-            accountsDataStore.getOrCreateUnallocatedAccount()
-                .then(() => accountsDataStore.getAllAccounts())
-                .then(accounts => loadAccounts(accounts)),
-            transactionsDataStore.getAllTransactions()
-                .then(transactions => loadTransactions(transactions))
-        ]).then(() => this.setState({ ready: true }));
     }
 
     render() {
@@ -155,4 +127,4 @@ class Component extends React.Component<AppProps, AppState> implements ModalApi,
     }
 }
 
-export const App = connect(null, { loadAccounts, loadTransactions })(Component); 
+export const App = Component; 

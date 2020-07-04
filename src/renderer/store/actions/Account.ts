@@ -1,28 +1,27 @@
-import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { isBlank } from '@/util/Filters';
 import { hasFlag } from '@/util/Flags';
 import { Log } from '@/util/Logger';
-import { Account, AccountData, AccountType, isBankAccountType, isDepositAccountType } from '@models/Account';
+import { Account, AccountType, isBankAccountType, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
+import { nanoid } from 'nanoid';
 import { CombinedState } from '../store';
 import { addLinkedTransaction, insertTransactions } from './Transaction';
 
-const database = new AccountDataStoreClient();
-
 export enum AccountAction {
-    Load = 'store:action:account-load',
-    Update = 'store:action:account-update'
+    Add = 'store:action:account-add',
+    Update = 'store:action:account-update',
+    UpdateBalance = 'store:action:account-update-balance',
 }
 
-export interface LoadAccountAction {
-    type: AccountAction.Load;
-    accounts: Account[];
+export interface AddAccountAction {
+    type: AccountAction.Add;
+    account: Account;
 }
 
-export const loadAccounts = (accounts: Account[]): LoadAccountAction => ({
-    type: AccountAction.Load,
-    accounts
+export const addAccount = (account: Account): AddAccountAction => ({
+    type: AccountAction.Add,
+    account
 });
 
 export interface UpdateAccountAction {
@@ -35,22 +34,35 @@ export const updateAccount = (account: Account): UpdateAccountAction => ({
     account
 });
 
-export const createEnvelope = (name: string) => (dispatch: any) => {
+export interface UpdateAccountBalanceAction {
+    type: AccountAction.UpdateBalance;
+    accountId: string,
+    balance: Currency,
+}
+
+export const updateAccountBalance = (accountId: string, balance: Currency): UpdateAccountBalanceAction => ({
+    type: AccountAction.UpdateBalance,
+    accountId,
+    balance,
+});
+
+export const createEnvelope = (name: string, linkedAccountIds: string[] = []): AddAccountAction => {
     if (isBlank(name)) {
         throw new Error('Name cannot be blank.');
     }
     
-    const accountData: AccountData = {
+    const account: Account = {
+        _id: nanoid(),
         name,
         type: AccountType.UserEnvelope,
         balance: Currency.ZERO,
-        linkedAccountIds: []
+        linkedAccountIds,
     };
 
-    return database.addAccount(accountData)
-        .then(() => database.getAllAccounts())
-        .then(accounts =>  dispatch(loadAccounts(accounts)));
+    return addAccount(account);
 };
+
+/* *** */
 
 export const createBankAccount = (name: string, type: AccountType, balance: Currency) => (dispatch: any, getState: () => CombinedState) => {
     if (isBlank(name)) {
@@ -63,41 +75,42 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
         throw new Error(`Balance is invalid: ${balance.toString()}`);
     }
     
-    const accountData: AccountData = {
+    const account: Account = {
+        _id: nanoid(),
         name,
         type,
         balance,
         linkedAccountIds: [],
     };
     
-    return database.addAccount(accountData)
-        .then(created => {
-            return database.getAllAccounts()
-            .then(accounts => dispatch(loadAccounts(accounts)))
-            .then(() => {
-                const createdAccount = created[0];
-                
-                /**
-                 * When adding a new deposit account, the funds (or lack thereof) 
-                 * should be applied to the "unallocated" (i.e. ready-to-budget) budget.
-                 */
-                if (createdAccount && isDepositAccountType(createdAccount.type)) {
-                    const unallocatedId = getState().accounts.unallocatedId;
-                    if (!unallocatedId) {
-                        Log.error('No unallocated account exists');
-                        return;
-                    }
-                    
-                    return dispatch(insertTransactions([{
-                        flags: TransactionFlag.Adjustment,
-                        accountId: unallocatedId!,
-                        date: new Date(),
-                        description: `Initial balance from account ${createdAccount._id} (${createdAccount.name})`,
-                        amount: createdAccount.balance,
-                        linkedTransactionIds: [],
-                    }]));
+    return dispatch(addAccount(account))
+        .then(() => {
+            if (isDepositAccountType(type)) {
+                const unallocatedId = getState().accounts.unallocatedId;
+                if (!unallocatedId) {
+                    Log.error('No unallocated account exists');
+                    return;
                 }
-            });
+                
+                return dispatch(insertTransactions([{
+                    flags: TransactionFlag.Adjustment,
+                    accountId: unallocatedId!,
+                    date: new Date(),
+                    description: `Initial balance from account ${account._id} (${name})`,
+                    amount: balance,
+                    linkedTransactionIds: [],
+                }]));
+
+            } else if (isCreditCardAccountType(type)) {
+                const paymentEnvelope: Account = {
+                    _id: nanoid(),
+                    name: `Payment for "${name}"`,
+                    type: AccountType.PaymentEnvelope,
+                    balance: Currency.ZERO,
+                    linkedAccountIds: [account._id as string],
+                };
+                return dispatch(addAccount(paymentEnvelope));
+            }
         });
 }
 
@@ -124,8 +137,7 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
             `updated balance: ${newBalance.toString()}`,
         );
 
-        return database.updateAccountBalance(account._id, newBalance)
-            .then(updated => dispatch(updateAccount(updated)))
+        return dispatch(updateAccountBalance(account._id, newBalance))
             .then(() => next(transactions, i + 1))
             .then(() => {
                 /**

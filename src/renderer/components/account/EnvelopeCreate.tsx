@@ -5,7 +5,7 @@ import { createEnvelope } from "../../store/actions/Account";
 import { CommonValidators, FieldValue, FormValidator } from '../../../util/FormValidator';
 
 export interface EnvelopeCreateProps {
-    createEnvelope?: (name: string) => Promise<void>;
+    createEnvelope?: (name: string) => any;
 }
 
 export interface EnvelopeCreateState {
