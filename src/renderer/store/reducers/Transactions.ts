@@ -1,7 +1,8 @@
 import { listToMap } from '@/util/Data';
 import { Transaction } from '@models/Transaction';
 import memoizeOne from 'memoize-one';
-import { AddManyTransactionAction, AddTransactionAction, TransactionAction } from '../actions/Transaction';
+import { AddManyTransactionAction, AddTransactionAction, TransactionAction, AddTransactionFlagsAction } from '../actions/Transaction';
+import { unionFlags } from '@/util/Flags';
 
 export interface TransactionState {
     transactions: Record<string, Transaction>;
@@ -67,12 +68,27 @@ const addManyTransactions = (state: TransactionState, action: AddManyTransaction
     };
 };
 
+const addFlags = (state: TransactionState, action: AddTransactionFlagsAction): TransactionState => {
+    return {
+        ...state,
+        transactions: {
+            ...state.transactions,
+            [action.transaction._id]: {
+                ...action.transaction,
+                flags: unionFlags(action.transaction.flags, action.flags)
+            }
+        }
+    };
+}
+
 export const transactions = (state: TransactionState = initialState, action: any): TransactionState => {
     switch(action.type as TransactionAction) {
         case TransactionAction.Add:
             return addTransaction(state, action as AddTransactionAction);
         case TransactionAction.AddMany:
             return addManyTransactions(state, action as AddManyTransactionAction);
+        case TransactionAction.AddFlags:
+            return addFlags(state, action as AddTransactionFlagsAction);
         default:
             return state;
     }

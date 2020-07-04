@@ -8,9 +8,10 @@ import { CombinedState } from '../store';
 import { applyTransactionsToAccount, applyTransactionToAccount } from './Account';
 
 export enum TransactionAction {
-    Add = 'store:action:transaction-add',
-    AddLinked = 'store:action:transaction-add-linked',
-    AddMany = 'store:action:transaction-add-many',
+    Add = 'store:action:transaction:add',
+    AddLinked = 'store:action:transaction:add-linked',
+    AddMany = 'store:action:transaction:add-many',
+    AddFlags = 'store:action:transaction:add-flags',
 }
 
 export interface AddTransactionAction {
@@ -33,6 +34,18 @@ export interface AddManyTransactionAction {
 export const addManyTransactions = (transactions: Transaction[]): AddManyTransactionAction => ({
     type: TransactionAction.AddMany,
     transactions
+});
+
+export interface AddTransactionFlagsAction {
+    type: TransactionAction.AddFlags;
+    transaction: Transaction;
+    flags: TransactionFlag;
+}
+
+export const addTransactionFlags = (transaction: Transaction, flags: TransactionFlag): AddTransactionFlagsAction => ({
+    type: TransactionAction.AddFlags,
+    transaction,
+    flags,
 });
 
 export const insertTransactions = (transactionData: TransactionData[]) => (dispatch: any) => {
