@@ -1,5 +1,7 @@
 
-export const containsFlag = (needle: number, haystack?: number): boolean => (typeof haystack === 'number') && ((haystack & needle) === needle);
+export const hasFlag = (needle: number, haystack?: number): boolean => (typeof haystack === 'number') && ((haystack & needle) === needle);
+
+export const hasAnyFlag = () => {};
 
 export const unionFlags = (...flags: number[]): number => {
     if (flags.length < 2) {

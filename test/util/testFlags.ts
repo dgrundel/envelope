@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { unionFlags, containsFlag, intersectFlags } from '@/util/Flags';
+import { unionFlags, hasFlag, intersectFlags } from '@/util/Flags';
 import { TransactionFlag } from '@/models/Transaction';
 
 describe('Flags', function() {
@@ -11,13 +11,13 @@ describe('Flags', function() {
 
     it('should find flags in a combined set', function () {
         const combined = unionFlags(TransactionFlag.BankCredit, TransactionFlag.BankDebit, TransactionFlag.Adjustment, TransactionFlag.Transfer);
-        const exists = containsFlag(TransactionFlag.BankCredit, combined);
+        const exists = hasFlag(TransactionFlag.BankCredit, combined);
         assert.ok(exists);
     });
 
     it('should not find flags when not present', function () {
         const combined = unionFlags(TransactionFlag.Adjustment, TransactionFlag.BankCredit);
-        const exists = containsFlag(combined, TransactionFlag.CreditAccountCredit);
+        const exists = hasFlag(combined, TransactionFlag.CreditAccountCredit);
         assert.ok(!exists);
     });
 

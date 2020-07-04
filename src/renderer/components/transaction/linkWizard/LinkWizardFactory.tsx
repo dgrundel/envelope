@@ -63,6 +63,44 @@ export const createLinkWizard = (transaction: Transaction) => {
 
         onFinish(state: LinkWizardState) {
             Log.debug('Link Wizard Finish', state);
+
+            if (state.accountAmountTypeFlag === TransactionFlag.BankCredit) {
+                if (state.selectedTransactionFlag === TransactionFlag.Transfer) {
+                    // A transfer from another account
+                    TransactionFlag.Transfer
+
+                } else {
+                    // A deposit, refund, or other income
+                    TransactionFlag.None
+                }
+
+            } else if (state.accountAmountTypeFlag === TransactionFlag.BankDebit) {
+                if (state.selectedTransactionFlag === TransactionFlag.Transfer) {
+                    // A transfer to another account
+                    TransactionFlag.Transfer
+
+                } else {
+                    // A purchase, fee, outgoing payment, or other account withdrawl
+                    TransactionFlag.None
+                }
+
+            } else if (state.accountAmountTypeFlag === TransactionFlag.CreditAccountCredit) {
+                if (state.selectedTransactionFlag === TransactionFlag.Transfer) {
+                    // A payment from a checking or other account
+                    TransactionFlag.Transfer
+
+                } else {
+                    // A refund, promotional credit, or other type of credit
+                    TransactionFlag.None
+                }
+
+            } else if (state.accountAmountTypeFlag === TransactionFlag.CreditAccountDebit) {
+                // A credit card purchase
+                TransactionFlag.None
+                
+            } else {
+                throw new Error(`Unrecognized accountAmountTypeFlag: ${state.accountAmountTypeFlag}`);
+            }
         }
 
         render() {

@@ -2,7 +2,7 @@ import { AccountDataStoreClient } from '@/dataStore/impl/AccountDataStore';
 import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { isBlank } from '@/util/Filters';
-import { containsFlag } from '@/util/Flags';
+import { hasFlag } from '@/util/Flags';
 import { Log } from '@/util/Logger';
 import { Account, AccountData, AccountType, isBankAccountType, isDepositAccountType } from '@models/Account';
 import { CombinedState } from '../store';
@@ -132,7 +132,7 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
                  * Positive transactions on Checking and Savings accounts
                  * go directly to the unallocated envelope to be distributed later.
                  */
-                const isNotTransfer = !containsFlag(TransactionFlag.Transfer, transaction.flags);
+                const isNotTransfer = !hasFlag(TransactionFlag.Transfer, transaction.flags);
                 if (isNotTransfer && isDepositAccountType(account.type)) {
                     if (transaction.amount.isPositive()) {
                         const unallocatedId = getState().accounts.unallocatedId;

@@ -8,6 +8,7 @@ import { LinkWizardStepProps } from '../LinkWizardFactory';
 import { LinkWizardStepFrame } from '../LinkWizardStepFrame';
 import { Log } from '@/util/Logger';
 import { isBlank } from '@/util/Filters';
+import { unionFlags, intersectFlags } from '@/util/Flags';
 
 export interface LinkedTransactionSelectProps extends LinkWizardStepProps {
     linkableTransactions?: Transaction[];
@@ -83,10 +84,27 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
 const mapStateToProps = (state: CombinedState, ownProps: LinkedTransactionSelectProps): LinkedTransactionSelectProps => {
     const accountId = ownProps.selectedAccountId;
     const absAmount = ownProps.transaction.amount.getAbsolute();
+
+    let flags = TransactionFlag.None;
+    switch(ownProps.accountAmountTypeFlag) {
+        case TransactionFlag.BankCredit:
+            flags = TransactionFlag.BankDebit;
+            break;
+        case TransactionFlag.BankDebit:
+            flags = unionFlags(
+                TransactionFlag.BankCredit,
+                TransactionFlag.CreditAccountCredit
+            );
+            break;
+        case TransactionFlag.CreditAccountCredit:
+            flags = TransactionFlag.BankDebit;
+            break;
+    }
     
     const accountTransactions = state.transactions.sortedIds
         .map(id => state.transactions.transactions[id])
-        .filter(transaction => transaction.accountId === accountId);
+        .filter(transaction => transaction.accountId === accountId
+            && intersectFlags(transaction.flags, flags) > 0);
 
     const withSameAmount = accountTransactions.filter(transaction => transaction.amount.getAbsolute().eq(absAmount));
     const linkableTransactions = withSameAmount.length > 0 ? withSameAmount : accountTransactions;
