@@ -3,7 +3,9 @@ import * as windowStateKeeper from 'electron-window-state';
 import * as path from 'path';
 import * as url from 'url';
 import { dataStoreManager } from './dataStores';
+import { JsonStoreHost, JsonStoreName } from '@/dataStore/JSONStore';
 
+const jsonStoreHost = new JsonStoreHost(JsonStoreName.EnvelopeUserDate);
 const dataStores = dataStoreManager;
 
 function createWindow(): void {
