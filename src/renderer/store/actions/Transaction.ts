@@ -1,16 +1,40 @@
-import { TransactionDataStoreClient } from '@/dataStore/impl/TransactionDataStore';
 import { Currency } from '@/util/Currency';
 import { unionFlags } from '@/util/Flags';
 import { Log } from '@/util/Logger';
 import { Account } from '@models/Account';
 import { getAccountAmountTransactionFlag, Transaction, TransactionData, TransactionFlag } from '@models/Transaction';
+import { nanoid } from 'nanoid';
+import { CombinedState } from '../store';
 import { applyTransactionsToAccount, applyTransactionToAccount } from './Account';
 
-const database = new TransactionDataStoreClient();
-
 export enum TransactionAction {
-    Load = 'store:action:transaction-load'
+    Add = 'store:action:transaction-add',
+    AddLinked = 'store:action:transaction-add-linked',
+    AddMany = 'store:action:transaction-add-many',
+    Load = 'store:action:transaction-load',
 }
+
+export interface AddTransactionAction {
+    type: TransactionAction.Add;
+    transaction: Transaction;
+    linkTo?: Transaction;
+}
+
+export const addTransaction = (transaction: Transaction, linkTo?: Transaction): AddTransactionAction => ({
+    type: TransactionAction.Add,
+    transaction,
+    linkTo,
+});
+
+export interface AddManyTransactionAction {
+    type: TransactionAction.AddMany;
+    transactions: Transaction[];
+}
+
+export const addManyTransactions = (transactions: Transaction[]): AddManyTransactionAction => ({
+    type: TransactionAction.AddMany,
+    transactions
+});
 
 export interface LoadTransactionAction {
     type: TransactionAction.Load;
@@ -22,32 +46,36 @@ export const loadTransactions = (transactions: Transaction[]): LoadTransactionAc
     transactions
 });
 
-export const addLinkedTransaction = (transaction: TransactionData, linkTo: Transaction) => (dispatch: any) => {
-    const transactionData = {
-        ...transaction,
-        linkedTransactionIds: [linkTo._id]
-    };
-    
-    return database.addLinkedTransaction(transactionData, linkTo)
-        .then(createdAndUpdated => {
-            Log.debug('addLinkedTransaction', createdAndUpdated);
+export const insertTransactions = (transactionData: TransactionData[]) => (dispatch: any) => {
+    const transactions: Transaction[] = transactionData.map(data => ({
+        ...data,
+        _id: nanoid(),
+    }));
 
-            const created = createdAndUpdated[0];
-            return dispatch(applyTransactionToAccount(created))
-                .then(() => database.getAllTransactions())
-                .then((transactions: Transaction[]) => dispatch(loadTransactions(transactions)))
-                .then(() => createdAndUpdated);
+    return dispatch(addManyTransactions(transactions))
+        .then(() => {
+            Log.debug('addTransactions', transactions);
+            return dispatch(applyTransactionsToAccount(transactions))
+                .then(() => transactions);
         });
 };
 
-export const insertTransactions = (transactionData: TransactionData[]) => (dispatch: any) => {
-    return database.addTransactions(transactionData)
-        .then(inserted => {
-            Log.debug('addTransactions', inserted);
-            return dispatch(applyTransactionsToAccount(inserted))
-                .then(() => database.getAllTransactions())
-                .then((transactions: Transaction[]) => dispatch(loadTransactions(transactions)))
-                .then(() => inserted);
+export const addLinkedTransaction = (transactionData: TransactionData, linkTo: Transaction) => (dispatch: any, getState: () => CombinedState) => {
+    const transaction: Transaction = {
+        ...transactionData,
+        _id: nanoid(),
+        linkedTransactionIds: [linkTo._id],
+    };
+    
+    return dispatch(addTransaction(transaction, linkTo))
+        .then(() => dispatch(applyTransactionToAccount(transaction)))
+        .then(() => {
+            const createdAndUpdated = [
+                transaction,
+                getState().transactions.transactions[linkTo._id],
+            ];
+            Log.debug('addLinkedTransaction', createdAndUpdated);
+            return createdAndUpdated;
         });
 };
 
@@ -61,7 +89,8 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
         getAccountAmountTransactionFlag(fromAccount, inverseAmount)
     );
 
-    const fromTransaction: TransactionData = {
+    const fromTransaction: Transaction = {
+        _id: nanoid(),
         accountId: fromAccount._id,
         date,
         description,
@@ -70,10 +99,11 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
         flags,
     };
 
-    return database.addTransaction(fromTransaction)
-        .then(inserted => {
-            Log.debug('addTransaction (fromTransaction)', inserted);
-            return dispatch(applyTransactionToAccount(inserted))
+    return dispatch(addTransaction(fromTransaction))
+        .then(() => {
+            Log.debug('addTransaction (fromTransaction)', fromTransaction);
+
+            return dispatch(applyTransactionToAccount(fromTransaction))
                 .then(() => {
                     const flags = unionFlags(
                         TransactionFlag.Transfer, 
@@ -85,11 +115,11 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
                         date,
                         description,
                         amount,
-                        linkedTransactionIds: [inserted._id],
+                        linkedTransactionIds: [fromTransaction._id],
                         flags,
                     };
 
-                    return dispatch(addLinkedTransaction(toTransaction, inserted));
+                    return dispatch(addLinkedTransaction(toTransaction, fromTransaction));
                 });
         });
 };

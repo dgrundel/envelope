@@ -62,8 +62,6 @@ export const createEnvelope = (name: string, linkedAccountIds: string[] = []): A
     return addAccount(account);
 };
 
-/* *** */
-
 export const createBankAccount = (name: string, type: AccountType, balance: Currency) => (dispatch: any, getState: () => CombinedState) => {
     if (isBlank(name)) {
         throw new Error('Name cannot be blank.');

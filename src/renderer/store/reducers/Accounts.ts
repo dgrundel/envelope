@@ -36,8 +36,7 @@ const getSortedIds = (accounts: Record<string, Account>): string[] => {
             return 0;
         }
         return (nameA < nameB) ? -1 : 1;
-    })
-    
+    });
 }
 
 const addAccount = (state: AccountState, action: AddAccountAction): AccountState => {
