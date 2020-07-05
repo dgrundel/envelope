@@ -83,10 +83,6 @@ const addFlags = (state: TransactionState, action: AddTransactionFlagsAction): T
 }
 
 const linkExisting = (state: TransactionState, action: LinkExistingTransactionsAction): TransactionState => {
-    // [action.transaction._id]: {
-    //     ...action.transaction,
-    //     flags: unionFlags(action.transaction.flags, action.flags)
-    // }
     const linkIds = action.transactions.map(t => t._id);
     const updates = action.transactions.reduce((map: Record<string, Transaction>, transaction: Transaction) => {
         map[transaction._id] = {

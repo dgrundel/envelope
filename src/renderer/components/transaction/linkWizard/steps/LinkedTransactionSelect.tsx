@@ -22,8 +22,15 @@ const columns: IColumn[] = [
     { key: 'column3', name: 'Amount', fieldName: 'amount', minWidth: 150, },
 ];
 
+interface ListItem extends IObjectWithKey {
+    date: string;
+    description: string;
+    amount: string;
+    transaction: Transaction;
+}
+
 class Component extends React.Component<LinkedTransactionSelectProps> {
-    private readonly items: IObjectWithKey[];
+    private readonly items: ListItem[];
     private readonly selection: Selection;
 
     constructor(props: LinkedTransactionSelectProps) {
@@ -34,21 +41,24 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
             date: t.date.toLocaleDateString(),
             description: t.description,
             amount: t.amount.toFormattedString(),
+            transaction: t,
         }));
 
         this.selection = new Selection({
             items: this.items,
             onSelectionChanged: () => {
                 const items = this.selection.getSelection();
-                const key = items[0]?.key?.toString();
-                this.props.setState({
-                    linkedTransactionId: key
-                });
+                const item = items[0] as ListItem;
+                if (item) {
+                    this.props.setState({
+                        linkedTransaction: item.transaction,
+                    });
+                }
             },
         });
 
-        if (this.props.linkedTransactionId) {
-            this.selection.setKeySelected(this.props.linkedTransactionId, true, false);
+        if (this.props.linkedTransaction) {
+            this.selection.setKeySelected(this.props.linkedTransaction._id, true, false);
         }
 
         if (props.selectedTransactionFlag === TransactionFlag.Transfer) {
@@ -64,7 +74,7 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
     }
 
     validateState(state: LinkWizardStepProps) {
-        if (isBlank(state.linkedTransactionId)) {
+        if (!state.linkedTransaction) {
             return 'Please select a transaction.';
         }
     }

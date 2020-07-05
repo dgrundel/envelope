@@ -8,6 +8,7 @@ import { TransactionFlagSelect } from './steps/TransactionFlagSelect';
 import { intersectFlags, unionFlags } from '@/util/Flags';
 import { LinkedAccountSelect } from './steps/LinkedAccountSelect';
 import { LinkedTransactionSelect } from './steps/LinkedTransactionSelect';
+import { addTransactionFlags, linkExistingTransactions } from '@/renderer/store/actions/Transaction';
 
 export interface LinkWizardState {
     transaction: Transaction;
@@ -15,7 +16,7 @@ export interface LinkWizardState {
 
     selectedTransactionFlag?: TransactionFlag;
     selectedAccountId?: string;
-    linkedTransactionId?: string;
+    linkedTransaction?: Transaction;
 }
 
 export type LinkWizardStepProps = LinkWizardState & WizardStepApi<LinkWizardState>;
@@ -36,6 +37,8 @@ export const createLinkWizard = (transaction: Transaction) => {
         // mapped from store
 
         // store actions
+        addTransactionFlags?: (transaction: Transaction, flags: TransactionFlag) => void;
+        linkExistingTransactions?: (transactions: Transaction[]) => void;
     }
 
     class Component extends React.Component<Props> {
@@ -69,6 +72,16 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // A transfer from another account
                     // TransactionFlag.BankCredit
                     // TransactionFlag.Transfer
+                    linkExistingTransactions([
+                        state.transaction, 
+                        state.linkedTransaction!
+                    ]);
+                    const flags = unionFlags(
+                        TransactionFlag.Transfer,
+                        TransactionFlag.Reconciled
+                    );
+                    addTransactionFlags(state.transaction, flags);
+                    addTransactionFlags(state.linkedTransaction!, flags);
 
                 } else {
                     // A deposit, refund, or other income
@@ -81,6 +94,16 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // A transfer to another account
                     // TransactionFlag.BankDebit
                     // TransactionFlag.Transfer
+                    linkExistingTransactions([
+                        state.transaction, 
+                        state.linkedTransaction!
+                    ]);
+                    const flags = unionFlags(
+                        TransactionFlag.Transfer,
+                        TransactionFlag.Reconciled
+                    );
+                    addTransactionFlags(state.transaction, flags);
+                    addTransactionFlags(state.linkedTransaction!, flags);
 
                 } else {
                     // A purchase, fee, outgoing payment, or other account withdrawl
@@ -125,5 +148,10 @@ export const createLinkWizard = (transaction: Transaction) => {
         };
     }
 
-    return connect(mapStateToProps, { })(Component);
+    const mappedActions = {
+        addTransactionFlags,
+        linkExistingTransactions,
+    };
+
+    return connect(mapStateToProps, mappedActions)(Component);
 }
