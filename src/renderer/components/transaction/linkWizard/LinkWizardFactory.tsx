@@ -8,7 +8,9 @@ import { TransactionFlagSelect } from './steps/TransactionFlagSelect';
 import { intersectFlags, unionFlags } from '@/util/Flags';
 import { LinkedAccountSelect } from './steps/LinkedAccountSelect';
 import { LinkedTransactionSelect } from './steps/LinkedTransactionSelect';
-import { addTransactionFlags, linkExistingTransactions } from '@/renderer/store/actions/Transaction';
+import { addTransactionFlags, linkExistingTransactions, addTransaction } from '@/renderer/store/actions/Transaction';
+import { Account } from '@models/Account';
+import { nanoid } from 'nanoid';
 
 export interface LinkWizardState {
     transaction: Transaction;
@@ -35,8 +37,10 @@ export const createLinkWizard = (transaction: Transaction) => {
 
     interface Props {
         // mapped from store
+        accounts?: Record<string, Account>;
 
         // store actions
+        addTransaction?: (transaction: Transaction, linkTo?: Transaction) => void;
         addTransactionFlags?: (transaction: Transaction, flags: TransactionFlag) => void;
         linkExistingTransactions?: (transactions: Transaction[]) => void;
     }
@@ -87,6 +91,18 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // A deposit, refund, or other income
                     // TransactionFlag.BankCredit
                     // TransactionFlag.None
+                    const envelope = this.props.accounts![state.selectedAccountId!];
+                    const linkedTransaction: Transaction = {
+                        _id: nanoid(),
+                        date: new Date(),
+                        accountId: envelope._id,
+                        amount: state.transaction.amount.getInverse(),
+                        description: state.transaction.description,
+                        linkedTransactionIds: [],
+                        flags: TransactionFlag.Reconciled,
+                    };
+                    addTransaction(linkedTransaction, state.transaction);
+                    addTransactionFlags(state.transaction, TransactionFlag.Reconciled);
                 }
 
             } else if (state.accountAmountTypeFlag === TransactionFlag.BankDebit) {
@@ -109,6 +125,18 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // A purchase, fee, outgoing payment, or other account withdrawl
                     // TransactionFlag.BankDebit
                     // TransactionFlag.None
+                    const envelope = this.props.accounts![state.selectedAccountId!];
+                    const linkedTransaction: Transaction = {
+                        _id: nanoid(),
+                        date: new Date(),
+                        accountId: envelope._id,
+                        amount: state.transaction.amount.getInverse(),
+                        description: state.transaction.description,
+                        linkedTransactionIds: [],
+                        flags: TransactionFlag.Reconciled,
+                    };
+                    addTransaction(linkedTransaction, state.transaction);
+                    addTransactionFlags(state.transaction, TransactionFlag.Reconciled);
                 }
 
             } else if (state.accountAmountTypeFlag === TransactionFlag.CreditAccountCredit) {
@@ -116,11 +144,29 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // A payment from a checking or other account
                     // TransactionFlag.CreditAccountCredit
                     // TransactionFlag.Transfer
+                    addTransactionFlags(state.transaction, unionFlags(
+                        TransactionFlag.Transfer,
+                        TransactionFlag.Reconciled,
+                    ));
 
                 } else {
                     // A refund, promotional credit, or other type of credit
                     // TransactionFlag.CreditAccountCredit
                     // TransactionFlag.None
+                    const envelope = this.props.accounts![state.selectedAccountId!];
+                    const linkedTransaction: Transaction = {
+                        _id: nanoid(),
+                        date: new Date(),
+                        accountId: envelope._id,
+                        // amount is the same as the original transaction 
+                        // because credit cards are reversed
+                        amount: state.transaction.amount,
+                        description: state.transaction.description,
+                        linkedTransactionIds: [],
+                        flags: TransactionFlag.Reconciled,
+                    };
+                    addTransaction(linkedTransaction, state.transaction);
+                    addTransactionFlags(state.transaction, TransactionFlag.Reconciled);
                 }
 
             } else if (state.accountAmountTypeFlag === TransactionFlag.CreditAccountDebit) {
@@ -131,6 +177,20 @@ export const createLinkWizard = (transaction: Transaction) => {
                 // A credit card purchase
                 // TransactionFlag.CreditAccountDebit
                 // TransactionFlag.None
+                const envelope = this.props.accounts![state.selectedAccountId!];
+                const linkedTransaction: Transaction = {
+                    _id: nanoid(),
+                    date: new Date(),
+                    accountId: envelope._id,
+                    // amount is the same as the original transaction 
+                    // because credit cards are reversed
+                    amount: state.transaction.amount,
+                    description: state.transaction.description,
+                    linkedTransactionIds: [],
+                    flags: TransactionFlag.Reconciled,
+                };
+                addTransaction(linkedTransaction, state.transaction);
+                addTransactionFlags(state.transaction, TransactionFlag.Reconciled);
                 
             } else {
                 throw new Error(`Unrecognized accountAmountTypeFlag: ${state.accountAmountTypeFlag}`);
@@ -145,10 +205,12 @@ export const createLinkWizard = (transaction: Transaction) => {
     const mapStateToProps = (state: CombinedState, ownProps: Props): Props => {
         return {
             ...ownProps,
+            accounts: state.accounts.accounts,
         };
     }
 
     const mappedActions = {
+        addTransaction,
         addTransactionFlags,
         linkExistingTransactions,
     };
