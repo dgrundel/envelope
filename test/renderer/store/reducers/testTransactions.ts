@@ -2,7 +2,7 @@ import { AccountType } from '@/models/Account';
 import { transactions } from '@/renderer/store/reducers/Transactions';
 import { Currency } from '@/util/Currency';
 import { assert } from 'chai';
-import { addTransaction } from '@/renderer/store/actions/Transaction';
+import { addTransaction, addManyTransactions } from '@/renderer/store/actions/Transaction';
 import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { getIdentifier } from '@/util/Identifier';
 
@@ -88,5 +88,28 @@ describe('tranasctions reducer', function() {
         });
         assert.deepEqual(updatedState.transactions[linkedId], linked);
         assert.deepEqual(updatedState.sortedIds, [linkToId, linkedId]);
+    });
+
+    it('should correctly add _many_ transactions', function() {
+        const generateTransaction = (id: string, dateString: string) => ({
+            _id: id,
+            accountId: 'test-account-id',
+            date: new Date(dateString),
+            amount: new Currency(12, 340),
+            description: 'test trans desc',
+            flags: TransactionFlag.BankCredit,
+            linkedTransactionIds: [],
+        });
+
+        const many = [
+            generateTransaction('d', '2020-06-07'),
+            generateTransaction('b', '2020-06-04'),
+            generateTransaction('a', '2020-06-02'),
+            generateTransaction('c', '2020-06-05'),
+        ];
+        
+        const state = transactions(undefined, addManyTransactions(many));
+
+        assert.deepEqual(state.sortedIds, ['a', 'b', 'c', 'd']);
     });
 });

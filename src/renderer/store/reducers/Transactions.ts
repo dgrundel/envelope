@@ -1,3 +1,4 @@
+import { Currency } from '@/util/Currency';
 import { listToMap } from '@/util/Data';
 import { Transaction } from '@models/Transaction';
 import memoizeOne from 'memoize-one';
