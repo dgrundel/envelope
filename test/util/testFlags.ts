@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import { assert } from 'chai';
 import { unionFlags, hasFlag, intersectFlags } from '@/util/Flags';
 import { TransactionFlag } from '@/models/Transaction';
 

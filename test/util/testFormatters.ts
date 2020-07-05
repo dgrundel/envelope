@@ -1,5 +1,5 @@
+import { assert } from 'chai';
 import { leftPad } from '@/util/Formatters';
-import * as assert from 'assert';
 
 describe('Formatters', function() {
     describe('leftPad()', function() {
