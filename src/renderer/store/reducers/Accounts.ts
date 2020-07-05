@@ -22,7 +22,9 @@ const createInitialState = (): AccountState => {
         accounts: {
             [unallocateAccount._id]: unallocateAccount,
         },
-        sortedIds: [],
+        sortedIds: [
+            unallocateAccount._id
+        ],
         unallocatedId: unallocateAccount._id
     };
 }
