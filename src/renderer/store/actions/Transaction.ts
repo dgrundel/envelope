@@ -1,9 +1,9 @@
 import { Currency } from '@/util/Currency';
 import { unionFlags } from '@/util/Flags';
+import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import { Account } from '@models/Account';
 import { getAccountAmountTransactionFlag, Transaction, TransactionData, TransactionFlag } from '@models/Transaction';
-import { nanoid } from 'nanoid';
 import { CombinedState } from '../store';
 import { applyTransactionsToAccount, applyTransactionToAccount } from './Account';
 
@@ -62,7 +62,7 @@ export const linkExistingTransactions = (transactions: Transaction[]): LinkExist
 export const insertTransactions = (transactionData: TransactionData[]) => (dispatch: any) => {
     const transactions: Transaction[] = transactionData.map(data => ({
         ...data,
-        _id: nanoid(),
+        _id: getIdentifier(),
     }));
 
     return Promise.resolve(dispatch(addManyTransactions(transactions)))
@@ -76,7 +76,7 @@ export const insertTransactions = (transactionData: TransactionData[]) => (dispa
 export const addLinkedTransaction = (transactionData: TransactionData, linkTo: Transaction) => (dispatch: any, getState: () => CombinedState) => {
     const transaction: Transaction = {
         ...transactionData,
-        _id: nanoid(),
+        _id: getIdentifier(),
         linkedTransactionIds: [linkTo._id],
     };
     
@@ -103,7 +103,7 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
     );
 
     const fromTransaction: Transaction = {
-        _id: nanoid(),
+        _id: getIdentifier(),
         accountId: fromAccount._id,
         date,
         description,

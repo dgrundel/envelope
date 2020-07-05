@@ -4,7 +4,7 @@ import * as windowStateKeeper from 'electron-window-state';
 import * as path from 'path';
 import * as url from 'url';
 
-const jsonStoreHost = new JsonStoreHost(JsonStoreName.EnvelopeUserDate);
+const jsonStoreHost = new JsonStoreHost(JsonStoreName.EnvelopeUserData);
 
 function createWindow(): void {
     const mainWindowState = windowStateKeeper({

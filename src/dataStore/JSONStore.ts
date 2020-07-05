@@ -5,7 +5,7 @@ import * as ElectronStore from 'electron-store';
 const BASE_STORE_CONFIG = {};
 
 export enum JsonStoreName {
-    EnvelopeUserDate = 'envelope-user-data'
+    EnvelopeUserData = 'envelope-user-data'
 }
 
 enum JsonStoreEvent {

@@ -1,8 +1,8 @@
-import { Account, AccountType } from '@models/Account';
-import { AccountAction, AddAccountAction, UpdateAccountAction, UpdateAccountBalanceAction } from '../actions/Account';
-import { nanoid } from 'nanoid';
 import { Currency } from '@/util/Currency';
+import { getIdentifier } from '@/util/Identifier';
+import { Account, AccountType } from '@models/Account';
 import memoizeOne from 'memoize-one';
+import { AccountAction, AddAccountAction, UpdateAccountAction, UpdateAccountBalanceAction } from '../actions/Account';
 
 export interface AccountState {
     accounts: Record<string, Account>;
@@ -12,7 +12,7 @@ export interface AccountState {
 
 const createInitialState = (): AccountState => {
     const unallocateAccount: Account = {
-        _id: nanoid(),
+        _id: getIdentifier(),
         name: 'Ready to Budget',
         type: AccountType.Unallocated,
         balance: Currency.ZERO,

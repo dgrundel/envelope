@@ -12,7 +12,7 @@ export interface CombinedState {
     transactions: TransactionState
 }
 
-const jsonClient = new JsonStoreClient(JsonStoreName.EnvelopeUserDate);
+const jsonClient = new JsonStoreClient(JsonStoreName.EnvelopeUserData);
 
 const reconciler = (inboundState: CombinedState): CombinedState => {
     return {

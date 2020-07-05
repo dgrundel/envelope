@@ -2,9 +2,9 @@ import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { isBlank } from '@/util/Filters';
 import { hasFlag } from '@/util/Flags';
+import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import { Account, AccountType, isBankAccountType, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
-import { nanoid } from 'nanoid';
 import { CombinedState } from '../store';
 import { addLinkedTransaction, insertTransactions } from './Transaction';
 
@@ -52,7 +52,7 @@ export const createEnvelope = (name: string, linkedAccountIds: string[] = []): A
     }
     
     const account: Account = {
-        _id: nanoid(),
+        _id: getIdentifier(),
         name,
         type: AccountType.UserEnvelope,
         balance: Currency.ZERO,
@@ -74,7 +74,7 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
     }
     
     const account: Account = {
-        _id: nanoid(),
+        _id: getIdentifier(),
         name,
         type,
         balance,
@@ -101,7 +101,7 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
 
             } else if (isCreditCardAccountType(type)) {
                 const paymentEnvelope: Account = {
-                    _id: nanoid(),
+                    _id: getIdentifier(),
                     name: `Payment for "${name}"`,
                     type: AccountType.PaymentEnvelope,
                     balance: Currency.ZERO,
