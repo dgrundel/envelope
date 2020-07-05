@@ -1,8 +1,11 @@
 import { assert } from 'chai';
 import { accounts } from '@/renderer/store/reducers/Accounts';
 import { Currency } from '@/util/Currency';
-import { AccountType } from '@/models/Account';
+import { Account, AccountType } from '@/models/Account';
 import { addAccount, updateAccount, updateAccountBalance } from '@/renderer/store/actions/Account';
+import { getIdentifier } from '@/util/Identifier';
+
+const UNALLOC_NAME = 'Ready to Budget';
 
 describe('accounts reducer', function() {
     it('should provide usable initial state', function() {
@@ -17,7 +20,7 @@ describe('accounts reducer', function() {
                     "_id": unallocatedId,
                     "balance": Currency.ZERO,
                     "linkedAccountIds": [],
-                    "name": "Ready to Budget",
+                    "name": UNALLOC_NAME,
                     "type": AccountType.Unallocated,
                 },
             },
@@ -70,7 +73,33 @@ describe('accounts reducer', function() {
         assert.deepEqual(updatedState.accounts[_id], updatedAccount);
     });
 
-    it('should update an account BALANCE correctly', function() {
+    it('should correctly sort accounts', function() {
+        const generateAccount = (name: string): Account => ({
+            _id: getIdentifier(),
+            name,
+            type: AccountType.Checking,
+            balance: Currency.ZERO,
+            linkedAccountIds: [],
+        });
+
+        const a = generateAccount('a');
+        const b = generateAccount('b');
+        const c = generateAccount('c');
+        const d = generateAccount('d');
+
+        let state = accounts(undefined, {});
+        state = accounts(state, addAccount(b));
+        state = accounts(state, addAccount(d));
+        state = accounts(state, addAccount(c));
+        state = accounts(state, addAccount(a));
+
+        const sortedNames = state.sortedIds.map(_id => state.accounts[_id])
+            .map(account => account.name);
+
+        assert.deepEqual(sortedNames, ['a', 'b', 'c', 'd', UNALLOC_NAME]);
+    });
+
+    it('should update an account _balance_ correctly', function() {
         const _id = 'test-update-account-id';
 
         const originalAccount = {
@@ -88,4 +117,5 @@ describe('accounts reducer', function() {
         const updatedState = accounts(originalState, updateAccountBalance(_id, updatedBalance));
         assert.equal(updatedState.accounts[_id].balance, updatedBalance);
     });
+    
 });
