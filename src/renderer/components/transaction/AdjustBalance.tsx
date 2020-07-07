@@ -1,9 +1,10 @@
 import { Account } from '@/models/Account';
-import { getAccountAmountTransactionFlag, Transaction, TransactionData, TransactionFlag } from '@/models/Transaction';
-import { insertTransactions } from '@/renderer/store/actions/Transaction';
+import { getAccountAmountTransactionFlag, Transaction, TransactionFlag } from '@/models/Transaction';
+import { addTransaction } from '@/renderer/store/actions/Transaction';
 import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
 import { getRequiredCurrencyError } from '@/util/ErrorGenerators';
 import { unionFlags } from '@/util/Flags';
+import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import { MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';
 import * as React from "react";
@@ -14,7 +15,7 @@ export interface AdjustBalanceProps {
     onComplete?: () => void;
 
     // store actions
-    insertTransactions?: (transactionData: TransactionData[]) => Promise<Transaction>;
+    addTransaction?: (transaction: Transaction) => void;
 }
 
 interface State {
@@ -90,7 +91,8 @@ class Component extends React.Component<AdjustBalanceProps, State> {
 
         const amountFlag = getAccountAmountTransactionFlag(account, amount);
 
-        const transactionData: TransactionData = {
+        const transaction: Transaction = {
+            _id: getIdentifier(),
             accountId: account._id,
             date: new Date(),
             amount: amount,
@@ -99,11 +101,10 @@ class Component extends React.Component<AdjustBalanceProps, State> {
             flags: unionFlags(amountFlag, TransactionFlag.Adjustment),
         };
 
-        this.props.insertTransactions!([transactionData]).then(created => {
-            Log.debug('Added adjustment transaction.', created);
-            this.props.onComplete && this.props.onComplete();
-        });
+        this.props.addTransaction!(transaction);
+        Log.debug('Added adjustment transaction.', transaction);
+        this.props.onComplete && this.props.onComplete();
     }
 }
 
-export const AdjustBalance = connect(null, { insertTransactions })(Component);
+export const AdjustBalance = connect(null, { addTransaction })(Component);

@@ -2,12 +2,18 @@ import { AccountType } from '@/models/Account';
 import { transactions } from '@/renderer/store/reducers/Transactions';
 import { Currency } from '@/util/Currency';
 import { assert } from 'chai';
-import { addTransaction, addManyTransactions, addTransactionFlags, linkExistingTransactions } from '@/renderer/store/actions/Transaction';
+import { addManyTransactions, addTransactionFlags, linkExistingTransactions, AddTransactionAction, TransactionAction } from '@/renderer/store/actions/Transaction';
 import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { getIdentifier } from '@/util/Identifier';
 import { unionFlags } from '@/util/Flags';
 
 describe('tranasctions reducer', function() {
+    const createAddAction = (transaction: Transaction, linkTo?: Transaction): AddTransactionAction => ({
+        type: TransactionAction.Add,
+        transaction,
+        linkTo,
+    });
+
     it('should provide usable initial state', function() {
         const actualInitialState = transactions(undefined, {});
         
@@ -28,7 +34,7 @@ describe('tranasctions reducer', function() {
             flags: TransactionFlag.BankCredit,
             linkedTransactionIds: [],
         };
-        const action = addTransaction(transaction);
+        const action = createAddAction(transaction);
         const state = transactions(undefined, action);
 
         assert.deepEqual(state.transactions[_id], transaction);
@@ -47,10 +53,10 @@ describe('tranasctions reducer', function() {
         });
         
         let state = transactions(undefined, {});
-        state = transactions(state, addTransaction(generateTransaction('d', '2020-06-07')));
-        state = transactions(state, addTransaction(generateTransaction('b', '2020-06-04')));
-        state = transactions(state, addTransaction(generateTransaction('a', '2020-06-02')));
-        state = transactions(state, addTransaction(generateTransaction('c', '2020-06-05')));
+        state = transactions(state, createAddAction(generateTransaction('d', '2020-06-07')));
+        state = transactions(state, createAddAction(generateTransaction('b', '2020-06-04')));
+        state = transactions(state, createAddAction(generateTransaction('a', '2020-06-02')));
+        state = transactions(state, createAddAction(generateTransaction('c', '2020-06-05')));
 
         assert.deepEqual(state.sortedIds, ['a', 'b', 'c', 'd']);
     });
@@ -66,7 +72,7 @@ describe('tranasctions reducer', function() {
             flags: TransactionFlag.BankCredit,
             linkedTransactionIds: [],
         };
-        const state = transactions(undefined, addTransaction(linkTo));
+        const state = transactions(undefined, createAddAction(linkTo));
 
         assert.deepEqual(state.transactions[linkToId], linkTo);
 
@@ -81,7 +87,7 @@ describe('tranasctions reducer', function() {
             linkedTransactionIds: [],
         };
 
-        const updatedState = transactions(state, addTransaction(linked, linkTo));
+        const updatedState = transactions(state, createAddAction(linked, linkTo));
 
         assert.deepEqual(updatedState.transactions[linkToId], {
             ...linkTo,
@@ -126,7 +132,7 @@ describe('tranasctions reducer', function() {
             linkedTransactionIds: [],
         };
         
-        const state = transactions(undefined, addTransaction(transaction));
+        const state = transactions(undefined, createAddAction(transaction));
 
         assert.deepEqual(state.transactions[_id], transaction);
         assert.deepEqual(state.sortedIds, [_id]);

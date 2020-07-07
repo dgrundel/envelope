@@ -6,7 +6,7 @@ import { Account } from '@models/Account';
 import { isEqual } from 'lodash';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { ImportWizardStepProps, rowToTransactionData } from "../ImportWizardFactory";
+import { ImportWizardStepProps, rowToTransaction } from "../ImportWizardFactory";
 
 export interface InvertAmountsSelectProps extends ImportWizardStepProps {
     duplicateTransactions?: Transaction[];
@@ -31,7 +31,7 @@ class Component extends React.Component<InvertAmountsSelectProps> {
         this.state = {};
 
         this.items = props.rows.map((row, i) => {
-            const transaction = rowToTransactionData(
+            const transaction = rowToTransaction(
                 row, 
                 this.props.invertTransactions, 
                 this.props.dateColumn!,

@@ -6,7 +6,7 @@ import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import { Account, AccountType, isBankAccountType, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
 import { CombinedState } from '../store';
-import { addLinkedTransaction, insertTransactions } from './Transaction';
+import { addTransaction } from './Transaction';
 
 export enum AccountAction {
     Add = 'store:action:account-add',
@@ -90,14 +90,16 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
                     return;
                 }
                 
-                return dispatch(insertTransactions([{
+                const transaction: Transaction = {
+                    _id: getIdentifier(),
                     flags: TransactionFlag.Adjustment,
                     accountId: unallocatedId!,
                     date: new Date(),
                     description: `Initial balance from account ${account._id} (${name})`,
                     amount: balance,
                     linkedTransactionIds: [],
-                }]));
+                };
+                return dispatch(addTransaction(transaction));
 
             } else if (isCreditCardAccountType(type)) {
                 const paymentEnvelope: Account = {
@@ -151,14 +153,16 @@ export const applyTransactionsToAccount = (transactions: Transaction[]) => (disp
                             return;
                         }
 
-                        return dispatch(addLinkedTransaction({
+                        const newTransaction: Transaction = {
+                            _id: getIdentifier(),
                             flags: TransactionFlag.Transfer,
                             accountId: unallocatedId!,
                             date: new Date(),
                             description: `Inflow from account ${account._id} (${account.name})`,
                             amount: transaction.amount,
                             linkedTransactionIds: [transaction._id],
-                        }, transaction));
+                        };
+                        return dispatch(addTransaction(newTransaction, transaction));
                     }
                 }
             });

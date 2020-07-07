@@ -1,9 +1,10 @@
 import { Account } from '@/models/Account';
-import { Transaction, TransactionData, getAccountAmountTransactionFlag } from '@/models/Transaction';
-import { addLinkedTransaction } from '@/renderer/store/actions/Transaction';
+import { getAccountAmountTransactionFlag, Transaction } from '@/models/Transaction';
+import { addTransaction } from '@/renderer/store/actions/Transaction';
 import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
 import { chainErrorGenerators, ErrorGenerator, maxCurrencyErrorGenerator, minCurrencyErrorGenerator } from '@/util/ErrorGenerators';
 import { filterOnlyAssignableAccounts } from '@/util/Filters';
+import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import { MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';
 import * as React from "react";
@@ -20,7 +21,7 @@ export interface AddLinksProps {
     accounts?: Record<string, Account>;
 
     // store actions
-    addLinkedTransaction?: (transaction: TransactionData, linkTo: Transaction) => Promise<[Transaction, Transaction]>;
+    addTransaction?: (transaction: Transaction, linkTo: Transaction) => void;
 }
 
 interface State {
@@ -111,7 +112,8 @@ class Component extends React.Component<AddLinksProps, State> {
 
         Log.debug(`Linking ${amount.toFormattedString} of transaction`, this.props.linkTo, 'to envelope', envelope);
 
-        const transactionData: TransactionData = {
+        const newTransaction: Transaction = {
+            _id: getIdentifier(),
             flags: getAccountAmountTransactionFlag(envelope, amount),
             accountId: envelope._id,
             date: new Date(),
@@ -120,10 +122,9 @@ class Component extends React.Component<AddLinksProps, State> {
             linkedTransactionIds: []
         };
 
-        this.props.addLinkedTransaction!(transactionData, this.props.linkTo).then(createdAndUpdated => {
-            Log.debug('Added linked transaction.', createdAndUpdated);
-            this.props.onComplete && this.props.onComplete();
-        });
+        this.props.addTransaction!(newTransaction, this.props.linkTo);
+        Log.debug('Added linked transaction.', [ newTransaction, this.props.linkTo ]);
+        this.props.onComplete && this.props.onComplete();
     }
 }
 
@@ -134,4 +135,4 @@ const mapStateToProps = (state: CombinedState, ownProps: AddLinksProps): AddLink
     };
 }
 
-export const AddLinks = connect(mapStateToProps, { addLinkedTransaction })(Component);
+export const AddLinks = connect(mapStateToProps, { addTransaction })(Component);

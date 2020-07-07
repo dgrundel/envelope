@@ -1,9 +1,10 @@
 import { Account } from "@/models/Account";
-import { getAccountAmountTransactionFlag, TransactionData } from "@/models/Transaction";
+import { getAccountAmountTransactionFlag, Transaction } from "@/models/Transaction";
 import { getAppContext } from "@/renderer/AppContext";
-import { insertTransactions } from "@/renderer/store/actions/Transaction";
+import { addManyTransactions } from "@/renderer/store/actions/Transaction";
 import { CombinedState } from "@/renderer/store/store";
 import { Currency } from "@/util/Currency";
+import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import * as React from "react";
 import { connect } from "react-redux";
@@ -35,14 +36,14 @@ export interface ImportWizardState {
 
 export type ImportWizardStepProps = ImportWizardState & WizardStepApi<ImportWizardState>;
 
-export const rowToTransactionData = (
+export const rowToTransaction = (
     row: Row,
     invert: boolean,
     dateColumn: string,
     amountColumn: string,
     descriptionColumns: string[],
     account: Account
-): TransactionData => {
+): Transaction => {
     const currency = Currency.parse(row[amountColumn]);
     const amount = invert ? currency.getInverse() : currency;
     const flags = getAccountAmountTransactionFlag(account, amount);
@@ -54,6 +55,7 @@ export const rowToTransactionData = (
         .join(' ');
 
     return {
+        _id: getIdentifier(),
         accountId,
         date,
         amount,
@@ -71,8 +73,8 @@ export const rowsToTransactions = (
     amountColumn: string,
     descriptionColumns: string[],
     account: Account
-): TransactionData[] => {
-    return rows.map(row => rowToTransactionData(row, invert, dateColumn, amountColumn, descriptionColumns, account));
+): Transaction[] => {
+    return rows.map(row => rowToTransaction(row, invert, dateColumn, amountColumn, descriptionColumns, account));
 };
 
 export const createImportWizard = (rows: Row[]) => {
@@ -86,7 +88,7 @@ export const createImportWizard = (rows: Row[]) => {
         accounts?: Record<string, Account>;
 
         // store actions
-        insertTransactions?: (transactionData: TransactionData[]) => Promise<void>;
+        addManyTransactions?: (transaction: Transaction[]) => void;
     }
 
     class Component extends React.Component<Props> {
@@ -133,12 +135,12 @@ export const createImportWizard = (rows: Row[]) => {
                 selectedAccount,
             );
 
-            this.props.insertTransactions!(rowsAsTransactions).then(() => {
-                const appContext = getAppContext();
-                // dismiss import modal
-                appContext.modalApi.dismissModal();
-                appContext.pageApi.setPage(AppPage.Transactions);
-            });
+            this.props.addManyTransactions!(rowsAsTransactions);
+            
+            const appContext = getAppContext();
+            // dismiss import modal
+            appContext.modalApi.dismissModal();
+            appContext.pageApi.setPage(AppPage.Transactions);
         }
 
         render() {
@@ -153,5 +155,5 @@ export const createImportWizard = (rows: Row[]) => {
         };
     }
 
-    return connect(mapStateToProps, { insertTransactions })(Component);
+    return connect(mapStateToProps, { addManyTransactions })(Component);
 }

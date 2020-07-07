@@ -5,7 +5,7 @@ import { Log } from '@/util/Logger';
 import { Account } from '@models/Account';
 import { getAccountAmountTransactionFlag, Transaction, TransactionData, TransactionFlag } from '@models/Transaction';
 import { CombinedState } from '../store';
-import { applyTransactionsToAccount, applyTransactionToAccount } from './Account';
+import { applyTransactionToAccount } from './Account';
 
 export enum TransactionAction {
     Add = 'store:action:transaction:add',
@@ -21,11 +21,18 @@ export interface AddTransactionAction {
     linkTo?: Transaction;
 }
 
-export const addTransaction = (transaction: Transaction, linkTo?: Transaction): AddTransactionAction => ({
-    type: TransactionAction.Add,
-    transaction,
-    linkTo,
-});
+export const addTransaction = (transaction: Transaction, linkTo?: Transaction) => (dispatch: any) => {
+    const addAction: AddTransactionAction = {
+        type: TransactionAction.Add,
+        transaction,
+        linkTo,
+    };
+    
+    // TODO: convert this back to a "normal" action creator
+    // will need to remove the promises from applyTransactionToAccount as well, and probably move that logic into a reducer
+    dispatch(addAction);
+    return dispatch(applyTransactionToAccount(transaction));
+};
 
 export interface AddManyTransactionAction {
     type: TransactionAction.AddMany;
@@ -59,39 +66,6 @@ export const linkExistingTransactions = (transactions: Transaction[]): LinkExist
     transactions,
 });
 
-export const insertTransactions = (transactionData: TransactionData[]) => (dispatch: any) => {
-    const transactions: Transaction[] = transactionData.map(data => ({
-        ...data,
-        _id: getIdentifier(),
-    }));
-
-    return Promise.resolve(dispatch(addManyTransactions(transactions)))
-        .then(() => {
-            Log.debug('addTransactions', transactions);
-            return dispatch(applyTransactionsToAccount(transactions))
-                .then(() => transactions);
-        });
-};
-
-export const addLinkedTransaction = (transactionData: TransactionData, linkTo: Transaction) => (dispatch: any, getState: () => CombinedState) => {
-    const transaction: Transaction = {
-        ...transactionData,
-        _id: getIdentifier(),
-        linkedTransactionIds: [linkTo._id],
-    };
-    
-    return Promise.resolve(dispatch(addTransaction(transaction, linkTo)))
-        .then(() => dispatch(applyTransactionToAccount(transaction)))
-        .then(() => {
-            const createdAndUpdated = [
-                transaction,
-                getState().transactions.transactions[linkTo._id],
-            ];
-            Log.debug('addLinkedTransaction', createdAndUpdated);
-            return createdAndUpdated;
-        });
-};
-
 export const transferFunds = (amount: Currency, fromAccount: Account, toAccount: Account) => (dispatch: any) => {
     const date = new Date();
     const description = `Transfer from "${fromAccount.name}" to "${toAccount.name}"`;
@@ -123,7 +97,8 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
                         getAccountAmountTransactionFlag(toAccount, amount)
                     );
 
-                    const toTransaction: TransactionData = {
+                    const toTransaction: Transaction = {
+                        _id: getIdentifier(),
                         accountId: toAccount._id,
                         date,
                         description,
@@ -132,7 +107,7 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
                         flags,
                     };
 
-                    return dispatch(addLinkedTransaction(toTransaction, fromTransaction));
+                    return dispatch(addTransaction(toTransaction, fromTransaction));
                 });
         });
 };
