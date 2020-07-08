@@ -8,7 +8,7 @@ import { TransactionFlagSelect } from './steps/TransactionFlagSelect';
 import { intersectFlags, unionFlags } from '@/util/Flags';
 import { LinkedAccountSelect } from './steps/LinkedAccountSelect';
 import { RelatedTransactionSelect } from './steps/RelatedTransactionSelect';
-import { addTransactionFlags, linkExistingTransactions, addTransaction, linkTransactionsAsTransfer } from '@/renderer/store/actions/Transaction';
+import { addTransactionFlags, linkExistingTransactions, addTransaction, linkTransactionsAsTransfer, addReconcileTransaction } from '@/renderer/store/actions/Transaction';
 import { Account } from '@models/Account';
 import { nanoid } from 'nanoid';
 
@@ -44,6 +44,7 @@ export const createLinkWizard = (transaction: Transaction) => {
         addTransactionFlags?: (transaction: Transaction, flags: TransactionFlag) => void;
         linkExistingTransactions?: (transactions: Transaction[]) => void;
         linkTransactionsAsTransfer?: (transactions: Transaction[]) => void;
+        addReconcileTransaction?: (existingTransaction: Transaction, otherAccount: Account) => void;
     }
 
     class Component extends React.Component<Props> {
@@ -87,17 +88,7 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // TransactionFlag.BankCredit
                     // TransactionFlag.None
                     const envelope = this.props.accounts![state.relatedAccountId!];
-                    const linkedTransaction: Transaction = {
-                        _id: nanoid(),
-                        date: new Date(),
-                        accountId: envelope._id,
-                        amount: state.transaction.amount.getInverse(),
-                        description: state.transaction.description,
-                        linkedTransactionIds: [],
-                        flags: TransactionFlag.Reconciled,
-                    };
-                    this.props.addTransaction!(linkedTransaction, state.transaction);
-                    this.props.addTransactionFlags!(state.transaction, TransactionFlag.Reconciled);
+                    this.props.addReconcileTransaction!(state.transaction, envelope);
                 }
 
             } else if (state.amountTypeFlag === TransactionFlag.BankDebit) {
@@ -115,17 +106,7 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // TransactionFlag.BankDebit
                     // TransactionFlag.None
                     const envelope = this.props.accounts![state.relatedAccountId!];
-                    const linkedTransaction: Transaction = {
-                        _id: nanoid(),
-                        date: new Date(),
-                        accountId: envelope._id,
-                        amount: state.transaction.amount.getInverse(),
-                        description: state.transaction.description,
-                        linkedTransactionIds: [],
-                        flags: TransactionFlag.Reconciled,
-                    };
-                    this.props.addTransaction!(linkedTransaction, state.transaction);
-                    this.props.addTransactionFlags!(state.transaction, TransactionFlag.Reconciled);
+                    this.props.addReconcileTransaction!(state.transaction, envelope);
                 }
 
             } else if (state.amountTypeFlag === TransactionFlag.CreditAccountCredit) {
@@ -143,19 +124,7 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // TransactionFlag.CreditAccountCredit
                     // TransactionFlag.None
                     const envelope = this.props.accounts![state.relatedAccountId!];
-                    const linkedTransaction: Transaction = {
-                        _id: nanoid(),
-                        date: new Date(),
-                        accountId: envelope._id,
-                        // amount is the same as the original transaction 
-                        // because credit cards are reversed
-                        amount: state.transaction.amount,
-                        description: state.transaction.description,
-                        linkedTransactionIds: [],
-                        flags: TransactionFlag.Reconciled,
-                    };
-                    this.props.addTransaction!(linkedTransaction, state.transaction);
-                    this.props.addTransactionFlags!(state.transaction, TransactionFlag.Reconciled);
+                    this.props.addReconcileTransaction!(state.transaction, envelope);
                 }
 
             } else if (state.amountTypeFlag === TransactionFlag.CreditAccountDebit) {
@@ -167,19 +136,7 @@ export const createLinkWizard = (transaction: Transaction) => {
                 // TransactionFlag.CreditAccountDebit
                 // TransactionFlag.None
                 const envelope = this.props.accounts![state.relatedAccountId!];
-                const linkedTransaction: Transaction = {
-                    _id: nanoid(),
-                    date: new Date(),
-                    accountId: envelope._id,
-                    // amount is the same as the original transaction 
-                    // because credit cards are reversed
-                    amount: state.transaction.amount,
-                    description: state.transaction.description,
-                    linkedTransactionIds: [],
-                    flags: TransactionFlag.Reconciled,
-                };
-                this.props.addTransaction!(linkedTransaction, state.transaction);
-                this.props.addTransactionFlags!(state.transaction, TransactionFlag.Reconciled);
+                this.props.addReconcileTransaction!(state.transaction, envelope);
                 
             } else {
                 throw new Error(`Unrecognized accountAmountTypeFlag: ${state.amountTypeFlag}`);
@@ -203,6 +160,7 @@ export const createLinkWizard = (transaction: Transaction) => {
         addTransactionFlags,
         linkExistingTransactions,
         linkTransactionsAsTransfer,
+        addReconcileTransaction,
     };
 
     return connect(mapStateToProps, mappedActions)(Component);

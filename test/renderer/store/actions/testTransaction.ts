@@ -1,11 +1,11 @@
 import { Account, AccountType } from '@/models/Account';
 import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { AccountAction } from '@/renderer/store/actions/Account';
-import { addTransaction, TransactionAction, transferFunds, linkTransactionsAsTransfer } from '@/renderer/store/actions/Transaction';
+import { addTransaction, TransactionAction, transferFunds, linkTransactionsAsTransfer, addReconcileTransaction } from '@/renderer/store/actions/Transaction';
 import { Currency } from '@/util/Currency';
 import { assert } from 'chai';
 import { mockStore } from '../mockStore';
-import { unionFlags } from '@/util/Flags';
+import { unionFlags, hasFlag } from '@/util/Flags';
 
 
 describe('Transaction actions', function () {
@@ -16,8 +16,7 @@ describe('Transaction actions', function () {
             type: AccountType.Unallocated,
             balance: Currency.ZERO,
             linkedAccountIds: [],
-        };
-        
+        };        
         const store = mockStore([testAccount]);
 
         const t: Transaction = {
@@ -76,6 +75,7 @@ describe('Transaction actions', function () {
         store.dispatch(action);
 
         const storeActions = store.getActions();
+        assert.equal(storeActions.length, 4);
 
         // transaction applied to source account
         assert.equal(storeActions[0].type, TransactionAction.Add);
@@ -134,11 +134,9 @@ describe('Transaction actions', function () {
         };
         
         const store = mockStore([a1, a2], [t1, t2]);
-
         store.dispatch(linkTransactionsAsTransfer([t1, t2]));
 
         const storeActions = store.getActions();
-
         assert.equal(storeActions.length, 3);
 
         const linkAction = storeActions[0];
@@ -162,6 +160,119 @@ describe('Transaction actions', function () {
             TransactionFlag.Transfer,
             TransactionFlag.Reconciled,
         ));
+    });
 
+    it('should addReconcileTransaction', function () {
+        const a1: Account = {
+            _id: 'a1',
+            name: 'a1',
+            type: AccountType.Checking,
+            balance: new Currency(100, 0),
+            linkedAccountIds: [],
+        };
+        const a2: Account = {
+            _id: 'a2',
+            name: 'a2',
+            type: AccountType.Savings,
+            balance: new Currency(100, 0),
+            linkedAccountIds: [],
+        };
+        
+        const t1Amount = new Currency(5, 0);
+        const t1: Transaction = {
+            _id: 't1',
+            accountId: a2._id,
+            date: new Date(),
+            amount: t1Amount,
+            description: 't1',
+            flags: TransactionFlag.BankCredit,
+            linkedTransactionIds: [],
+        };
+
+        const store = mockStore([a1, a2], [t1]);
+        
+        store.dispatch(addReconcileTransaction(t1, a1));
+        
+        const storeActions = store.getActions();
+        assert.equal(storeActions.length, 3);
+
+        // add transaction action
+        const action0 = storeActions[0];
+        assert.equal(action0.type, TransactionAction.Add);
+        assert.deepEqual(action0.linkTo, t1);
+
+        const transaction = action0.transaction;
+        assert.equal(transaction.accountId, a1._id);
+        assert.deepEqual(transaction.amount, t1Amount.getInverse());
+        assert.equal(transaction.flags, TransactionFlag.Reconciled);
+
+        // applying new transaction to a1
+        const action1 = storeActions[1];
+        assert.equal(action1.type, AccountAction.UpdateBalance);
+        assert.equal(action1.accountId, a1._id);
+        assert.deepEqual(action1.balance, a1.balance.sub(t1Amount));
+
+        // adding reconciled flag to the original transaction
+        const action2 = storeActions[2];
+        assert.equal(action2.type, TransactionAction.AddFlags);
+        assert.deepEqual(action2.transaction, t1);
+        assert.ok(hasFlag(action2.flags, TransactionFlag.Reconciled), 'Action must have reconciled flag');
+    });
+
+    it('should addReconcileTransaction with correct amount when one is a credit card', function () {
+        const a1: Account = {
+            _id: 'a1',
+            name: 'a1',
+            type: AccountType.CreditCard,
+            balance: new Currency(100, 0),
+            linkedAccountIds: [],
+        };
+        const a2: Account = {
+            _id: 'a2',
+            name: 'a2',
+            type: AccountType.Checking,
+            balance: new Currency(100, 0),
+            linkedAccountIds: [],
+        };
+        
+        const t1Amount = new Currency(5, 0);
+        const t1: Transaction = {
+            _id: 't1',
+            accountId: a2._id,
+            date: new Date(),
+            amount: t1Amount,
+            description: 't1',
+            flags: TransactionFlag.BankCredit,
+            linkedTransactionIds: [],
+        };
+
+        const store = mockStore([a1, a2], [t1]);
+        
+        store.dispatch(addReconcileTransaction(t1, a1));
+        
+        const storeActions = store.getActions();
+        assert.equal(storeActions.length, 3);
+
+        // add transaction action
+        const action0 = storeActions[0];
+        assert.equal(action0.type, TransactionAction.Add);
+        assert.deepEqual(action0.linkTo, t1);
+
+        const transaction = action0.transaction;
+        assert.equal(transaction.accountId, a1._id);
+        assert.deepEqual(transaction.amount, t1Amount);
+        assert.equal(transaction.flags, TransactionFlag.Reconciled);
+
+        // applying new transaction to a1
+        const action1 = storeActions[1];
+        assert.equal(action1.type, AccountAction.UpdateBalance);
+        assert.equal(action1.accountId, a1._id);
+        assert.deepEqual(action1.balance, a1.balance.add(t1Amount));
+
+        // adding reconciled flag to the original transaction
+        const action2 = storeActions[2];
+        assert.equal(action2.type, TransactionAction.AddFlags);
+        assert.deepEqual(action2.transaction, t1);
+        assert.ok(hasFlag(action2.flags, TransactionFlag.Reconciled), 'Action must have reconciled flag');
     });
 });
