@@ -1,11 +1,10 @@
-import { Account } from '@/models/Account';
 import { CombinedState } from '@/renderer/store/store';
-import { ErrorGenerator, requiredStringErrorGenerator, chainErrorGenerators, uniqueStringErrorGenerator } from '@/util/ErrorGenerators';
+import { chainErrorGenerators, requiredStringErrorGenerator, uniqueStringErrorGenerator } from '@/util/ErrorGenerators';
 import { MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';
+import memoizeOne from 'memoize-one';
 import * as React from "react";
 import { connect } from "react-redux";
 import { createEnvelope } from "../../store/actions/Account";
-import memoizeOne from 'memoize-one';
 
 export interface EnvelopeCreateProps {
     // mapped from state
