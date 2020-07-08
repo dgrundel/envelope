@@ -237,7 +237,7 @@ describe('Transaction actions', function () {
         const t1Amount = new Currency(5, 0);
         const t1: Transaction = {
             _id: 't1',
-            accountId: a2._id,
+            accountId: a1._id,
             date: new Date(),
             amount: t1Amount,
             description: 't1',
@@ -247,7 +247,7 @@ describe('Transaction actions', function () {
 
         const store = mockStore([a1, a2], [t1]);
         
-        store.dispatch(addReconcileTransaction(t1, a1));
+        store.dispatch(addReconcileTransaction(t1, a2));
         
         const storeActions = store.getActions();
         assert.equal(storeActions.length, 3);
@@ -258,15 +258,15 @@ describe('Transaction actions', function () {
         assert.deepEqual(action0.linkTo, t1);
 
         const transaction = action0.transaction;
-        assert.equal(transaction.accountId, a1._id);
+        assert.equal(transaction.accountId, a2._id);
         assert.deepEqual(transaction.amount, t1Amount);
         assert.equal(transaction.flags, TransactionFlag.Reconciled);
 
-        // applying new transaction to a1
+        // applying new transaction to a2
         const action1 = storeActions[1];
         assert.equal(action1.type, AccountAction.UpdateBalance);
-        assert.equal(action1.accountId, a1._id);
-        assert.deepEqual(action1.balance, a1.balance.add(t1Amount));
+        assert.equal(action1.accountId, a2._id);
+        assert.deepEqual(action1.balance, a2.balance.add(t1Amount));
 
         // adding reconciled flag to the original transaction
         const action2 = storeActions[2];

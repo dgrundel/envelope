@@ -117,18 +117,11 @@ export const linkTransactionsAsTransfer = (transactions: Transaction[]) => (disp
 };
 
 export const addReconcileTransaction = (existingTransaction: Transaction, otherAccount: Account) => (dispatch: any, getState: () => CombinedState) => {
-    const amountTypeFlag = findAmountTransactionFlag(existingTransaction);
-    const invert = amountTypeFlag === TransactionFlag.CreditAccountCredit || amountTypeFlag === TransactionFlag.CreditAccountDebit;
-
-    const amount = invert
-        ? existingTransaction.amount.getInverse()
-        : existingTransaction.amount;
-    
     const linkedTransaction: Transaction = {
         _id: getIdentifier(),
         date: new Date(),
         accountId: otherAccount._id,
-        amount,
+        amount: existingTransaction.amount,
         description: existingTransaction.description,
         linkedTransactionIds: [],
         flags: TransactionFlag.Reconciled,
