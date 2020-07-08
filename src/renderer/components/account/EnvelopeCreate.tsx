@@ -1,43 +1,50 @@
-import { PrimaryButton, TextField } from '@fluentui/react';
+import { Account } from '@/models/Account';
+import { CombinedState } from '@/renderer/store/store';
+import { ErrorGenerator, requiredStringErrorGenerator, chainErrorGenerators, uniqueStringErrorGenerator } from '@/util/ErrorGenerators';
+import { MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';
 import * as React from "react";
 import { connect } from "react-redux";
 import { createEnvelope } from "../../store/actions/Account";
-import { CommonValidators, FieldValue, FormValidator } from '../../../util/FormValidator';
+import memoizeOne from 'memoize-one';
 
 export interface EnvelopeCreateProps {
+    // mapped from state
+    existingAccountNames?: string[];
+    
+    // store actions
     createEnvelope?: (name: string) => any;
 }
 
 export interface EnvelopeCreateState {
-    values: Record<string, any>;
-    errors: Record<string, string>;
+    name?: string;
+    messages?: any;
 }
 
-const fieldValidators = [{
-    name: 'name',
-    validator: CommonValidators.required()
-}];
-
 class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState> {
-    private readonly validator: FormValidator;
 
     constructor(props: EnvelopeCreateProps) {
         super(props);
 
-        this.validator = new FormValidator(fieldValidators, this.onFieldChange.bind(this));
-        this.state = {
-            values: {},
-            errors: {}
-        };
+        this.state = {};
+
+        this.getNameErrorGenerator = memoizeOne(this.getNameErrorGenerator);
+    }
+
+    getNameErrorGenerator(existingAccountNames: string[] = []) {
+        return chainErrorGenerators(
+            requiredStringErrorGenerator('Please enter a name for the envelope.'),
+            uniqueStringErrorGenerator(existingAccountNames, 'That name already exists.'),
+        );
     }
 
     render() {
         return <form onSubmit={e => this.onSubmit(e)}>
             <TextField
                 label="Name"
-                value={this.state.values.name || ''}
-                errorMessage={this.state.errors.name}
-                onChange={(e, value?) => this.validator.setValue('name', value)}
+                value={this.state.name}
+                onGetErrorMessage={this.getNameErrorGenerator(this.props.existingAccountNames)}
+                onChange={(e, name?) => this.setState({ name })}
+                validateOnLoad={false}
             />
             <p style={({ textAlign: 'right' })}>
                 <PrimaryButton type="submit" text="Save" />
@@ -45,30 +52,38 @@ class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState
         </form>;
     }
 
-    onFieldChange(fieldName: string, fieldValue: FieldValue) {
-        const values = this.validator.values();
-        const errors = this.validator.errors();
-        this.setState({
-            values,
-            errors
-        });
-    }
-
     onSubmit(e: React.FormEvent<HTMLFormElement>): void {
         e.preventDefault();
-        
-        if (this.validator.allValid()) {
-            const values = this.validator.values();
-            
-            this.props.createEnvelope!(values.name as string);
 
-        } else {
-            const errors = this.validator.errors();
-            this.setState({
-                errors
-            });
+        const nameError = this.getNameErrorGenerator(this.props.existingAccountNames)(this.state.name);
+
+        if (nameError) {
+            const messages = <MessageBar
+                messageBarType={MessageBarType.error}
+                isMultiline={true}
+            >
+                <Text key="nameError" block>{nameError}</Text>
+            </MessageBar>;
+
+            this.setState({ messages });
+            return;
         }
+
+        // clear messages
+        this.setState({
+            name: undefined,
+            messages: undefined
+        });
+
+        this.props.createEnvelope!(this.state.name!);
     }
 }
 
-export const EnvelopeCreate = connect(null, { createEnvelope })(Component);
+const mapStateToProps = (state: CombinedState, ownProps: EnvelopeCreateProps): EnvelopeCreateProps => {
+    return {
+        ...ownProps,
+        existingAccountNames: state.accounts.sortedIds.map(id => state.accounts.accounts[id].name),
+    };
+}
+
+export const EnvelopeCreate = connect(mapStateToProps, { createEnvelope })(Component);
