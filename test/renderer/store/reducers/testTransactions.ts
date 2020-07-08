@@ -1,5 +1,5 @@
 import { Transaction, TransactionFlag } from '@/models/Transaction';
-import { addManyTransactions, AddTransactionAction, addTransactionFlags, linkExistingTransactions, TransactionAction } from '@/renderer/store/actions/Transaction';
+import { AddManyTransactionAction, AddTransactionAction, addTransactionFlags, linkExistingTransactions, TransactionAction } from '@/renderer/store/actions/Transaction';
 import { transactions } from '@/renderer/store/reducers/Transactions';
 import { Currency } from '@/util/Currency';
 import { unionFlags } from '@/util/Flags';
@@ -10,6 +10,11 @@ describe('Tranasctions reducer', function() {
         type: TransactionAction.Add,
         transaction,
         linkTo,
+    });
+
+    const createAddManyAction = (many: Transaction[]): AddManyTransactionAction => ({
+        type: TransactionAction.AddMany,
+        transactions: many,
     });
 
     it('should provide usable initial state', function() {
@@ -113,7 +118,7 @@ describe('Tranasctions reducer', function() {
             generateTransaction('c', '2020-06-05'),
         ];
         
-        const state = transactions(undefined, addManyTransactions(many));
+        const state = transactions(undefined, createAddManyAction(many));
 
         assert.deepEqual(state.sortedIds, ['a', 'b', 'c', 'd']);
     });
@@ -163,7 +168,7 @@ describe('Tranasctions reducer', function() {
             generateTransaction('c'),
             generateTransaction('d'),
         ];
-        const state = transactions(undefined, addManyTransactions(many));
+        const state = transactions(undefined, createAddManyAction(many));
 
         assert.deepEqual(state.sortedIds, ['a', 'b', 'c', 'd']);
 
@@ -190,7 +195,7 @@ describe('Tranasctions reducer', function() {
         const a = generateTransaction('a', ['x', 'x']);
         const b = generateTransaction('b', []);
 
-        const state = transactions(undefined, addManyTransactions([x, a, b]));
+        const state = transactions(undefined, createAddManyAction([x, a, b]));
         const updated = transactions(state, linkExistingTransactions([a, b]));
 
         assert.sameMembers(updated.transactions['x'].linkedTransactionIds, []);
@@ -198,3 +203,4 @@ describe('Tranasctions reducer', function() {
         assert.sameMembers(updated.transactions['b'].linkedTransactionIds, ['a']);
     });
 });
+

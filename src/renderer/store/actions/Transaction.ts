@@ -5,7 +5,7 @@ import { Log } from '@/util/Logger';
 import { Account, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
 import { getAmountTransactionFlag, Transaction, TransactionData, TransactionFlag, findAmountTransactionFlag } from '@models/Transaction';
 import { CombinedState } from '../store';
-import { applyTransactionToAccount } from './Account';
+import { applyTransactionToAccount, applyTransactionsToAccount } from './Account';
 
 export enum TransactionAction {
     Add = 'store:action:transaction:add',
@@ -21,14 +21,13 @@ export interface AddTransactionAction {
 }
 
 export const addTransaction = (transaction: Transaction, linkTo?: Transaction) => (dispatch: any) => {
-    const addAction: AddTransactionAction = {
+    const action: AddTransactionAction = {
         type: TransactionAction.Add,
         transaction,
         linkTo,
     };
     
-    // TODO: convert this back to a "normal" action creator
-    dispatch(addAction);
+    dispatch(action);
     dispatch(applyTransactionToAccount(transaction));
 };
 
@@ -37,10 +36,15 @@ export interface AddManyTransactionAction {
     transactions: Transaction[];
 }
 
-export const addManyTransactions = (transactions: Transaction[]): AddManyTransactionAction => ({
-    type: TransactionAction.AddMany,
-    transactions
-});
+export const addManyTransactions = (transactions: Transaction[]) => (dispatch: any) => {
+    const action: AddManyTransactionAction = {
+        type: TransactionAction.AddMany,
+        transactions
+    };
+
+    dispatch(action);
+    dispatch(applyTransactionsToAccount(transactions));
+}
 
 export interface AddTransactionFlagsAction {
     type: TransactionAction.AddFlags;
