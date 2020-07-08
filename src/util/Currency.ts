@@ -114,7 +114,10 @@ export class Currency {
         const whole = Math.floor(Math.abs(n / PRECISION)) * sign;
         const frac = n % PRECISION;
         
-        return new Currency(whole, frac);
+        // this is dumb but prevents `-0` from breaking unit tests
+        const fracOrZero = frac !== 0 ? frac : 0;
+        const wholeOrZero = whole !== 0 ? whole : 0;
+        return new Currency(wholeOrZero, fracOrZero);
     }
 
     static fromObject(o: any) {
