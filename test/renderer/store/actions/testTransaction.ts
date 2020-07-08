@@ -7,7 +7,6 @@ import { assert } from 'chai';
 import { mockStore } from '../mockStore';
 import { unionFlags, hasFlag } from '@/util/Flags';
 
-
 describe('Transaction actions', function () {
     it('addTransaction', () => {
         const testAccount: Account = {

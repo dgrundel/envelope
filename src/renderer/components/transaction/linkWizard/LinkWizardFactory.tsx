@@ -1,16 +1,15 @@
 import { Transaction, TransactionFlag } from '@/models/Transaction';
+import { addReconcileTransaction, addTransactionFlags, linkTransactionsAsTransfer } from '@/renderer/store/actions/Transaction';
 import { CombinedState } from "@/renderer/store/store";
+import { intersectFlags, unionFlags } from '@/util/Flags';
 import { Log } from '@/util/Logger';
+import { Account } from '@models/Account';
 import * as React from "react";
 import { connect } from "react-redux";
 import { createWizard, WizardStepApi } from "../../uiElements/WizardFactory";
-import { TransactionFlagSelect } from './steps/TransactionFlagSelect';
-import { intersectFlags, unionFlags } from '@/util/Flags';
 import { LinkedAccountSelect } from './steps/LinkedAccountSelect';
 import { RelatedTransactionSelect } from './steps/RelatedTransactionSelect';
-import { addTransactionFlags, linkExistingTransactions, addTransaction, linkTransactionsAsTransfer, addReconcileTransaction } from '@/renderer/store/actions/Transaction';
-import { Account } from '@models/Account';
-import { nanoid } from 'nanoid';
+import { TransactionFlagSelect } from './steps/TransactionFlagSelect';
 
 export interface LinkWizardState {
     transaction: Transaction;
@@ -40,9 +39,7 @@ export const createLinkWizard = (transaction: Transaction) => {
         accounts?: Record<string, Account>;
 
         // store actions
-        addTransaction?: (transaction: Transaction, linkTo?: Transaction) => void;
         addTransactionFlags?: (transaction: Transaction, flags: TransactionFlag) => void;
-        linkExistingTransactions?: (transactions: Transaction[]) => void;
         linkTransactionsAsTransfer?: (transactions: Transaction[]) => void;
         addReconcileTransaction?: (existingTransaction: Transaction, otherAccount: Account) => void;
     }
@@ -156,9 +153,7 @@ export const createLinkWizard = (transaction: Transaction) => {
     }
 
     const mappedActions = {
-        addTransaction,
         addTransactionFlags,
-        linkExistingTransactions,
         linkTransactionsAsTransfer,
         addReconcileTransaction,
     };
