@@ -1,4 +1,4 @@
-import { Transaction } from '@/models/Transaction';
+import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { mergeStyles, MessageBar, MessageBarButton, MessageBarType, Text } from '@fluentui/react';
 import { Account } from '@models/Account';
@@ -9,6 +9,7 @@ import { CombinedState } from '../../store/store';
 import { BaseModal, Modal } from '../uiElements/Modal';
 import { createLinkWizard } from './linkWizard/LinkWizardFactory';
 import { TransactionCard } from './TransactionCard';
+import { hasFlag } from '@/util/Flags';
 
 export interface AddLinkedTransactionsProps {
     transaction: Transaction;
@@ -31,6 +32,11 @@ class Component extends React.Component<AddLinkedTransactionsProps, {}> implemen
     }
 
     renderLinkWizardMessage(): any {
+        const isReconciled = hasFlag(TransactionFlag.Reconciled, this.props.transaction.flags);
+        if (isReconciled) {
+            return null;
+        }
+
         const onClick = () => {
             const WizardComponent = createLinkWizard(this.props.transaction);
             getAppContext().modalApi.replaceModal(<WizardComponent/>);

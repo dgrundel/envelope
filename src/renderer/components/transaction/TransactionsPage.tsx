@@ -1,4 +1,4 @@
-import { Transaction } from '@/models/Transaction';
+import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { getAppContext } from '@/renderer/AppContext';
 import { CombinedState } from '@/renderer/store/store';
 import { Currency } from '@/util/Currency';
@@ -11,6 +11,7 @@ import { Box } from "../uiElements/Box";
 import { DataTable } from '../uiElements/DataTable';
 import { filterOnlyImportedTransactions } from '@/util/Filters';
 import { FontIcon } from '@fluentui/react';
+import { hasFlag } from '@/util/Flags';
 
 export interface TransactionsPageProps {
     sortedTransactions?: Transaction[];
@@ -73,6 +74,8 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
     private linkedTransactionsFormatter(value: string, row: Transaction) {
         const transactionMap = this.props.transactions || {};
         const transaction = transactionMap[row._id];
+        const isReconciled = hasFlag(TransactionFlag.Reconciled, transaction.flags);
+        
         const existingLinks = transaction.linkedTransactionIds.map(id => transactionMap[id]) || [];
         
         const balance = existingLinks.reduce(
@@ -95,7 +98,7 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
         };
         
         let icon = <FontIcon iconName="Error" />;
-        if (balance.isZero()) {
+        if (isReconciled) {
             icon = <FontIcon iconName="CheckMark" />;
         }
 

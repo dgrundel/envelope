@@ -6,7 +6,8 @@ export const transactionStatePreprocessor = (state: TransactionState): Transacti
     const transactions = Object.keys(state.transactions).reduce((map: Record<string, Transaction>, id: string) => {
         map[id] = {
             ...state.transactions[id],
-            amount: Currency.fromObject(state.transactions[id].amount)
+            date: new Date(state.transactions[id].date),
+            amount: Currency.fromObject(state.transactions[id].amount),
         }
         return map;
     }, {});
