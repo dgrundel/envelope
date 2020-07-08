@@ -1,13 +1,13 @@
-import { assert } from 'chai';
-import { accounts } from '@/renderer/store/reducers/Accounts';
-import { Currency } from '@/util/Currency';
 import { Account, AccountType } from '@/models/Account';
 import { addAccount, updateAccount, updateAccountBalance } from '@/renderer/store/actions/Account';
+import { accounts } from '@/renderer/store/reducers/Accounts';
+import { Currency } from '@/util/Currency';
 import { getIdentifier } from '@/util/Identifier';
+import { assert } from 'chai';
 
 const UNALLOC_NAME = 'Ready to Budget';
 
-describe('accounts reducer', function() {
+describe('Acounts reducer', function() {
     it('should provide usable initial state', function() {
         const actualInitialState = accounts(undefined, {});
         const unallocatedId = actualInitialState.unallocatedId;

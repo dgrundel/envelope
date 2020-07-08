@@ -33,10 +33,10 @@ const addTransaction = (state: TransactionState, action: AddTransactionAction): 
         updates = {
             [action.linkTo._id]: {
                 ...action.linkTo,
-                linkedTransactionIds: [
+                linkedTransactionIds: uniq([
                     ...action.linkTo.linkedTransactionIds,
                     action.transaction._id,
-                ]
+                ])
             },
             [action.transaction._id]: action.transaction,
         };

@@ -9,7 +9,6 @@ import { applyTransactionToAccount } from './Account';
 
 export enum TransactionAction {
     Add = 'store:action:transaction:add',
-    AddLinked = 'store:action:transaction:add-linked',
     AddMany = 'store:action:transaction:add-many',
     AddFlags = 'store:action:transaction:add-flags',
     LinkExisting = 'store:action:transaction:link-existing',
@@ -29,7 +28,6 @@ export const addTransaction = (transaction: Transaction, linkTo?: Transaction) =
     };
     
     // TODO: convert this back to a "normal" action creator
-    // will need to remove the promises from applyTransactionToAccount as well, and probably move that logic into a reducer
     dispatch(addAction);
     dispatch(applyTransactionToAccount(transaction));
 };

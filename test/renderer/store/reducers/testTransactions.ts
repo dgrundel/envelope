@@ -1,13 +1,11 @@
-import { AccountType } from '@/models/Account';
+import { Transaction, TransactionFlag } from '@/models/Transaction';
+import { addManyTransactions, AddTransactionAction, addTransactionFlags, linkExistingTransactions, TransactionAction } from '@/renderer/store/actions/Transaction';
 import { transactions } from '@/renderer/store/reducers/Transactions';
 import { Currency } from '@/util/Currency';
-import { assert } from 'chai';
-import { addManyTransactions, addTransactionFlags, linkExistingTransactions, AddTransactionAction, TransactionAction } from '@/renderer/store/actions/Transaction';
-import { Transaction, TransactionFlag } from '@/models/Transaction';
-import { getIdentifier } from '@/util/Identifier';
 import { unionFlags } from '@/util/Flags';
+import { assert } from 'chai';
 
-describe('tranasctions reducer', function() {
+describe('Tranasctions reducer', function() {
     const createAddAction = (transaction: Transaction, linkTo?: Transaction): AddTransactionAction => ({
         type: TransactionAction.Add,
         transaction,

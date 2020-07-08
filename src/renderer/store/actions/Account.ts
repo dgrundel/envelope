@@ -127,32 +127,6 @@ export const applyTransactionToAccount = (transaction: Transaction) => (dispatch
     );
 
     dispatch(updateAccountBalance(account._id, newBalance));
-
-    /**
-     * Positive transactions on Checking and Savings accounts
-     * go directly to the unallocated envelope to be distributed later.
-     */
-    const isNotTransfer = !hasFlag(TransactionFlag.Transfer, transaction.flags);
-    if (isNotTransfer && isDepositAccountType(account.type)) {
-        if (transactionAmount.isPositive()) {
-            const unallocatedId = getState().accounts.unallocatedId;
-            if (unallocatedId) {
-                const newTransaction: Transaction = {
-                    _id: getIdentifier(),
-                    flags: TransactionFlag.Transfer,
-                    accountId: unallocatedId!,
-                    date: new Date(),
-                    description: `Inflow from account ${account._id} (${account.name})`,
-                    amount: transactionAmount,
-                    linkedTransactionIds: [transaction._id],
-                };
-                dispatch(addTransaction(newTransaction, transaction));
-
-            } else {
-                Log.error('No unallocated account exists');
-            }
-        }
-    }
 };
 
 export const applyTransactionsToAccount = (transactions: Transaction[]) => (dispatch: any) => {
