@@ -73,17 +73,29 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
         throw new Error(`Balance is invalid: ${balance.toString()}`);
     }
     
+    const isCreditCard = isCreditCardAccountType(type);
+
     const account: Account = {
         _id: getIdentifier(),
         name,
         type,
-        balance,
+        balance: isCreditCard ? balance.getInverse() : balance,
         linkedAccountIds: [],
     };
     
     dispatch(addAccount(account));
 
-    if (isDepositAccountType(type)) {
+    if (isCreditCard) {
+        const paymentEnvelope: Account = {
+            _id: getIdentifier(),
+            name: `Payment for "${name}"`,
+            type: AccountType.PaymentEnvelope,
+            balance: Currency.ZERO,
+            linkedAccountIds: [account._id as string],
+        };
+        dispatch(addAccount(paymentEnvelope));
+
+    } else if (isDepositAccountType(type)) {
         const unallocatedId = getState().accounts.unallocatedId;
         if (!unallocatedId) {
             Log.error('No unallocated account exists');
@@ -100,16 +112,6 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
             linkedTransactionIds: [],
         };
         dispatch(addTransaction(transaction));
-
-    } else if (isCreditCardAccountType(type)) {
-        const paymentEnvelope: Account = {
-            _id: getIdentifier(),
-            name: `Payment for "${name}"`,
-            type: AccountType.PaymentEnvelope,
-            balance: Currency.ZERO,
-            linkedAccountIds: [account._id as string],
-        };
-        dispatch(addAccount(paymentEnvelope));
     }
 }
 

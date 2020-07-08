@@ -124,7 +124,7 @@ describe('Account actions', function () {
         assert.deepEqual(action2.balance, new Currency(100, 0));
     });
 
-    it('should create a payment envelope when creating credit card account', () => {
+    it('should create a payment envelope when creating credit card account and set balance to inverse', () => {
         const store = mockStoreWithUnalloc();
         
         store.dispatch(createBankAccount('my credit card', AccountType.CreditCard, new Currency(100, 0)));
@@ -143,7 +143,7 @@ describe('Account actions', function () {
         assert.equal(account.name, 'my credit card');
         assert.equal(account.type, AccountType.CreditCard);
         assert.equal(account.linkedAccountIds.length, 0);
-        assert.deepEqual(account.balance, new Currency(100, 0));
+        assert.deepEqual(account.balance, new Currency(-100, 0));
 
         // create account action
         const action1 = storeActions[1];
