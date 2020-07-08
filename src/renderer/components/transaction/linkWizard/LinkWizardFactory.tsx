@@ -76,7 +76,7 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // A transfer from another account
                     // TransactionFlag.BankCredit
                     // TransactionFlag.Transfer
-                    linkExistingTransactions([
+                    this.props.linkExistingTransactions!([
                         state.transaction, 
                         state.linkedTransaction!
                     ]);
@@ -84,8 +84,8 @@ export const createLinkWizard = (transaction: Transaction) => {
                         TransactionFlag.Transfer,
                         TransactionFlag.Reconciled
                     );
-                    addTransactionFlags(state.transaction, flags);
-                    addTransactionFlags(state.linkedTransaction!, flags);
+                    this.props.addTransactionFlags!(state.transaction, flags);
+                    this.props.addTransactionFlags!(state.linkedTransaction!, flags);
 
                 } else {
                     // A deposit, refund, or other income
@@ -101,8 +101,8 @@ export const createLinkWizard = (transaction: Transaction) => {
                         linkedTransactionIds: [],
                         flags: TransactionFlag.Reconciled,
                     };
-                    addTransaction(linkedTransaction, state.transaction);
-                    addTransactionFlags(state.transaction, TransactionFlag.Reconciled);
+                    this.props.addTransaction!(linkedTransaction, state.transaction);
+                    this.props.addTransactionFlags!(state.transaction, TransactionFlag.Reconciled);
                 }
 
             } else if (state.accountAmountTypeFlag === TransactionFlag.BankDebit) {
@@ -110,7 +110,7 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // A transfer to another account
                     // TransactionFlag.BankDebit
                     // TransactionFlag.Transfer
-                    linkExistingTransactions([
+                    this.props.linkExistingTransactions!([
                         state.transaction, 
                         state.linkedTransaction!
                     ]);
@@ -118,8 +118,8 @@ export const createLinkWizard = (transaction: Transaction) => {
                         TransactionFlag.Transfer,
                         TransactionFlag.Reconciled
                     );
-                    addTransactionFlags(state.transaction, flags);
-                    addTransactionFlags(state.linkedTransaction!, flags);
+                    this.props.addTransactionFlags!(state.transaction, flags);
+                    this.props.addTransactionFlags!(state.linkedTransaction!, flags);
 
                 } else {
                     // A purchase, fee, outgoing payment, or other account withdrawl
@@ -135,8 +135,8 @@ export const createLinkWizard = (transaction: Transaction) => {
                         linkedTransactionIds: [],
                         flags: TransactionFlag.Reconciled,
                     };
-                    addTransaction(linkedTransaction, state.transaction);
-                    addTransactionFlags(state.transaction, TransactionFlag.Reconciled);
+                    this.props.addTransaction!(linkedTransaction, state.transaction);
+                    this.props.addTransactionFlags!(state.transaction, TransactionFlag.Reconciled);
                 }
 
             } else if (state.accountAmountTypeFlag === TransactionFlag.CreditAccountCredit) {
@@ -144,7 +144,7 @@ export const createLinkWizard = (transaction: Transaction) => {
                     // A payment from a checking or other account
                     // TransactionFlag.CreditAccountCredit
                     // TransactionFlag.Transfer
-                    addTransactionFlags(state.transaction, unionFlags(
+                    this.props.addTransactionFlags!(state.transaction, unionFlags(
                         TransactionFlag.Transfer,
                         TransactionFlag.Reconciled,
                     ));
@@ -165,8 +165,8 @@ export const createLinkWizard = (transaction: Transaction) => {
                         linkedTransactionIds: [],
                         flags: TransactionFlag.Reconciled,
                     };
-                    addTransaction(linkedTransaction, state.transaction);
-                    addTransactionFlags(state.transaction, TransactionFlag.Reconciled);
+                    this.props.addTransaction!(linkedTransaction, state.transaction);
+                    this.props.addTransactionFlags!(state.transaction, TransactionFlag.Reconciled);
                 }
 
             } else if (state.accountAmountTypeFlag === TransactionFlag.CreditAccountDebit) {
@@ -189,8 +189,8 @@ export const createLinkWizard = (transaction: Transaction) => {
                     linkedTransactionIds: [],
                     flags: TransactionFlag.Reconciled,
                 };
-                addTransaction(linkedTransaction, state.transaction);
-                addTransactionFlags(state.transaction, TransactionFlag.Reconciled);
+                this.props.addTransaction!(linkedTransaction, state.transaction);
+                this.props.addTransactionFlags!(state.transaction, TransactionFlag.Reconciled);
                 
             } else {
                 throw new Error(`Unrecognized accountAmountTypeFlag: ${state.accountAmountTypeFlag}`);

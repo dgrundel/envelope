@@ -31,7 +31,7 @@ export const addTransaction = (transaction: Transaction, linkTo?: Transaction) =
     // TODO: convert this back to a "normal" action creator
     // will need to remove the promises from applyTransactionToAccount as well, and probably move that logic into a reducer
     dispatch(addAction);
-    return dispatch(applyTransactionToAccount(transaction));
+    dispatch(applyTransactionToAccount(transaction));
 };
 
 export interface AddManyTransactionAction {
@@ -71,7 +71,7 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
     const description = `Transfer from "${fromAccount.name}" to "${toAccount.name}"`;
     
     const inverseAmount = amount.getInverse();
-    const flags = unionFlags(
+    const fromFlags = unionFlags(
         TransactionFlag.Transfer, 
         getAccountAmountTransactionFlag(fromAccount, inverseAmount)
     );
@@ -83,31 +83,26 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
         description,
         amount: inverseAmount,
         linkedTransactionIds: [],
-        flags,
+        flags: fromFlags,
     };
 
-    return Promise.resolve(dispatch(addTransaction(fromTransaction)))
-        .then(() => {
-            Log.debug('addTransaction (fromTransaction)', fromTransaction);
+    Log.debug('addTransaction (fromTransaction)', fromTransaction);
+    dispatch(addTransaction(fromTransaction));
 
-            return dispatch(applyTransactionToAccount(fromTransaction))
-                .then(() => {
-                    const flags = unionFlags(
-                        TransactionFlag.Transfer, 
-                        getAccountAmountTransactionFlag(toAccount, amount)
-                    );
+    const toFlags = unionFlags(
+        TransactionFlag.Transfer, 
+        getAccountAmountTransactionFlag(toAccount, amount)
+    );
 
-                    const toTransaction: Transaction = {
-                        _id: getIdentifier(),
-                        accountId: toAccount._id,
-                        date,
-                        description,
-                        amount,
-                        linkedTransactionIds: [fromTransaction._id],
-                        flags,
-                    };
+    const toTransaction: Transaction = {
+        _id: getIdentifier(),
+        accountId: toAccount._id,
+        date,
+        description,
+        amount,
+        linkedTransactionIds: [fromTransaction._id],
+        flags: toFlags,
+    };
 
-                    return dispatch(addTransaction(toTransaction, fromTransaction));
-                });
-        });
+    dispatch(addTransaction(toTransaction, fromTransaction));
 };

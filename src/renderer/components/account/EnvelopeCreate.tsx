@@ -60,7 +60,7 @@ class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState
         if (this.validator.allValid()) {
             const values = this.validator.values();
             
-            this.props.createEnvelope && this.props.createEnvelope(values.name as string);
+            this.props.createEnvelope!(values.name as string);
 
         } else {
             const errors = this.validator.errors();

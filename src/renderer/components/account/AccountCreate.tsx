@@ -91,7 +91,7 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
             const accountType = (values.type as AccountType);
             const balance = Currency.parse(values.balance as string).or(Currency.ZERO);
             
-            this.props.createBankAccount && this.props.createBankAccount(accountName, accountType, balance);
+            this.props.createBankAccount!(accountName, accountType, balance);
 
         } else {
             const errors = this.validator.errors();

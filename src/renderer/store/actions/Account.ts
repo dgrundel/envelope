@@ -81,92 +81,82 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
         linkedAccountIds: [],
     };
     
-    return Promise.resolve(dispatch(addAccount(account)))
-        .then(() => {
-            if (isDepositAccountType(type)) {
-                const unallocatedId = getState().accounts.unallocatedId;
-                if (!unallocatedId) {
-                    Log.error('No unallocated account exists');
-                    return;
-                }
-                
-                const transaction: Transaction = {
-                    _id: getIdentifier(),
-                    flags: TransactionFlag.Adjustment,
-                    accountId: unallocatedId!,
-                    date: new Date(),
-                    description: `Initial balance from account ${account._id} (${name})`,
-                    amount: balance,
-                    linkedTransactionIds: [],
-                };
-                return dispatch(addTransaction(transaction));
+    dispatch(addAccount(account));
 
-            } else if (isCreditCardAccountType(type)) {
-                const paymentEnvelope: Account = {
-                    _id: getIdentifier(),
-                    name: `Payment for "${name}"`,
-                    type: AccountType.PaymentEnvelope,
-                    balance: Currency.ZERO,
-                    linkedAccountIds: [account._id as string],
-                };
-                return dispatch(addAccount(paymentEnvelope));
-            }
-        });
+    if (isDepositAccountType(type)) {
+        const unallocatedId = getState().accounts.unallocatedId;
+        if (!unallocatedId) {
+            Log.error('No unallocated account exists');
+            return;
+        }
+        
+        const transaction: Transaction = {
+            _id: getIdentifier(),
+            flags: TransactionFlag.Adjustment,
+            accountId: unallocatedId!,
+            date: new Date(),
+            description: `Initial balance from account ${account._id} (${name})`,
+            amount: balance,
+            linkedTransactionIds: [],
+        };
+        dispatch(addTransaction(transaction));
+
+    } else if (isCreditCardAccountType(type)) {
+        const paymentEnvelope: Account = {
+            _id: getIdentifier(),
+            name: `Payment for "${name}"`,
+            type: AccountType.PaymentEnvelope,
+            balance: Currency.ZERO,
+            linkedAccountIds: [account._id as string],
+        };
+        dispatch(addAccount(paymentEnvelope));
+    }
 }
 
-export const applyTransactionToAccount = (transaction: Transaction) => (dispatch: any) => {
-    return dispatch(applyTransactionsToAccount([transaction]));
+export const applyTransactionToAccount = (transaction: Transaction) => (dispatch: any, getState: () => CombinedState) => {
+    const accountsState = getState().accounts;
+    const account = accountsState.accounts[transaction.accountId];
+    const transactionAmount = transaction.amount;
+    const newBalance = account.balance.add(transactionAmount);
+    
+    Log.debug(
+        'applyTransactionsToAccount',
+        'transaction:', transaction,
+        'account:', account,
+        `updated balance: ${newBalance.toString()}`,
+    );
+
+    dispatch(updateAccountBalance(account._id, newBalance));
+
+    /**
+     * Positive transactions on Checking and Savings accounts
+     * go directly to the unallocated envelope to be distributed later.
+     */
+    const isNotTransfer = !hasFlag(TransactionFlag.Transfer, transaction.flags);
+    if (isNotTransfer && isDepositAccountType(account.type)) {
+        if (transactionAmount.isPositive()) {
+            const unallocatedId = getState().accounts.unallocatedId;
+            if (unallocatedId) {
+                const newTransaction: Transaction = {
+                    _id: getIdentifier(),
+                    flags: TransactionFlag.Transfer,
+                    accountId: unallocatedId!,
+                    date: new Date(),
+                    description: `Inflow from account ${account._id} (${account.name})`,
+                    amount: transactionAmount,
+                    linkedTransactionIds: [transaction._id],
+                };
+                dispatch(addTransaction(newTransaction, transaction));
+
+            } else {
+                Log.error('No unallocated account exists');
+            }
+        }
+    }
 };
 
-export const applyTransactionsToAccount = (transactions: Transaction[]) => (dispatch: any, getState: () => CombinedState) => {
-
-    const next = (transactions: Transaction[], i: number): Promise<void> => {
-        if (i >= transactions.length) {
-            return Promise.resolve();
-        }
-
-        const transaction = transactions[i];
-        const accountsState = getState().accounts;
-        const account = accountsState.accounts[transaction.accountId];
-        const newBalance = account.balance.add(transaction.amount);
-        
-        Log.debug(
-            'applyTransactionsToAccount', 
-            'transaction:', transaction,
-            'account:', account,
-            `updated balance: ${newBalance.toString()}`,
-        );
-
-        return Promise.resolve(dispatch(updateAccountBalance(account._id, newBalance)))
-            .then(() => next(transactions, i + 1))
-            .then(() => {
-                /**
-                 * Positive transactions on Checking and Savings accounts
-                 * go directly to the unallocated envelope to be distributed later.
-                 */
-                const isNotTransfer = !hasFlag(TransactionFlag.Transfer, transaction.flags);
-                if (isNotTransfer && isDepositAccountType(account.type)) {
-                    if (transaction.amount.isPositive()) {
-                        const unallocatedId = getState().accounts.unallocatedId;
-                        if (!unallocatedId) {
-                            Log.error('No unallocated account exists');
-                            return;
-                        }
-
-                        const newTransaction: Transaction = {
-                            _id: getIdentifier(),
-                            flags: TransactionFlag.Transfer,
-                            accountId: unallocatedId!,
-                            date: new Date(),
-                            description: `Inflow from account ${account._id} (${account.name})`,
-                            amount: transaction.amount,
-                            linkedTransactionIds: [transaction._id],
-                        };
-                        return dispatch(addTransaction(newTransaction, transaction));
-                    }
-                }
-            });
-    };
-    
-    return next(transactions, 0);
+export const applyTransactionsToAccount = (transactions: Transaction[]) => (dispatch: any) => {
+    transactions.forEach(transaction => {
+        dispatch(applyTransactionToAccount(transaction));
+    });
 };

@@ -1,9 +1,8 @@
-import { Account, AccountType, getAccountTypeLabel, getAccountTypeIcon } from '@/models/Account';
+import { Account, AccountType, getAccountTypeIcon, getAccountTypeLabel } from '@/models/Account';
 import { Dropdown, DropdownMenuItemType, Icon, IDropdownOption, mergeStyles } from '@fluentui/react';
 import memoizeOne from 'memoize-one';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { transferFunds } from '../../store/actions/Transaction';
 import { CombinedState } from '../../store/store';
 
 type GroupedAccounts = Record<AccountType, Account[]>;
@@ -130,4 +129,4 @@ const mapStateToProps = (state: CombinedState, ownProps: AccountDropdownProps): 
     };
 }
 
-export const AccountDropdown = connect(mapStateToProps, { transferFunds })(Component);
+export const AccountDropdown = connect(mapStateToProps, {})(Component);

@@ -23,7 +23,7 @@ export interface MoveMoneyProps {
     accounts?: Record<string, Account>;
 
     // store actions
-    transferFunds?: (amount: Currency, fromAccount: Account, toAccount: Account) => Promise<void>;
+    transferFunds?: (amount: Currency, fromAccount: Account, toAccount: Account) => void;
 }
 
 interface State {
@@ -127,10 +127,9 @@ class Component extends React.Component<MoveMoneyProps, State> {
         const amount = Currency.parse(this.state.amount!);
         Log.debug('Transferring funds from', fromAccount, 'to', toAccount, amount);
 
-        this.props.transferFunds!(amount, fromAccount, toAccount).then(() => {
-            Log.debug('Transfer complete.');
-            this.props.onComplete && this.props.onComplete();
-        });
+        this.props.transferFunds!(amount, fromAccount, toAccount);
+        Log.debug('Transfer complete.');
+        this.props.onComplete && this.props.onComplete();
     }
 }
 
