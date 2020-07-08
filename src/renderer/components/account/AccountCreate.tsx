@@ -101,16 +101,19 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
             return;
         }
 
-        // clear messages
-        this.setState({
-            messages: undefined
-        });
-
         const accountName = this.state.name!;
         const accountType = this.state.accountType!;
         const balance = Currency.parse(this.state.balance!).or(Currency.ZERO);
         
         this.props.createBankAccount!(accountName, accountType, balance);
+
+        // clear state
+        this.setState({
+            name: '',
+            accountType: undefined,
+            balance: '0.00',
+            messages: undefined,
+        });
     }
 }
 

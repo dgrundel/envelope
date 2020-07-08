@@ -69,13 +69,13 @@ class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState
             return;
         }
 
-        // clear messages
+        this.props.createEnvelope!(this.state.name!);
+
+        // clear state
         this.setState({
-            name: undefined,
+            name: '',
             messages: undefined
         });
-
-        this.props.createEnvelope!(this.state.name!);
     }
 }
 
