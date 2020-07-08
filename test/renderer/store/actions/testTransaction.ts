@@ -165,7 +165,7 @@ describe('Transaction actions', function () {
         const a1: Account = {
             _id: 'a1',
             name: 'a1',
-            type: AccountType.Checking,
+            type: AccountType.UserEnvelope,
             balance: new Currency(100, 0),
             linkedAccountIds: [],
         };
@@ -202,14 +202,14 @@ describe('Transaction actions', function () {
 
         const transaction = action0.transaction;
         assert.equal(transaction.accountId, a1._id);
-        assert.deepEqual(transaction.amount, t1Amount.getInverse());
+        assert.deepEqual(transaction.amount, t1Amount);
         assert.equal(transaction.flags, TransactionFlag.Reconciled);
 
         // applying new transaction to a1
         const action1 = storeActions[1];
         assert.equal(action1.type, AccountAction.UpdateBalance);
         assert.equal(action1.accountId, a1._id);
-        assert.deepEqual(action1.balance, a1.balance.sub(t1Amount));
+        assert.deepEqual(action1.balance, a1.balance.add(t1Amount));
 
         // adding reconciled flag to the original transaction
         const action2 = storeActions[2];
@@ -273,42 +273,5 @@ describe('Transaction actions', function () {
         assert.equal(action2.type, TransactionAction.AddFlags);
         assert.deepEqual(action2.transaction, t1);
         assert.ok(hasFlag(action2.flags, TransactionFlag.Reconciled), 'Action must have reconciled flag');
-    });
-
-    it('should refuse to addReconcileTransaction for two credit card accounts', function () {
-        const a1: Account = {
-            _id: 'a1',
-            name: 'a1',
-            type: AccountType.CreditCard,
-            balance: new Currency(100, 0),
-            linkedAccountIds: [],
-        };
-        const a2: Account = {
-            _id: 'a2',
-            name: 'a2',
-            type: AccountType.CreditCard,
-            balance: new Currency(100, 0),
-            linkedAccountIds: [],
-        };
-        
-        const t1Amount = new Currency(5, 0);
-        const t1: Transaction = {
-            _id: 't1',
-            accountId: a2._id,
-            date: new Date(),
-            amount: t1Amount,
-            description: 't1',
-            flags: TransactionFlag.CreditAccountCredit,
-            linkedTransactionIds: [],
-        };
-
-        const store = mockStore([a1, a2], [t1]);
-        
-        try {
-            store.dispatch(addReconcileTransaction(t1, a1));
-            assert.fail('should throw exception');
-        } catch (e) {
-            assert.equal(e.message, 'cannot transfer or reconcile between credit cards');
-        }
     });
 });

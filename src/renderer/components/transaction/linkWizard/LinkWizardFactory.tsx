@@ -1,4 +1,4 @@
-import { Transaction, TransactionFlag } from '@/models/Transaction';
+import { Transaction, TransactionFlag, findAmountTransactionFlag } from '@/models/Transaction';
 import { addReconcileTransaction, addTransactionFlags, linkTransactionsAsTransfer } from '@/renderer/store/actions/Transaction';
 import { CombinedState } from "@/renderer/store/store";
 import { intersectFlags, unionFlags } from '@/util/Flags';
@@ -24,16 +24,6 @@ export type LinkWizardStepProps = LinkWizardState & WizardStepApi<LinkWizardStat
 
 export const createLinkWizard = (transaction: Transaction) => {
 
-    const accountAmountTypeFlag = intersectFlags(
-        transaction.flags,
-        unionFlags(
-            TransactionFlag.BankCredit,
-            TransactionFlag.BankDebit,
-            TransactionFlag.CreditAccountCredit,
-            TransactionFlag.CreditAccountDebit
-        )
-    );
-
     interface Props {
         // mapped from store
         accounts?: Record<string, Account>;
@@ -57,7 +47,7 @@ export const createLinkWizard = (transaction: Transaction) => {
                 },
                 {
                     transaction,
-                    amountTypeFlag: accountAmountTypeFlag,
+                    amountTypeFlag: findAmountTransactionFlag(transaction),
                 },
                 [
                     TransactionFlagSelect,

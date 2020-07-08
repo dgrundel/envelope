@@ -1,4 +1,4 @@
-import { getAccountAmountTransactionFlag, getTransactionFlagDescription, TransactionData } from '@/models/Transaction';
+import { getAmountTransactionFlag, getTransactionFlagDescription, TransactionData } from '@/models/Transaction';
 import { CombinedState } from '@/renderer/store/store';
 import { Log } from '@/util/Logger';
 import { ChoiceGroup } from '@fluentui/react';
@@ -54,8 +54,8 @@ class Component extends React.Component<InvertAmountsSelectProps> {
         const account = this.props.selectedAccount!;
         const transaction = this.sampleTransaction;
 
-        const expectedType = getAccountAmountTransactionFlag(account, transaction.amount);
-        const invertedType = getAccountAmountTransactionFlag(account, transaction.amount.getInverse());
+        const expectedType = getAmountTransactionFlag(account, transaction.amount);
+        const invertedType = getAmountTransactionFlag(account, transaction.amount.getInverse());
 
         const expectedDescription = getTransactionFlagDescription(expectedType);
         const invertedDescription = getTransactionFlagDescription(invertedType);

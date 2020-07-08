@@ -1,5 +1,6 @@
 import { Currency } from '@/util/Currency';
 import { Account, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
+import { intersectFlags, unionFlags } from '@/util/Flags';
 
 export enum TransactionFlag {
     // nothing
@@ -50,7 +51,7 @@ const transactionFlagDescriptions = {
 
 export const getTransactionFlagDescription = (f: TransactionFlag): string => transactionFlagDescriptions[f];
 
-export const getAccountAmountTransactionFlag = (account: Account, amount: Currency): TransactionFlag => {
+export const getAmountTransactionFlag = (account: Account, amount: Currency): TransactionFlag => {
     const isAmountNegative = amount.isNegative();
     
     if (isDepositAccountType(account.type)) {
@@ -69,6 +70,18 @@ export const getAccountAmountTransactionFlag = (account: Account, amount: Curren
         // uh oh.
         return TransactionFlag.None;
     }
+}
+
+export const findAmountTransactionFlag = (transaction: Transaction) => {
+    return intersectFlags(
+        transaction.flags,
+        unionFlags(
+            TransactionFlag.BankCredit,
+            TransactionFlag.BankDebit,
+            TransactionFlag.CreditAccountCredit,
+            TransactionFlag.CreditAccountDebit
+        )
+    )
 }
 
 export interface TransactionData {

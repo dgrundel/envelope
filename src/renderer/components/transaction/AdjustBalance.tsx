@@ -1,5 +1,5 @@
 import { Account } from '@/models/Account';
-import { getAccountAmountTransactionFlag, Transaction, TransactionFlag } from '@/models/Transaction';
+import { getAmountTransactionFlag, Transaction, TransactionFlag } from '@/models/Transaction';
 import { addTransaction } from '@/renderer/store/actions/Transaction';
 import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
 import { getRequiredCurrencyError } from '@/util/ErrorGenerators';
@@ -89,7 +89,7 @@ class Component extends React.Component<AdjustBalanceProps, State> {
 
         Log.debug(`Adding adjustment transaction for ${amount.toFormattedString()} to account`, account);
 
-        const amountFlag = getAccountAmountTransactionFlag(account, amount);
+        const amountFlag = getAmountTransactionFlag(account, amount);
 
         const transaction: Transaction = {
             _id: getIdentifier(),

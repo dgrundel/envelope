@@ -2,8 +2,8 @@ import { Currency } from '@/util/Currency';
 import { unionFlags } from '@/util/Flags';
 import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
-import { Account, isCreditCardAccountType } from '@models/Account';
-import { getAccountAmountTransactionFlag, Transaction, TransactionData, TransactionFlag } from '@models/Transaction';
+import { Account, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
+import { getAmountTransactionFlag, Transaction, TransactionData, TransactionFlag, findAmountTransactionFlag } from '@models/Transaction';
 import { CombinedState } from '../store';
 import { applyTransactionToAccount } from './Account';
 
@@ -71,7 +71,7 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
     const inverseAmount = amount.getInverse();
     const fromFlags = unionFlags(
         TransactionFlag.Transfer, 
-        getAccountAmountTransactionFlag(fromAccount, inverseAmount)
+        getAmountTransactionFlag(fromAccount, inverseAmount)
     );
 
     const fromTransaction: Transaction = {
@@ -89,7 +89,7 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
 
     const toFlags = unionFlags(
         TransactionFlag.Transfer, 
-        getAccountAmountTransactionFlag(toAccount, amount)
+        getAmountTransactionFlag(toAccount, amount)
     );
 
     const toTransaction: Transaction = {
@@ -117,20 +117,12 @@ export const linkTransactionsAsTransfer = (transactions: Transaction[]) => (disp
 };
 
 export const addReconcileTransaction = (existingTransaction: Transaction, otherAccount: Account) => (dispatch: any, getState: () => CombinedState) => {
-    const existingTransAccount = getState().accounts.accounts[existingTransaction.accountId];
-    const existingIsCreditCard = isCreditCardAccountType(existingTransAccount.type);
-    const otherIsCreditCard = isCreditCardAccountType(otherAccount.type);
-    
-    // (credit card transactions cannot be reconciled with other credit card transactions)
-    if (existingIsCreditCard && otherIsCreditCard) {
-        throw new Error('cannot transfer or reconcile between credit cards');
-    }
-    
-    // because credit cards are reversed
-    // amount is the same as the original transaction 
-    const amount = (existingIsCreditCard || otherIsCreditCard)
-        ? existingTransaction.amount
-        : existingTransaction.amount.getInverse();
+    const amountTypeFlag = findAmountTransactionFlag(existingTransaction);
+    const invert = amountTypeFlag === TransactionFlag.CreditAccountCredit || amountTypeFlag === TransactionFlag.CreditAccountDebit;
+
+    const amount = invert
+        ? existingTransaction.amount.getInverse()
+        : existingTransaction.amount;
     
     const linkedTransaction: Transaction = {
         _id: getIdentifier(),
@@ -141,6 +133,7 @@ export const addReconcileTransaction = (existingTransaction: Transaction, otherA
         linkedTransactionIds: [],
         flags: TransactionFlag.Reconciled,
     };
+
     dispatch(addTransaction(linkedTransaction, existingTransaction));
     dispatch(addTransactionFlags(existingTransaction, TransactionFlag.Reconciled));
 };

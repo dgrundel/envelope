@@ -1,5 +1,5 @@
 import { Account } from '@/models/Account';
-import { getAccountAmountTransactionFlag, Transaction } from '@/models/Transaction';
+import { getAmountTransactionFlag, Transaction } from '@/models/Transaction';
 import { addTransaction } from '@/renderer/store/actions/Transaction';
 import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
 import { chainErrorGenerators, ErrorGenerator, maxCurrencyErrorGenerator, minCurrencyErrorGenerator } from '@/util/ErrorGenerators';
@@ -114,7 +114,7 @@ class Component extends React.Component<AddLinksProps, State> {
 
         const newTransaction: Transaction = {
             _id: getIdentifier(),
-            flags: getAccountAmountTransactionFlag(envelope, amount),
+            flags: getAmountTransactionFlag(envelope, amount),
             accountId: envelope._id,
             date: new Date(),
             amount: amount,

@@ -1,5 +1,5 @@
 import { Account } from "@/models/Account";
-import { getAccountAmountTransactionFlag, Transaction } from "@/models/Transaction";
+import { getAmountTransactionFlag, Transaction } from "@/models/Transaction";
 import { getAppContext } from "@/renderer/AppContext";
 import { addManyTransactions } from "@/renderer/store/actions/Transaction";
 import { CombinedState } from "@/renderer/store/store";
@@ -46,7 +46,7 @@ export const rowToTransaction = (
 ): Transaction => {
     const currency = Currency.parse(row[amountColumn]);
     const amount = invert ? currency.getInverse() : currency;
-    const flags = getAccountAmountTransactionFlag(account, amount);
+    const flags = getAmountTransactionFlag(account, amount);
     
     const accountId = account._id;
     const date = new Date(row[dateColumn]);
