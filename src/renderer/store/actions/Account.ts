@@ -75,11 +75,14 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
     
     const isCreditCard = isCreditCardAccountType(type);
 
+    // for credit cards, the balance is inverted since it's actually a debt.
+    const appliedBalance = isCreditCard ? balance.getInverse() : balance;
+
     const account: Account = {
         _id: getIdentifier(),
         name,
         type,
-        balance: isCreditCard ? balance.getInverse() : balance,
+        balance: appliedBalance,
         linkedAccountIds: [],
     };
     
