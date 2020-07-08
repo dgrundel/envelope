@@ -19,7 +19,7 @@ describe('Transaction actions', function () {
         const testAccount: Account = {
             _id: 'test-account-id',
             name: 'test',
-            type: AccountType.Checking,
+            type: AccountType.Unallocated,
             balance: Currency.ZERO,
             linkedAccountIds: [],
         };
@@ -44,7 +44,7 @@ describe('Transaction actions', function () {
             date: new Date(),
             amount: new Currency(100, 0),
             description: 'test trans desc',
-            flags: TransactionFlag.None,
+            flags: TransactionFlag.Reconciled,
             linkedTransactionIds: [],
         };
       
