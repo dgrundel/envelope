@@ -275,4 +275,41 @@ describe('Transaction actions', function () {
         assert.deepEqual(action2.transaction, t1);
         assert.ok(hasFlag(action2.flags, TransactionFlag.Reconciled), 'Action must have reconciled flag');
     });
+
+    it('should refuse to addReconcileTransaction for two credit card accounts', function () {
+        const a1: Account = {
+            _id: 'a1',
+            name: 'a1',
+            type: AccountType.CreditCard,
+            balance: new Currency(100, 0),
+            linkedAccountIds: [],
+        };
+        const a2: Account = {
+            _id: 'a2',
+            name: 'a2',
+            type: AccountType.CreditCard,
+            balance: new Currency(100, 0),
+            linkedAccountIds: [],
+        };
+        
+        const t1Amount = new Currency(5, 0);
+        const t1: Transaction = {
+            _id: 't1',
+            accountId: a2._id,
+            date: new Date(),
+            amount: t1Amount,
+            description: 't1',
+            flags: TransactionFlag.CreditAccountCredit,
+            linkedTransactionIds: [],
+        };
+
+        const store = mockStore([a1, a2], [t1]);
+        
+        try {
+            store.dispatch(addReconcileTransaction(t1, a1));
+            assert.fail('should throw exception');
+        } catch (e) {
+            assert.equal(e.message, 'cannot transfer or reconcile between credit cards');
+        }
+    });
 });
