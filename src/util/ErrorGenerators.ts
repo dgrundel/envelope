@@ -1,5 +1,6 @@
-import { isValidCurrencyString, isBlank, isNotBlank } from './Filters';
+import { isValidCurrencyString, isBlank, isNotBlank, filterOnlyAccountTypeIn } from './Filters';
 import { Currency } from './Currency';
+import { AccountType } from '@/models/Account';
 
 export type ErrorGenerator = (value?: string) => string;
 export type ErrorGeneratorFactory = (...args: any[]) => ErrorGenerator;
@@ -62,4 +63,9 @@ export const uniqueStringErrorGenerator: ErrorGeneratorFactory = (existingValues
         const exists = isNotBlank(value) && existing.includes(caseSensitive ? value : value.toLowerCase());
         return exists ? errorMessage : '';
     };
+};
+
+export const requiredAccountTypeErrorGenerator: ErrorGeneratorFactory = (allowedTypes: AccountType[], errorMessage: string) => (value?: string) => {
+    const valid = value && allowedTypes.includes(value as AccountType);
+    return valid ? '' : errorMessage;
 };

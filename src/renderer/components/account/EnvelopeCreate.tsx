@@ -38,6 +38,7 @@ class Component extends React.Component<EnvelopeCreateProps, EnvelopeCreateState
 
     render() {
         return <form onSubmit={e => this.onSubmit(e)}>
+            {this.state.messages}
             <TextField
                 label="Name"
                 value={this.state.name}

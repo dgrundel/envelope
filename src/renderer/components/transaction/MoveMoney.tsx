@@ -90,14 +90,18 @@ class Component extends React.Component<MoveMoneyProps, State> {
         e.preventDefault();
 
         const errors = [];
-        if(!isValidCurrencyString(this.state.amount)) {
-            errors.push('Please enter a valid amount.');
+        
+        const amountError = getRequiredCurrencyError(this.state.amount);
+        if(amountError) {
+            errors.push(amountError);
         }
+
         const fromId = (this.state.fromId!);
         const fromAccount = this.props.accounts![fromId];
         if (!fromAccount) {
             errors.push('Please select an account to move from.');
         }
+        
         const toId = (this.state.toId!);
         const toAccount = this.props.accounts![toId];
         if (!toAccount) {
