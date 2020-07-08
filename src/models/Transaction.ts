@@ -63,8 +63,8 @@ export const getAmountTransactionFlag = (account: Account, amount: Currency): Tr
     } else if (isCreditCardAccountType(account.type)) {
         // credit cards
         return isAmountNegative 
-            ? TransactionFlag.CreditAccountCredit
-            : TransactionFlag.CreditAccountDebit;
+            ? TransactionFlag.CreditAccountDebit
+            : TransactionFlag.CreditAccountCredit;
 
     } else {
         // uh oh.
