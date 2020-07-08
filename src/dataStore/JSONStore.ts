@@ -80,14 +80,12 @@ export class JsonStoreHost extends BaseJsonStore {
     getItem(key: string): Promise<any> {
         return new Promise(resolve => {
             const value = this.store.get(key);
-            Log.debug('get', key, value);
             resolve(value);
         });
     }
 
     setItem(key: string, value: any): Promise<void> {
         return new Promise(resolve => {
-            Log.debug('set', key, value);
             this.store.set(key, value);
             resolve();
         });
@@ -95,7 +93,6 @@ export class JsonStoreHost extends BaseJsonStore {
 
     removeItem(key: string): Promise<void> {
         return new Promise(resolve => {
-            Log.debug('remove', key);
             this.store.delete(key);
             resolve();
         });
@@ -109,22 +106,14 @@ export class JsonStoreClient extends BaseJsonStore {
     }
 
     getItem(key: string): Promise<any> {
-        return this.invoke(JsonStoreEvent.GetItem, key)
-            .then(value => {
-                Log.debug('get', key, value);
-                return value;
-            });
+        return this.invoke(JsonStoreEvent.GetItem, key);
     }
 
     setItem(key: string, value: any): Promise<void> {
-        Log.debug('set', key, value);
-
         return this.invoke(JsonStoreEvent.SetItem, key, value);
     }
 
     removeItem(key: string): Promise<void> {
-        Log.debug('remove', key);
-
         return this.invoke(JsonStoreEvent.RemoveItem, key);
     }
 }
