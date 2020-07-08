@@ -17,7 +17,7 @@ class Component extends React.Component<LinkWizardStepProps> {
     constructor(props: LinkWizardStepProps) {
         super(props);
 
-        switch(props.accountAmountTypeFlag) {
+        switch(props.amountTypeFlag) {
             case TransactionFlag.BankCredit:
                 this.options = [{
                     key: TransactionFlag.None.toString(),

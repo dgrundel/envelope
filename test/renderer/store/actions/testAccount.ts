@@ -20,7 +20,6 @@ describe('Account actions', function () {
         return store;
     }
     
-
     it('should create envelope without linked accounts', () => {
         const store = mockStoreWithUnalloc();
 

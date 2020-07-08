@@ -51,14 +51,14 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
                 const item = items[0] as ListItem;
                 if (item) {
                     this.props.setState({
-                        linkedTransaction: item.transaction,
+                        relatedTransaction: item.transaction,
                     });
                 }
             },
         });
 
-        if (this.props.linkedTransaction) {
-            this.selection.setKeySelected(this.props.linkedTransaction._id, true, false);
+        if (this.props.relatedTransaction) {
+            this.selection.setKeySelected(this.props.relatedTransaction._id, true, false);
         }
 
         if (props.selectedTransactionFlag === TransactionFlag.Transfer) {
@@ -74,14 +74,14 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
     }
 
     validateState(state: LinkWizardStepProps) {
-        if (!state.linkedTransaction) {
+        if (!state.relatedTransaction) {
             return 'Please select a transaction.';
         }
     }
     
     render() {
         return <LinkWizardStepFrame transaction={this.props.transaction}>
-            <p>Select the matching transaction from <strong>{this.props.selectedAccount!.name}</strong></p>
+            <p>Select the related transaction from <strong>{this.props.selectedAccount!.name}</strong></p>
 
             <DetailsList
                 items={this.items}
@@ -96,12 +96,12 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
 }
 
 const mapStateToProps = (state: CombinedState, ownProps: LinkedTransactionSelectProps): LinkedTransactionSelectProps => {
-    const selectedAccountId = ownProps.selectedAccountId!;
+    const selectedAccountId = ownProps.relatedAccountId!;
     const selectedAccount = state.accounts.accounts[selectedAccountId];
     const absAmount = ownProps.transaction.amount.getAbsolute();
 
     let flags = TransactionFlag.None;
-    switch(ownProps.accountAmountTypeFlag) {
+    switch(ownProps.amountTypeFlag) {
         case TransactionFlag.BankCredit:
             flags = TransactionFlag.BankDebit;
             break;
@@ -131,4 +131,4 @@ const mapStateToProps = (state: CombinedState, ownProps: LinkedTransactionSelect
     };
 }
 
-export const LinkedTransactionSelect = connect(mapStateToProps, {})(Component);
+export const RelatedTransactionSelect = connect(mapStateToProps, {})(Component);

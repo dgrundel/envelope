@@ -104,3 +104,14 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
 
     dispatch(addTransaction(toTransaction, fromTransaction));
 };
+
+export const linkTransactionsAsTransfer = (transactions: Transaction[]) => (dispatch: any) => {
+    dispatch(linkExistingTransactions(transactions));
+    const flags = unionFlags(
+        TransactionFlag.Transfer,
+        TransactionFlag.Reconciled
+    );
+    transactions.forEach(t => {
+        dispatch(addTransactionFlags(t, flags));
+    })
+};

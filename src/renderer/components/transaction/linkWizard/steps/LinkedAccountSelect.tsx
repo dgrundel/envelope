@@ -18,19 +18,19 @@ class Component extends React.Component<LinkWizardStepProps> {
         if (props.selectedTransactionFlag === TransactionFlag.Transfer) {
             this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
                 && filterOnlyDepositAccounts(account);
-        } else if (props.accountAmountTypeFlag === TransactionFlag.BankCredit || props.accountAmountTypeFlag === TransactionFlag.BankDebit) {
+        } else if (props.amountTypeFlag === TransactionFlag.BankCredit || props.amountTypeFlag === TransactionFlag.BankDebit) {
             this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
                 && filterOnlyAssignableAccounts(account);
-        } else if (props.accountAmountTypeFlag === TransactionFlag.CreditAccountCredit) {
+        } else if (props.amountTypeFlag === TransactionFlag.CreditAccountCredit) {
             this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
                 && filterOnlyAssignableAccounts(account);
-        } else if (props.accountAmountTypeFlag === TransactionFlag.CreditAccountDebit) {
+        } else if (props.amountTypeFlag === TransactionFlag.CreditAccountDebit) {
             this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
                 && account.type === AccountType.UserEnvelope;   
         }
 
         if (props.selectedTransactionFlag === TransactionFlag.Transfer) {
-            switch(this.props.accountAmountTypeFlag) {
+            switch(this.props.amountTypeFlag) {
                 case TransactionFlag.BankCredit:
                 case TransactionFlag.CreditAccountCredit:
                     this.inputLabel = 'From which account was the money transferred?';
@@ -47,7 +47,7 @@ class Component extends React.Component<LinkWizardStepProps> {
     }
 
     validateState(state: LinkWizardStepProps) {
-        if (isBlank(state.selectedAccountId)) {
+        if (isBlank(state.relatedAccountId)) {
             return state.selectedTransactionFlag === TransactionFlag.Transfer
                 ? 'Please select an account.'
                 : 'Please select an envelope.';
@@ -68,7 +68,7 @@ class Component extends React.Component<LinkWizardStepProps> {
         const onChange = (e: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
             const selectedAccountId = option?.key as string;
             this.props.setState({
-                selectedAccountId
+                relatedAccountId: selectedAccountId
             });
         };
 
