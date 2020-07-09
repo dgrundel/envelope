@@ -15,34 +15,27 @@ export interface CombinedState {
 }
 
 const jsonClient = new JsonStoreClient(JsonStoreName.EnvelopeUserData);
-
-const reconciler = (inboundState: CombinedState, originalState: CombinedState, reducedState: CombinedState): CombinedState => {
-    return {
-        ...originalState,
-        ...reducedState,
-        ...inboundState,
-        accounts: accountStatePreprocessor(inboundState.accounts),
-        transactions: transactionStatePreprocessor(inboundState.transactions),
-    };
+const basePersistConfig = {
+    storage: jsonClient,
 };
 
-const persistConfig = {
-    key: 'root',
-    storage: jsonClient,
-    debug: true,
-    stateReconciler: reconciler,
-    blacklist: [
-        'appState',
-    ],
+const accountsPersistConfig = {
+    ...basePersistConfig,
+    key: 'accounts',
+    stateReconciler: (inbound: AccountState): AccountState => accountStatePreprocessor(inbound),
+}
+
+const transactionsPersistConfig = {
+    ...basePersistConfig,
+    key: 'transactions',
+    stateReconciler: (inbound: TransactionState): TransactionState => transactionStatePreprocessor(inbound),
 }
 
 const rootReducer = combineReducers({
     appState,
-    accounts,
-    transactions
+    accounts: persistReducer(accountsPersistConfig, accounts),
+    transactions: persistReducer(transactionsPersistConfig, transactions),
 });
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
-
-export const ReduxStore = createStore(persistedReducer, applyMiddleware(thunk));
+export const ReduxStore = createStore(rootReducer, applyMiddleware(thunk));
 export const ReduxStorePersistor = persistStore(ReduxStore);
