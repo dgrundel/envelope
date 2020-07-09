@@ -29,7 +29,8 @@ const columns: IColumn[] = [
     { key: 'column1', name: 'Date', fieldName: 'date', minWidth: 100, maxWidth: 120, },
     { key: 'column2', name: 'Account', fieldName: 'account', minWidth: 150, maxWidth: 180, },
     { key: 'column3', name: 'Description', fieldName: 'description', minWidth: 350, },
-    { key: 'column4', name: 'reconciled', fieldName: 'reconciled', minWidth: 32, maxWidth: 48, isIconOnly: true, },
+    { key: 'column4', name: 'Amount', fieldName: 'amount', minWidth: 100, maxWidth: 200,  },
+    { key: 'column5', name: 'reconciled', fieldName: 'reconciled', minWidth: 32, maxWidth: 48, isIconOnly: true, },
 ];
 
 class Component extends React.Component<TransactionsPageProps, TransactionsPageState> {
@@ -77,6 +78,7 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
                     date: t.date.toLocaleDateString(),
                     account: accounts[t.accountId].name,
                     description: t.description,
+                    amount: t.amount.toFormattedString(),
                     reconciled: <span onClick={onClick}>
                         <FontIcon iconName={isReconciled ? 'CheckMark' : 'Error'} />
                     </span>
