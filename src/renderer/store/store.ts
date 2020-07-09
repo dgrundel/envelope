@@ -6,10 +6,12 @@ import { accountStatePreprocessor } from './preprocessors/Account';
 import { transactionStatePreprocessor } from './preprocessors/Transaction';
 import { accounts, AccountState } from './reducers/Accounts';
 import { transactions, TransactionState } from './reducers/Transactions';
+import { appState, AppState } from './reducers/AppState';
 
 export interface CombinedState {
+    appState: AppState,
     accounts: AccountState,
-    transactions: TransactionState
+    transactions: TransactionState,
 }
 
 const jsonClient = new JsonStoreClient(JsonStoreName.EnvelopeUserData);
@@ -27,9 +29,13 @@ const persistConfig = {
     storage: jsonClient,
     debug: true,
     stateReconciler: reconciler,
+    blacklist: [
+        'appState',
+    ],
 }
 
 const rootReducer = combineReducers({
+    appState,
     accounts,
     transactions
 });

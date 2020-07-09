@@ -1,14 +1,25 @@
+import { Transaction, TransactionFlag } from '@/models/Transaction';
+import { doesNotHaveFlag } from '@/util/Flags';
+import { FontIcon } from '@fluentui/react/lib/Icon';
 import '@public/components/Sidebar.scss';
+import memoizeOne from 'memoize-one';
 import * as React from "react";
-import { getAppContext } from '../AppContext';
+import { connect } from 'react-redux';
+import { setPage } from '../store/actions/AppState';
+import { CombinedState } from '../store/store';
 import { AppPage } from './App';
 import { ImportDropTarget } from './import/ImportDropTarget';
-import { FontIcon } from '@fluentui/react/lib/Icon';
 
 export interface SidebarProps {
+    // mapped from state
+    activePage?: AppPage,
+    unreconciledTransactionCount?: number;
+
+    // store actions
+    setPage?: (page: AppPage) => void;
 }
 
-export class Sidebar extends React.Component<SidebarProps, {}> {
+class Component extends React.Component<SidebarProps, {}> {
     render() {
         return <div id="sidebar">
             <h4 className="sidebar-nav-header">Navigation Header</h4>
@@ -18,17 +29,32 @@ export class Sidebar extends React.Component<SidebarProps, {}> {
                 {this.renderNavLink(AppPage.Envelopes, 'Envelopes')}
                 {this.renderNavLink(AppPage.Transactions, <>
                     Transactions
-                    <FontIcon iconName="AlertSolid" />
+                    {this.props.unreconciledTransactionCount! > 0 && <FontIcon iconName="AlertSolid" />}
                 </>)}
             </ul>
             <ImportDropTarget/>
         </div>;
     }
 
-
     renderNavLink(page: AppPage, label: any) {
-        const pageApi = getAppContext().pageApi;
+        const onClick = () => this.props.setPage!(page);
 
-        return <li className={pageApi.getActivePage() === page ? 'sidebar-nav-link-active' : ''} onClick={() => pageApi.setPage(page)}>{label}</li>;
+        return <li className={this.props.activePage === page ? 'sidebar-nav-link-active' : ''} onClick={onClick}>{label}</li>;
     }
 }
+
+const getUnreconciledCount = memoizeOne((transactions: Record<string, Transaction>): number => {
+    return Object.values(transactions)
+        .filter(transaction => doesNotHaveFlag(TransactionFlag.Reconciled, transaction.flags))
+        .length;
+});
+
+const mapStateToProps = (state: CombinedState, ownProps: SidebarProps): SidebarProps => {
+    return {
+        ...ownProps,
+        activePage: state.appState.page,
+        unreconciledTransactionCount: getUnreconciledCount(state.transactions.transactions),
+    };
+};
+
+export const Sidebar = connect(mapStateToProps, { setPage, })(Component);

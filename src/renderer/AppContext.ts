@@ -1,24 +1,20 @@
 import { ModalApi } from './components/uiElements/Modal';
-import { PageApi } from './components/App';
 
 export interface AppContext {
     modalApi: ModalApi;
-    pageApi: PageApi;
 }
 
 class AppContextImpl implements AppContext {
     readonly modalApi: ModalApi;
-    readonly pageApi: PageApi;
 
-    constructor(app: ModalApi & PageApi) {
+    constructor(app: ModalApi) {
         this.modalApi = app;
-        this.pageApi = app;
     }
 }
 
 let appContext: AppContext;
 
-export const initAppContext = (app: ModalApi & PageApi) => {
+export const initAppContext = (app: ModalApi) => {
     if (appContext) {
         throw new Error('App context is already initialized.');
     }

@@ -5,6 +5,7 @@ import { listToMap } from '@/util/Data';
 import * as Redux from 'redux';
 import createMockStore from 'redux-mock-store';
 import thunk, { ThunkDispatch } from 'redux-thunk';
+import { AppPage } from '@/renderer/components/App';
 
 type DispatchExts = ThunkDispatch<CombinedState, void, Redux.AnyAction>;
 
@@ -13,6 +14,9 @@ const mocker = createMockStore<CombinedState, DispatchExts>(middleware);
 
 export const mockStore = (accounts?: Account[], transactions?: Transaction[], unallocatedId?: string) => {
     return mocker({
+        appState: {
+            page: AppPage.Dashboard,
+        },
         accounts: {
             accounts: listToMap(accounts || []),
             sortedIds: accounts ? accounts.map(a => a._id) : [],
@@ -21,6 +25,6 @@ export const mockStore = (accounts?: Account[], transactions?: Transaction[], un
         transactions: {
             transactions: listToMap(transactions || []),
             sortedIds: transactions ? transactions.map(a => a._id) : [],
-        }
+        },
     });
 };

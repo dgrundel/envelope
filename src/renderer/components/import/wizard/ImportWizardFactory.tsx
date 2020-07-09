@@ -16,6 +16,7 @@ import { DateFieldSelect } from './steps/DateFieldSelect';
 import { DescriptionFieldSelect } from "./steps/DescriptionFieldSelect";
 import { DuplicatesSelect } from './steps/DuplicatesSelect';
 import { InvertAmountsSelect } from "./steps/InvertAmountsSelect";
+import { setPage } from '@/renderer/store/actions/AppState';
 
 
 export interface Row {
@@ -99,6 +100,7 @@ export const createImportWizard = (rows: Row[]) => {
 
         // store actions
         addManyTransactions?: (transaction: Transaction[]) => void;
+        setPage?: (page: AppPage) => void;
     }
 
     class Component extends React.Component<Props> {
@@ -153,7 +155,7 @@ export const createImportWizard = (rows: Row[]) => {
             const appContext = getAppContext();
             // dismiss import modal
             appContext.modalApi.dismissModal();
-            appContext.pageApi.setPage(AppPage.Transactions);
+            this.props.setPage!(AppPage.Transactions);
         }
 
         render() {
@@ -168,5 +170,5 @@ export const createImportWizard = (rows: Row[]) => {
         };
     }
 
-    return connect(mapStateToProps, { addManyTransactions })(Component);
+    return connect(mapStateToProps, { addManyTransactions, setPage })(Component);
 }
