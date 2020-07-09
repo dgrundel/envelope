@@ -38,7 +38,7 @@ export const createLinkWizard = (transaction: Transaction) => {
     }
 
     class Component extends React.Component<Props> {
-        InnerComponent: () => JSX.Element;
+        InnerComponent: any;
         
         constructor(props: Props) {
             super(props);

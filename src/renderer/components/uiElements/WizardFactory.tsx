@@ -1,9 +1,10 @@
-import { getAppContext } from "@/renderer/AppContext";
 import { Log } from "@/util/Logger";
 import { MessageBar, MessageBarType, mergeStyles } from "@fluentui/react";
 import * as React from "react";
 import { BaseModal, ModalButton } from "./Modal";
 import { isNotBlank } from "@/util/Filters";
+import { connect } from 'react-redux';
+import { dismissModal } from '@/renderer/store/actions/AppState';
 
 export type WizardStateValidatorResult = string | string[] | undefined | void;
 export type WizardStateValidator<P> = (state: P) => WizardStateValidatorResult;
@@ -87,7 +88,13 @@ const errorMessageBarStyle = mergeStyles({
 
 export const createWizard = <P extends object>(props: WizardProps<P>, initialProps: P, steps: React.ComponentType<P & WizardStepApi<P>>[]) => {
     
-    const WizardComponent = () => {
+    interface Props {
+        dismissModal?: () => void;
+    };
+
+    const WizardComponent = (componentProps: Props) => {
+        const dismissModal = componentProps.dismissModal!;
+
         const [stepState, setStepState] = React.useState<P>(initialProps);
         const [internalState, setInternalState] = React.useState<InternalState<P>>({
             step: 0,
@@ -162,7 +169,7 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
             }
 
             if (errorMessages.length === 0) {
-                getAppContext().modalApi.dismissModal();
+                dismissModal();
             } else {
                 setInternalState({
                     ...internalState,
@@ -180,7 +187,7 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
             }
             
             if (errorMessages.length === 0) {
-                getAppContext().modalApi.dismissModal();
+                dismissModal();
             } else {
                 setInternalState({
                     ...internalState,
@@ -209,5 +216,5 @@ export const createWizard = <P extends object>(props: WizardProps<P>, initialPro
         </BaseModal>;
     }
     
-    return WizardComponent;
+    return connect(null, { dismissModal })(WizardComponent);
 };

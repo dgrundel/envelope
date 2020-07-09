@@ -1,43 +1,24 @@
 import '@public/components/App.scss';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { initAppContext } from '../AppContext';
 import { CombinedState } from '../store/store';
 import { AccountsPage } from "./account/AccountsPage";
 import { EnvelopesPage } from './account/EnvelopesPage';
 import { DashboardPage } from './DashboardPage';
 import { Sidebar } from './Sidebar';
 import { TransactionsPage } from './transaction/TransactionsPage';
-import { Modal, ModalApi } from "./uiElements/Modal";
-import { AppPage } from '../store/reducers/AppState';
+import { AppPage, Modal } from '../store/reducers/AppState';
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
 
 export interface AppProps {
+    // mapped state
     activePage?: AppPage;
+    activeModal?: Modal;
 }
 
-export interface AppState {
-    modals: Modal[];
-}
-
-class Component extends React.Component<AppProps, AppState> implements ModalApi {
+class Component extends React.Component<AppProps> {
     
-    constructor(props: AppProps) {
-        super(props);
-
-        this.state = {
-            modals: [],
-        };
-
-        // ModalApi
-        this.dismissModal = this.dismissModal.bind(this);
-        this.queueModal = this.queueModal.bind(this);
-        this.replaceModal = this.replaceModal.bind(this);
-        
-        initAppContext(this);
-    }
-
     render() {
         return <div id="app">
             <div id="header">
@@ -47,7 +28,7 @@ class Component extends React.Component<AppProps, AppState> implements ModalApi 
             <Sidebar/>
             <div id="main">
                 {this.renderPage()}
-                {this.showModal()}
+                {this.props.activeModal}
             </div>
         </div>;
     }
@@ -65,41 +46,13 @@ class Component extends React.Component<AppProps, AppState> implements ModalApi 
                 return <DashboardPage/>;
         }
     }
-
-    replaceModal(modal: Modal) {
-        this.setState({
-            modals: [modal]
-        });
-    }
-    
-    queueModal(modal: Modal) {
-        this.setState(prev => {
-            return {
-                modals: prev.modals.concat(modal)
-            }
-        });
-    }
-
-    showModal() {
-        if (this.state.modals.length) {
-            return this.state.modals[0];
-        }
-        return null;
-    }
-
-    dismissModal() {
-        this.setState(prev => {
-            return {
-                modals: prev.modals.slice(1)
-            }
-        });
-    }
 }
 
 const mapStateToProps = (state: CombinedState, ownProps: AppProps): AppProps => {
     return {
         ...ownProps,
         activePage: state.appState.page,
+        activeModal: state.appState.modal,
     };
 };
 

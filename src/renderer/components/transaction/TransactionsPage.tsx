@@ -1,5 +1,4 @@
 import { Transaction, TransactionFlag } from '@/models/Transaction';
-import { getAppContext } from '@/renderer/AppContext';
 import { CombinedState } from '@/renderer/store/store';
 import { Currency } from '@/util/Currency';
 import { filterOnlyImportedTransactions } from '@/util/Filters';
@@ -10,11 +9,17 @@ import * as React from "react";
 import { connect } from 'react-redux';
 import { Box } from "../uiElements/Box";
 import { TransactionModal } from './TransactionModal';
+import { setModal } from '@/renderer/store/actions/AppState';
+import { Modal } from '@/renderer/store/reducers/AppState';
 
 export interface TransactionsPageProps {
+    // mapped from state
     sortedTransactions?: Transaction[];
     transactions?: Record<string, Transaction>;
     accounts?: Record<string, Account>;
+
+    // store actions
+    setModal?: (modal: Modal) => void;
 }
 
 export interface TransactionsPageState {
@@ -40,9 +45,10 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
     }
 
     renderList() {
-        const sortedTransactions = this.props.sortedTransactions || [];
-        const accounts = this.props.accounts || {};
-        const transactionMap = this.props.transactions || {};
+        const sortedTransactions = this.props.sortedTransactions!;
+        const accounts = this.props.accounts!;
+        const transactionMap = this.props.transactions!;
+        const setModal = (this.props.setModal!);
 
         if (sortedTransactions.length === 0) {
             return 'No transactions yet.';
@@ -63,7 +69,7 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
                 
                 const onClick = (e: React.MouseEvent) => {
                     e.preventDefault();
-                    getAppContext().modalApi.queueModal(<TransactionModal transaction={t} unlinkedBalance={balance} />);
+                    setModal(<TransactionModal transaction={t} unlinkedBalance={balance} />);
                 };
 
                 return {
@@ -99,4 +105,4 @@ const mapStateToProps = (state: CombinedState, ownProps: TransactionsPageProps):
         .filter(filterOnlyImportedTransactions)
 });
 
-export const TransactionsPage = connect(mapStateToProps, {})(Component);
+export const TransactionsPage = connect(mapStateToProps, { setModal, })(Component);

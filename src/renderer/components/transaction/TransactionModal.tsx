@@ -1,15 +1,16 @@
 import { Transaction, TransactionFlag } from '@/models/Transaction';
+import { Modal } from '@/renderer/store/reducers/AppState';
 import { Currency } from '@/util/Currency';
-import { mergeStyles, MessageBar, MessageBarButton, MessageBarType, Text } from '@fluentui/react';
+import { hasFlag } from '@/util/Flags';
+import { MessageBar, MessageBarButton, MessageBarType } from '@fluentui/react';
 import { Account } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { getAppContext } from '../../AppContext';
 import { CombinedState } from '../../store/store';
-import { BaseModal, Modal } from '../uiElements/Modal';
+import { BaseModal } from '../uiElements/Modal';
 import { createLinkWizard } from './linkWizard/LinkWizardFactory';
 import { TransactionCard } from './TransactionCard';
-import { hasFlag } from '@/util/Flags';
+import { setModal, dismissModal } from '@/renderer/store/actions/AppState';
 
 export interface AddLinkedTransactionsProps {
     transaction: Transaction;
@@ -18,12 +19,16 @@ export interface AddLinkedTransactionsProps {
     // mapped props from state
     accountMap?: Record<string, Account>;
     existingLinks?: Transaction[];
+
+    // store actions
+    setModal?: (modal: Modal) => void;
+    dismissModal?: () => void;
 }
 
 class Component extends React.Component<AddLinkedTransactionsProps, {}> implements Modal {
 
     render() {
-        const dismissModal = getAppContext().modalApi.dismissModal;
+        const dismissModal = this.props.dismissModal!;
 
         return <BaseModal heading="Transaction Details" closeButtonHandler={dismissModal}>
             <TransactionCard transaction={this.props.transaction}/>
@@ -32,6 +37,8 @@ class Component extends React.Component<AddLinkedTransactionsProps, {}> implemen
     }
 
     renderLinkWizardMessage(): any {
+        const setModal = this.props.setModal!;
+
         const isReconciled = hasFlag(TransactionFlag.Reconciled, this.props.transaction.flags);
         if (isReconciled) {
             return null;
@@ -39,7 +46,7 @@ class Component extends React.Component<AddLinkedTransactionsProps, {}> implemen
 
         const onClick = () => {
             const WizardComponent = createLinkWizard(this.props.transaction);
-            getAppContext().modalApi.replaceModal(<WizardComponent/>);
+            setModal(<WizardComponent/>);
         };
         
         return <MessageBar
@@ -59,4 +66,9 @@ const mapStateToProps = (state: CombinedState, ownProps: AddLinkedTransactionsPr
     existingLinks: ownProps.transaction.linkedTransactionIds.map(id => state.transactions.transactions[id])
 })
 
-export const TransactionModal = connect(mapStateToProps, {})(Component);
+const mappedActions = {
+    setModal,
+    dismissModal,
+};
+
+export const TransactionModal = connect(mapStateToProps, mappedActions)(Component);

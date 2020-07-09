@@ -1,20 +1,23 @@
-import { Account, AccountType, getAccountTypeLabel, getBankAccountTypes } from '@models/Account';
-import * as React from "react";
-import { connect } from 'react-redux';
-import { AccountCreate } from './AccountCreate';
-import { Box } from "../uiElements/Box";
-import { AccountState } from '@/renderer/store/reducers/Accounts';
 import { CombinedState } from '@/renderer/store/store';
 import { filterOnlyBankAccounts } from '@/util/Filters';
 import { IconButton, mergeStyles } from '@fluentui/react';
-import { getAppContext } from '@/renderer/AppContext';
-import { BaseModal } from '../uiElements/Modal';
+import { Account, AccountType, getAccountTypeLabel } from '@models/Account';
+import * as React from "react";
+import { connect } from 'react-redux';
 import { AdjustBalance } from '../transaction/AdjustBalance';
-
-// import '@public/components/AccountsPage.scss';
+import { Box } from "../uiElements/Box";
+import { BaseModal } from '../uiElements/Modal';
+import { AccountCreate } from './AccountCreate';
+import { setModal, dismissModal } from '@/renderer/store/actions/AppState';
+import { Modal } from '@/renderer/store/reducers/AppState';
 
 export interface AccountsPageProps {
+    // mapped from state
     accounts?: Account[];
+
+    // store actions
+    setModal?: (modal: Modal) => void;
+    dismissModal?: () => void;
 }
 
 export interface AccountsPageState {
@@ -75,15 +78,14 @@ class Component extends React.Component<AccountsPageProps, AccountsPageState> {
     }
 
     showAdjustBalanceModal(account: Account) {
-        const dismiss = () => {
-            getAppContext().modalApi.dismissModal();
-        };
+        const setModal = this.props.setModal!;
+        const dismissModal = this.props.dismissModal!;
 
-        const modal = <BaseModal heading={`Adjust balance of ${account.name}`} closeButtonHandler={dismiss}>
-            <AdjustBalance account={account} onComplete={dismiss}/>
+        const modal = <BaseModal heading={`Adjust balance of ${account.name}`} closeButtonHandler={dismissModal}>
+            <AdjustBalance account={account} onComplete={dismissModal}/>
         </BaseModal>;
 
-        getAppContext().modalApi.queueModal(modal);
+        setModal(modal);
     }
 }
 
@@ -92,4 +94,9 @@ const mapStateToProps = (state: CombinedState, ownProps: AccountsPageProps): Acc
     accounts: state.accounts.sortedIds.map(id => state.accounts.accounts[id]).filter(filterOnlyBankAccounts)
 })
 
-export const AccountsPage = connect(mapStateToProps, {})(Component);
+const storeActions = {
+    setModal,
+    dismissModal,
+};
+
+export const AccountsPage = connect(mapStateToProps, storeActions)(Component);

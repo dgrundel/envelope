@@ -1,12 +1,7 @@
 import { DefaultButton, FontIcon } from '@fluentui/react';
 import '@public/components/Modal.scss';
 import * as React from "react";
-import { getAppContext } from '../../AppContext';
-
-
-export interface Modal {
-    // marker interface
-}
+import { Modal } from '@/renderer/store/reducers/AppState';
 
 export interface ModalButton {
     buttonText: any;
@@ -24,48 +19,6 @@ export interface ModalProps {
     // CSS rules for the modal
     style?: React.CSSProperties;
 }
-
-export interface ModalApi {
-    queueModal: (modal: Modal) => void;
-    replaceModal: (modal: Modal) => void;
-    dismissModal: () => void;
-}
-
-export const ButtonSets = {
-    ok: (callback?: () => void) => [
-        {
-            buttonText: 'OK',
-            onClick: () => {
-                callback && callback();
-                getAppContext().modalApi.dismissModal();
-            }
-        }
-    ],
-    close: (callback?: () => void) => [
-        { 
-            buttonText: 'Close', 
-            onClick: () => {
-                callback && callback();
-                getAppContext().modalApi.dismissModal();
-            }
-        }
-    ],
-    okCancel: (okCallback?: () => void, cancelCallback?: () => void) => [
-        {
-            buttonText: 'OK',
-            onClick: () => {
-                okCallback && okCallback();
-                getAppContext().modalApi.dismissModal();
-            }
-        },{
-            buttonText: 'Cancel',
-            onClick: () => {
-                cancelCallback && cancelCallback();
-                getAppContext().modalApi.dismissModal();
-            }
-        }
-    ]
-};
 
 export class BaseModal extends React.Component<ModalProps, {}> implements Modal {
     render() {

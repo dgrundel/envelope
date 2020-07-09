@@ -1,6 +1,5 @@
 import { Account } from "@/models/Account";
 import { getAmountTransactionFlag, Transaction } from "@/models/Transaction";
-import { getAppContext } from "@/renderer/AppContext";
 import { addManyTransactions } from "@/renderer/store/actions/Transaction";
 import { CombinedState } from "@/renderer/store/store";
 import { Currency } from "@/util/Currency";
@@ -15,8 +14,8 @@ import { DateFieldSelect } from './steps/DateFieldSelect';
 import { DescriptionFieldSelect } from "./steps/DescriptionFieldSelect";
 import { DuplicatesSelect } from './steps/DuplicatesSelect';
 import { InvertAmountsSelect } from "./steps/InvertAmountsSelect";
-import { setPage } from '@/renderer/store/actions/AppState';
-import { AppPage } from '@/renderer/store/reducers/AppState';
+import { setPage, dismissModal } from '@/renderer/store/actions/AppState';
+import { AppPage, Modal } from '@/renderer/store/reducers/AppState';
 
 
 export interface Row {
@@ -101,10 +100,11 @@ export const createImportWizard = (rows: Row[]) => {
         // store actions
         addManyTransactions?: (transaction: Transaction[]) => void;
         setPage?: (page: AppPage) => void;
+        dismissModal?: () => void;
     }
 
     class Component extends React.Component<Props> {
-        InnerComponent: () => JSX.Element;
+        InnerComponent: any;
         
         constructor(props: Props) {
             super(props);
@@ -152,9 +152,8 @@ export const createImportWizard = (rows: Row[]) => {
 
             this.props.addManyTransactions!(rowsAsTransactions);
             
-            const appContext = getAppContext();
             // dismiss import modal
-            appContext.modalApi.dismissModal();
+            this.props.dismissModal!();
             this.props.setPage!(AppPage.Transactions);
         }
 
@@ -170,5 +169,11 @@ export const createImportWizard = (rows: Row[]) => {
         };
     }
 
-    return connect(mapStateToProps, { addManyTransactions, setPage })(Component);
+    const storeActions = {
+        addManyTransactions,
+        setPage,
+        dismissModal,
+    };
+    
+    return connect(mapStateToProps, storeActions)(Component);
 }

@@ -1,7 +1,7 @@
-import * as React from "react";
-
-import { Modal, BaseModal } from "./uiElements/Modal";
 import { Spinner, SpinnerSize, Text } from '@fluentui/react';
+import * as React from "react";
+import { Modal } from '../store/reducers/AppState';
+import { BaseModal } from "./uiElements/Modal";
 
 export interface SpinnerModalProps {
     text?: string;

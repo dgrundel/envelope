@@ -1,4 +1,3 @@
-import { getAppContext } from '@/renderer/AppContext';
 import { Log } from "@/util/Logger";
 import { FontIcon } from '@fluentui/react';
 import '@public/components/import/ImportDropTarget.scss';
@@ -6,12 +5,16 @@ import * as csv from 'neat-csv';
 import * as React from "react";
 import { DropTarget } from "../uiElements/DropTarget";
 import { createImportWizard } from './wizard/ImportWizardFactory';
-
+import { connect } from 'react-redux';
+import { setModal } from '@/renderer/store/actions/AppState';
+import { Modal } from '@/renderer/store/reducers/AppState';
 
 export interface ImportProps {
+    // store actions
+    setModal?: (modal: Modal) => void;
 }
 
-export class ImportDropTarget extends React.Component<ImportProps, {}> {
+class Component extends React.Component<ImportProps, {}> {
 
     constructor(props: ImportProps) {
         super(props);
@@ -29,6 +32,8 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
     }
 
     dropHandler(result: Promise<DataTransferItemList>) {
+        const setModal = this.props.setModal!;
+
         // first filter out non-files
         // resolve with a list of files
         // reject if no files
@@ -53,7 +58,7 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
             csvFiles.forEach(csvRows => {
                 Log.debug('csvRows', csvRows);
                 const Component = createImportWizard(csvRows);
-                getAppContext().modalApi.queueModal(<Component/>);
+                setModal(<Component/>);
             });
         })
         // if we got an error along the way, handle it.
@@ -62,3 +67,5 @@ export class ImportDropTarget extends React.Component<ImportProps, {}> {
         });
     }
 }
+
+export const ImportDropTarget = connect(null, { setModal, })(Component);

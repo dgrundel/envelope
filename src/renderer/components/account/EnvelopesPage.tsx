@@ -1,4 +1,3 @@
-import { getAppContext } from '@/renderer/AppContext';
 import { CombinedState } from '@/renderer/store/store';
 import { filterOnlyAccountType } from '@/util/Filters';
 import { IconButton, Text } from '@fluentui/react';
@@ -10,11 +9,18 @@ import { Box } from '../uiElements/Box';
 import { Layout } from '../uiElements/Layout';
 import { BaseModal } from '../uiElements/Modal';
 import { EnvelopeCreate } from './EnvelopeCreate';
+import { setModal, dismissModal } from '@/renderer/store/actions/AppState';
+import { Modal } from '@/renderer/store/reducers/AppState';
 
 export interface EnvelopesPageProps {
+    // mapped from state
     userEnvelopes?: Account[];
     creditCardEnvelopes?: Account[];
     unallocatedAccount?: Account;
+
+    //store actions
+    setModal?: (modal: Modal) => void;
+    dismissModal?: () => void;
 }
 
 export interface EnvelopesPageState {
@@ -60,30 +66,28 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
     }
 
     showRemoveMoneyModal(envelope: Account) {
-        const dismiss = () => {
-            getAppContext().modalApi.dismissModal();
-        };
+        const setModal = this.props.setModal!;
+        const dismissModal = this.props.dismissModal!;
 
-        const modal = <BaseModal heading={`Remove money from ${envelope.name}`} closeButtonHandler={dismiss}>
-            <MoveMoney fromId={envelope._id} showFrom={false} onComplete={dismiss}/>
+        const modal = <BaseModal heading={`Remove money from ${envelope.name}`} closeButtonHandler={dismissModal}>
+            <MoveMoney fromId={envelope._id} showFrom={false} onComplete={dismissModal}/>
         </BaseModal>;
 
-        getAppContext().modalApi.queueModal(modal);
+        setModal(modal);
     }
 
     showAddMoneyModal(envelope: Account) {
-        const dismiss = () => {
-            getAppContext().modalApi.dismissModal();
-        };
+        const setModal = this.props.setModal!;
+        const dismissModal = this.props.dismissModal!;
 
         // if the envelope is negative, suggest getting it back to zero
         const suggestedAmount = envelope.balance.isNegative() ? envelope.balance.getInverse() : undefined;
 
-        const modal = <BaseModal heading={`Add money to ${envelope.name}`} closeButtonHandler={dismiss}>
-            <MoveMoney toId={envelope._id} showTo={false} onComplete={dismiss} amount={suggestedAmount} />
+        const modal = <BaseModal heading={`Add money to ${envelope.name}`} closeButtonHandler={dismissModal}>
+            <MoveMoney toId={envelope._id} showTo={false} onComplete={dismissModal} amount={suggestedAmount} />
         </BaseModal>;
 
-        getAppContext().modalApi.queueModal(modal);
+        setModal(modal);
     }
 }
 
@@ -98,4 +102,9 @@ const mapStateToProps = (state: CombinedState, ownProps: EnvelopesPageProps): En
     };
 }
 
-export const EnvelopesPage = connect(mapStateToProps, {})(Component); 
+const storeActions = {
+    setModal,
+    dismissModal,
+};
+
+export const EnvelopesPage = connect(mapStateToProps, storeActions)(Component); 
