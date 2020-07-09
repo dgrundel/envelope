@@ -2,16 +2,14 @@ import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { getAppContext } from '@/renderer/AppContext';
 import { CombinedState } from '@/renderer/store/store';
 import { Currency } from '@/util/Currency';
-import { Log } from '@/util/Logger';
+import { filterOnlyImportedTransactions } from '@/util/Filters';
+import { hasFlag } from '@/util/Flags';
+import { DetailsList, DetailsListLayoutMode, FontIcon, IColumn, SelectionMode } from '@fluentui/react';
 import { Account } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { TransactionModal } from './TransactionModal';
 import { Box } from "../uiElements/Box";
-import { DataTable } from '../uiElements/DataTable';
-import { filterOnlyImportedTransactions } from '@/util/Filters';
-import { FontIcon } from '@fluentui/react';
-import { hasFlag } from '@/util/Flags';
+import { TransactionModal } from './TransactionModal';
 
 export interface TransactionsPageProps {
     sortedTransactions?: Transaction[];
@@ -22,8 +20,14 @@ export interface TransactionsPageProps {
 export interface TransactionsPageState {
 }
 
-class Component extends React.Component<TransactionsPageProps, TransactionsPageState> {
+const columns: IColumn[] = [
+    { key: 'column1', name: 'Date', fieldName: 'date', minWidth: 100, maxWidth: 120, },
+    { key: 'column2', name: 'Account', fieldName: 'account', minWidth: 150, maxWidth: 180, },
+    { key: 'column3', name: 'Description', fieldName: 'description', minWidth: 350, },
+    { key: 'column4', name: 'reconciled', fieldName: 'reconciled', minWidth: 32, maxWidth: 48, isIconOnly: true, },
+];
 
+class Component extends React.Component<TransactionsPageProps, TransactionsPageState> {
     constructor(props: TransactionsPageProps) {
         super(props);
         this.state = {};
@@ -38,73 +42,51 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
     renderList() {
         const sortedTransactions = this.props.sortedTransactions || [];
         const accounts = this.props.accounts || {};
+        const transactionMap = this.props.transactions || {};
 
         if (sortedTransactions.length === 0) {
             return 'No transactions yet.';
         }
 
-        return <DataTable<Transaction>
-            rows={sortedTransactions}
-            fields={[{
-                name: 'date',
-                label: 'Date',
-                formatter: (value, row) => row.date.toLocaleDateString()
-            },{
-                name: 'accountId',
-                label: 'Account',
-                formatter: (id) => accounts[id].name
-            },{
-                name: 'description',
-                label: 'Description'
-            },{
-                name: 'amount',
-                label: 'Amount',
-                formatter: (value: Currency, row) => value.toFormattedString()
-            },{
-                name: 'linkedTransactions',
-                label: <FontIcon iconName="Link"/>,
-                formatter: this.linkedTransactionsFormatter.bind(this)
-            }]}
-            keyField={'_id'}
-            onSelect={(selected) => Log.debug('Table selection changed', selected)}
-        />
+        const items = sortedTransactions
+            .map(t => {
+                const isReconciled = hasFlag(TransactionFlag.Reconciled, t.flags);
+                const existingLinks = t.linkedTransactionIds.map(id => transactionMap[id]) || [];
+                const balance = existingLinks.reduce(
+                    (bal: Currency, link: Transaction) => {
+                        // Log.debug('link', link);
+                        // subtract linked amounts to see if it zeros out
+                        return bal.sub(link.amount);
+                    },
+                    t.amount
+                );
+                
+                const onClick = (e: React.MouseEvent) => {
+                    e.preventDefault();
+                    getAppContext().modalApi.queueModal(<TransactionModal transaction={t} unlinkedBalance={balance} />);
+                };
 
-    }
+                return {
+                    key: t._id,
+                    date: t.date.toLocaleDateString(),
+                    account: accounts[t.accountId].name,
+                    description: t.description,
+                    reconciled: <span onClick={onClick}>
+                        <FontIcon iconName={isReconciled ? 'CheckMark' : 'Error'} />
+                    </span>
+                }
+            });
 
-    private linkedTransactionsFormatter(value: string, row: Transaction) {
-        const transactionMap = this.props.transactions || {};
-        const transaction = transactionMap[row._id];
-        const isReconciled = hasFlag(TransactionFlag.Reconciled, transaction.flags);
-        
-        const existingLinks = transaction.linkedTransactionIds.map(id => transactionMap[id]) || [];
-        
-        const balance = existingLinks.reduce(
-            (bal: Currency, link: Transaction) => {
-                // Log.debug('link', link);
-                // subtract linked amounts to see if it zeros out
-                return bal.sub(link.amount);
-            },
-            transaction.amount
-        );
+        return <DetailsList
+            items={items}
+            columns={columns}
+            layoutMode={DetailsListLayoutMode.justified}
+            selectionMode={SelectionMode.none}
+            // selectionMode={SelectionMode.single}
+            // selection={this.selection}
+            // selectionPreservedOnEmptyClick={true}
+        />;
 
-        // Log.debug('balance', transaction.description, balance.toString());
-        
-        const clickHander = (e: React.MouseEvent) => {
-            e.preventDefault();
-
-            const modal = <TransactionModal transaction={transaction} unlinkedBalance={balance} />;
-            
-            getAppContext().modalApi.queueModal(modal);
-        };
-        
-        let icon = <FontIcon iconName="Error" />;
-        if (isReconciled) {
-            icon = <FontIcon iconName="CheckMark" />;
-        }
-
-        return <span onClick={clickHander}>
-            {icon}
-        </span>;
     }
 }
 
