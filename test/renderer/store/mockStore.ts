@@ -5,7 +5,7 @@ import { listToMap } from '@/util/Data';
 import * as Redux from 'redux';
 import createMockStore from 'redux-mock-store';
 import thunk, { ThunkDispatch } from 'redux-thunk';
-import { AppPage } from '@/renderer/components/App';
+import { AppPage } from '@/renderer/store/reducers/AppState';
 
 type DispatchExts = ThunkDispatch<CombinedState, void, Redux.AnyAction>;
 

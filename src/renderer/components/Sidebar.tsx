@@ -7,8 +7,8 @@ import * as React from "react";
 import { connect } from 'react-redux';
 import { setPage } from '../store/actions/AppState';
 import { CombinedState } from '../store/store';
-import { AppPage } from './App';
 import { ImportDropTarget } from './import/ImportDropTarget';
+import { AppPage } from '../store/reducers/AppState';
 
 export interface SidebarProps {
     // mapped from state

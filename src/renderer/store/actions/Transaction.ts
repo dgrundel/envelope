@@ -134,3 +134,81 @@ export const addReconcileTransaction = (existingTransaction: Transaction, otherA
     dispatch(addTransaction(linkedTransaction, existingTransaction));
     dispatch(addTransactionFlags(existingTransaction, TransactionFlag.Reconciled));
 };
+
+/**
+ * Link two existing transactions that represent a transfer of funds
+ * between two known accounts.
+ * 
+ * @param fromTransaction - transaction with flag TransactionFlag.BankDebit
+ * @param toTransaction - transaction with flag TransactionFlag.BankCredit
+ */
+export const addLinkedTransactionForBankTransfer = (fromTransaction: Transaction, toTransaction: Transaction) => (dispatch: any, getState: () => CombinedState) => {
+    dispatch(linkTransactionsAsTransfer([
+        fromTransaction,
+        toTransaction,
+    ]));
+};
+
+
+/**
+ * Link and reconcile a transaction that represents a deposit, 
+ * refund, or other income.
+ * 
+ * @param transaction - the transaction representing the credit 
+ *  in the bank account, has flag TransactionFlag.BankCredit
+ * @param envelope - the envelope to which the transaction should be applied
+ */
+export const addLinkedTransactionForBankDeposit = (transaction: Transaction, envelope: Account) => (dispatch: any, getState: () => CombinedState) => {
+    dispatch(addReconcileTransaction(transaction, envelope));
+};
+
+/**
+ * Link and reconcile a transaction that represents a purchase, fee, 
+ * outgoing payment, or other account withdrawl.
+ * 
+ * @param transaction - the transaction representing the debit in the 
+ *  bank account, has flag TransactionFlag.BankDebit
+ * @param envelope - the envelope to which the transaction should be applied
+ */
+export const addLinkedTransactionForBankDebit = (transaction: Transaction, envelope: Account) => (dispatch: any, getState: () => CombinedState) => {
+    dispatch(addReconcileTransaction(transaction, envelope));
+};
+
+/**
+ * Reconcile a transaction that represents a payment applied to
+ * the credit card from a checking or other bank account.
+ * 
+ * _Note:_ This transaction has no linked transactions. We merely
+ * reconcile it. The bank account debit will be linked to a
+ * payment envelope.
+ * 
+ * @param transaction - the transaction representing the credit
+ *  to the credit card account, has flag TransactionFlag.CreditAccountCredit
+ */
+export const reconcileTransactionForCreditCardPaymentFromBank = (transaction: Transaction) => (dispatch: any, getState: () => CombinedState) => {
+    dispatch(addTransactionFlags!(transaction, unionFlags(
+        TransactionFlag.Transfer,
+        TransactionFlag.Reconciled,
+    )));
+};
+
+/**
+ * Link and reconcile a transaction that represents a refund, promotional 
+ * credit, or other type of credit.
+ * 
+ * @param transaction - transaction in credit card account, has flag TransactionFlag.CreditAccountCredit
+ * @param envelope - the envelope to which the transaction should be applied
+ */
+export const addLinkedTransactionForCreditCardRefund = (transaction: Transaction, envelope: Account) => (dispatch: any, getState: () => CombinedState) => {
+    dispatch(addReconcileTransaction(transaction, envelope));
+};
+
+/**
+ * Link and reconcile a transaction that represents a credit card purchase.
+ * 
+ * @param transaction - transaction in credit card account, has flag TransactionFlag.CreditAccountDebit
+ * @param envelope - the envelope to which the transaction should be applied
+ */
+export const addLinkedTransactionForCreditCardPurchase = (transaction: Transaction, envelope: Account) => (dispatch: any, getState: () => CombinedState) => {
+    dispatch(addReconcileTransaction(transaction, envelope));
+};

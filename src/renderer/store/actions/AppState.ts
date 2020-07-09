@@ -1,4 +1,4 @@
-import { AppPage } from '@/renderer/components/App';
+import { AppPage } from '../reducers/AppState';
 
 export enum AppStateAction {
     SetPage = 'store:action:app-state:set-page',

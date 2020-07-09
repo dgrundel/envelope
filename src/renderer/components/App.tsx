@@ -9,15 +9,9 @@ import { DashboardPage } from './DashboardPage';
 import { Sidebar } from './Sidebar';
 import { TransactionsPage } from './transaction/TransactionsPage';
 import { Modal, ModalApi } from "./uiElements/Modal";
+import { AppPage } from '../store/reducers/AppState';
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
-
-export enum AppPage {
-    Dashboard,
-    Accounts,
-    Envelopes,
-    Transactions,
-}
 
 export interface AppProps {
     activePage?: AppPage;

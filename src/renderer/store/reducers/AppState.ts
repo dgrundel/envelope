@@ -1,5 +1,11 @@
 import { AppStateAction, SetPageAction } from '../actions/AppState';
-import { AppPage } from '@/renderer/components/App';
+
+export enum AppPage {
+    Dashboard,
+    Accounts,
+    Envelopes,
+    Transactions,
+}
 
 export interface AppState {
     page: AppPage;

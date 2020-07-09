@@ -5,6 +5,7 @@ import { TransactionAction } from '@/renderer/store/actions/Transaction';
 import { Currency } from '@/util/Currency';
 import { assert } from 'chai';
 import { mockStore } from '../mockStore';
+import { unionFlags } from '@/util/Flags';
 
 
 describe('Account actions', function () {
@@ -114,7 +115,7 @@ describe('Account actions', function () {
 
         const transaction = action1.transaction;
         assert.equal(transaction.accountId, store.getState().accounts.unallocatedId);
-        assert.equal(transaction.flags, TransactionFlag.Adjustment);
+        assert.equal(transaction.flags, unionFlags(TransactionFlag.Adjustment, TransactionFlag.Reconciled));
         assert.deepEqual(transaction.amount, new Currency(100, 0));
 
         // update balance action to set balance of unallocated

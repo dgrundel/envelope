@@ -8,7 +8,6 @@ import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import * as React from "react";
 import { connect } from "react-redux";
-import { AppPage } from "../../App";
 import { createWizard, WizardStepApi } from "../../uiElements/WizardFactory";
 import { AccountSelect } from './steps/AccountSelect';
 import { AmountFieldSelect } from "./steps/AmountFieldSelect";
@@ -17,6 +16,7 @@ import { DescriptionFieldSelect } from "./steps/DescriptionFieldSelect";
 import { DuplicatesSelect } from './steps/DuplicatesSelect';
 import { InvertAmountsSelect } from "./steps/InvertAmountsSelect";
 import { setPage } from '@/renderer/store/actions/AppState';
+import { AppPage } from '@/renderer/store/reducers/AppState';
 
 
 export interface Row {
