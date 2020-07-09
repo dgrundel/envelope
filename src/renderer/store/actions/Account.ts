@@ -1,7 +1,7 @@
 import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { isBlank } from '@/util/Filters';
-import { hasFlag } from '@/util/Flags';
+import { hasFlag, unionFlags } from '@/util/Flags';
 import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import { Account, AccountType, isBankAccountType, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
@@ -107,7 +107,7 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
         
         const transaction: Transaction = {
             _id: getIdentifier(),
-            flags: TransactionFlag.Adjustment,
+            flags: unionFlags(TransactionFlag.Adjustment, TransactionFlag.Reconciled),
             accountId: unallocatedId!,
             date: new Date(),
             description: `Initial balance from account ${account._id} (${name})`,
