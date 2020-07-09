@@ -1,17 +1,15 @@
+import { getAppContext } from '@/renderer/AppContext';
 import { CombinedState } from '@/renderer/store/store';
-import { Currency } from '@/util/Currency';
+import { filterOnlyAccountType } from '@/util/Filters';
+import { IconButton, Text } from '@fluentui/react';
 import { Account, AccountType } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { Box } from '../uiElements/Box';
-import { DataTable } from '../uiElements/DataTable';
-import { EnvelopeCreate } from './EnvelopeCreate';
-import { filterOnlyAccountType } from '@/util/Filters';
-import { Text, IconButton } from '@fluentui/react';
-import { Layout } from '../uiElements/Layout';
 import { MoveMoney } from '../transaction/MoveMoney';
+import { Box } from '../uiElements/Box';
+import { Layout } from '../uiElements/Layout';
 import { BaseModal } from '../uiElements/Modal';
-import { getAppContext } from '@/renderer/AppContext';
+import { EnvelopeCreate } from './EnvelopeCreate';
 
 export interface EnvelopesPageProps {
     userEnvelopes?: Account[];
@@ -32,18 +30,18 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
     
     render() {
         return <>
-            <Layout cols={2}>
-                <Box heading="Create an Envelope">
-                    <EnvelopeCreate/>
-                </Box>
-                <Box heading="Available">
+            <Box heading="Available">
+                <Layout cols={2}>
                     <p><Text variant={'xxLarge'}>{this.props.unallocatedAccount?.balance.toFormattedString()}</Text></p>
 
                     <MoveMoney fromId={this.props.unallocatedAccount?._id} showFrom={false}/>
-                </Box>
-            </Layout>
+                </Layout>
+            </Box>
             
             <Layout cols={3}>
+                <Box heading="Create an Envelope">
+                    <EnvelopeCreate/>
+                </Box>
                 {this.props.creditCardEnvelopes!.map(e => this.renderEnvelope(e))}
                 {this.props.userEnvelopes!.map(e => this.renderEnvelope(e))}
             </Layout>
