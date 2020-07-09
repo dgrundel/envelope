@@ -98,7 +98,7 @@ class Component extends React.Component<AdjustBalanceProps, State> {
             amount: amount,
             description: 'Manual balance adjustment',
             linkedTransactionIds: [],
-            flags: unionFlags(amountFlag, TransactionFlag.Adjustment),
+            flags: unionFlags(amountFlag, TransactionFlag.Adjustment, TransactionFlag.Reconciled),
         };
 
         this.props.addTransaction!(transaction);
