@@ -2,10 +2,10 @@ import { Currency } from '@/util/Currency';
 import { unionFlags } from '@/util/Flags';
 import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
-import { Account, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
-import { getAmountTransactionFlag, Transaction, TransactionData, TransactionFlag, findAmountTransactionFlag } from '@models/Transaction';
+import { Account } from '@models/Account';
+import { getAmountTransactionFlag, Transaction, TransactionFlag } from '@models/Transaction';
 import { CombinedState } from '../store';
-import { applyTransactionToAccount, applyTransactionsToAccount } from './Account';
+import { applyTransactionsToAccount, applyTransactionToAccount } from './Account';
 
 export enum TransactionAction {
     Add = 'store:action:transaction:add',
