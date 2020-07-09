@@ -1,11 +1,10 @@
 import { Account, AccountType } from '@/models/Account';
 import { TransactionFlag } from '@/models/Transaction';
 import { AccountDropdown } from '@/renderer/components/account/AccountDropdown';
-import { filterOnlyAssignableAccounts, filterOnlyDepositAccounts, isBlank } from '@/util/Filters';
-import { IDropdownOption, Separator, MessageBar, MessageBarType } from '@fluentui/react';
+import { filterOnlyEnvelopeAccounts, filterOnlyDepositAccounts, isBlank } from '@/util/Filters';
+import { IDropdownOption, MessageBar, MessageBarType } from '@fluentui/react';
 import * as React from "react";
 import { LinkWizardStepProps } from '../LinkWizardFactory';
-import { TransactionCard } from '../../TransactionCard';
 import { LinkWizardStepFrame } from '../LinkWizardStepFrame';
 
 class Component extends React.Component<LinkWizardStepProps> {
@@ -20,10 +19,10 @@ class Component extends React.Component<LinkWizardStepProps> {
                 && filterOnlyDepositAccounts(account);
         } else if (props.amountTypeFlag === TransactionFlag.BankCredit || props.amountTypeFlag === TransactionFlag.BankDebit) {
             this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
-                && filterOnlyAssignableAccounts(account);
+                && filterOnlyEnvelopeAccounts(account);
         } else if (props.amountTypeFlag === TransactionFlag.CreditAccountCredit) {
             this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
-                && filterOnlyAssignableAccounts(account);
+                && filterOnlyEnvelopeAccounts(account);
         } else if (props.amountTypeFlag === TransactionFlag.CreditAccountDebit) {
             this.accountFilter = (account: Account) => account._id !== this.props.transaction.accountId
                 && account.type === AccountType.UserEnvelope;   

@@ -9,6 +9,7 @@ export const filterOnlyBankAccounts = filterOnlyAccountTypeIn(getBankAccountType
 export const filterOnlyDepositAccounts = filterOnlyAccountTypeIn(getDepositAccountTypes());
 export const filterOnlyImportableAccounts = filterOnlyBankAccounts;
 export const filterOnlyAssignableAccounts = filterOnlyAccountTypeIn(getAssignableAccountTypes());
+export const filterOnlyEnvelopeAccounts = filterOnlyAccountTypeIn(getAssignableAccountTypes().concat(AccountType.Unallocated));
 
 export const filterOnlyImportedTransactions = (transaction: TransactionData) => !!transaction.importData;
 
