@@ -16,7 +16,7 @@ export enum AppPage {
     Dashboard,
     Accounts,
     Envelopes,
-    Transactions
+    Transactions,
 }
 
 export interface AppProps {
