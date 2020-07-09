@@ -83,6 +83,16 @@ export const createImportWizard = (rows: Row[]) => {
         throw new Error('Rows cannot be empty.');
     }
 
+    // look for some columns we can "suggest"
+    const columnNames = Object.keys(rows[0]);
+    
+    // dateColumn: string,
+    const dateColumn = columnNames.find(name => name.toLowerCase().includes('date'));
+    // amountColumn: string,
+    const amountColumn = columnNames.find(name => name.toLowerCase().includes('amount'));
+    // descriptionColumns: string[],
+    const descriptionColumns = columnNames.filter(name => name.toLowerCase().includes('description'));
+
     interface Props {
         // mapped from store
         accounts?: Record<string, Account>;
@@ -105,6 +115,9 @@ export const createImportWizard = (rows: Row[]) => {
                 {
                     rows,
                     invertTransactions: false,
+                    dateColumn,
+                    amountColumn,
+                    descriptionColumns,
                 },
                 [
                     AccountSelect,
