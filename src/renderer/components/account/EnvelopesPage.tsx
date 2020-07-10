@@ -39,24 +39,22 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
         const unallocatedAccount = (this.props.unallocatedAccount!);
 
         return <>
-            <Layout>
+            <Layout split={2}>
                 <Card heading="Available">
-                    <Layout split={2} noMargin>
-                        <p className={unallocatedAccount.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
-                            <Text variant={'xxLarge'}>{unallocatedAccount.balance.toFormattedString()}</Text>
+                    <p className={unallocatedAccount.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
+                        <Text variant={'xxLarge'}>{unallocatedAccount.balance.toFormattedString()}</Text>
 
-                            {/* <IconButton iconProps={({ iconName: 'NewMail' })} title="Move Money to Envelope" onClick={() => this.showRemoveMoneyModal(unallocatedAccount)} /> */}
-                        </p>
+                        {/* <IconButton iconProps={({ iconName: 'NewMail' })} title="Move Money to Envelope" onClick={() => this.showRemoveMoneyModal(unallocatedAccount)} /> */}
+                    </p>
 
-                        <MoveMoney fromId={unallocatedAccount._id} showFrom={false}/>
-                    </Layout>
+                    <MoveMoney fromId={unallocatedAccount._id} showFrom={false}/>
+                </Card>
+                <Card heading="Create an Envelope">
+                    <EnvelopeCreate/>
                 </Card>
             </Layout>
             
             <Layout split={3}>
-                <Card heading="Create an Envelope">
-                    <EnvelopeCreate/>
-                </Card>
                 {this.props.creditCardEnvelopes!.map(e => this.renderEnvelope(e))}
                 {this.props.userEnvelopes!.map(e => this.renderEnvelope(e))}
             </Layout>
