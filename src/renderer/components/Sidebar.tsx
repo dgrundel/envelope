@@ -9,11 +9,15 @@ import { setPage } from '../store/actions/AppState';
 import { CombinedState } from '../store/store';
 import { ImportDropTarget } from './import/ImportDropTarget';
 import { AppPage } from '../store/reducers/AppState';
+import { Account } from '@/models/Account';
+import { filterOnlyAssignableAccounts } from '@/util/Filters';
+import { Currency } from '@/util/Currency';
 
 export interface SidebarProps {
     // mapped from state
     activePage?: AppPage,
     unreconciledTransactionCount?: number;
+    negativeEnvelopeCount?: number;
 
     // store actions
     setPage?: (page: AppPage) => void;
@@ -26,10 +30,13 @@ class Component extends React.Component<SidebarProps, {}> {
             <ul className="sidebar-nav">
                 {this.renderNavLink(AppPage.Dashboard, 'Dashboard')}
                 {this.renderNavLink(AppPage.Accounts, 'Accounts')}
-                {this.renderNavLink(AppPage.Envelopes, 'Envelopes')}
+                {this.renderNavLink(AppPage.Envelopes, <>
+                    Envelopes
+                    {this.renderAlert(this.props.negativeEnvelopeCount!)}
+                </>)}
                 {this.renderNavLink(AppPage.Transactions, <>
                     Transactions
-                    {this.props.unreconciledTransactionCount! > 0 && <FontIcon iconName="AlertSolid" />}
+                    {this.renderAlert(this.props.unreconciledTransactionCount!)}
                 </>)}
             </ul>
             <ImportDropTarget/>
@@ -41,6 +48,14 @@ class Component extends React.Component<SidebarProps, {}> {
 
         return <li className={this.props.activePage === page ? 'sidebar-nav-link-active' : ''} onClick={onClick}>{label}</li>;
     }
+
+    renderAlert(count: number) {
+        if (count === 0) {
+            return null;
+        }
+
+        return <FontIcon iconName="AlertSolid" />;
+    }
 }
 
 const getUnreconciledCount = memoizeOne((transactions: Record<string, Transaction>): number => {
@@ -49,11 +64,19 @@ const getUnreconciledCount = memoizeOne((transactions: Record<string, Transactio
         .length;
 });
 
+const getNegativeEnvelopeCount = memoizeOne((accounts: Record<string, Account>): number => {
+    return Object.values(accounts)
+        .filter(filterOnlyAssignableAccounts)
+        .filter(account => account.balance.lt(Currency.ZERO))
+        .length;
+});
+
 const mapStateToProps = (state: CombinedState, ownProps: SidebarProps): SidebarProps => {
     return {
         ...ownProps,
         activePage: state.appState.page,
         unreconciledTransactionCount: getUnreconciledCount(state.transactions.transactions),
+        negativeEnvelopeCount: getNegativeEnvelopeCount(state.accounts.accounts),
     };
 };
 

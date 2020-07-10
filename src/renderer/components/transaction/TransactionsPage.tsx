@@ -80,7 +80,7 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
                     description: t.description,
                     amount: t.amount.toFormattedString(),
                     reconciled: <span onClick={onClick}>
-                        <FontIcon iconName={isReconciled ? 'CheckMark' : 'Error'} />
+                        <FontIcon iconName={isReconciled ? 'CheckMark' : 'AlertSolid'} className={isReconciled ? 'color-success' : 'color-warn'} />
                     </span>
                 }
             });

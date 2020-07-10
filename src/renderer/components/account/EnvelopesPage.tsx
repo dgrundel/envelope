@@ -11,6 +11,7 @@ import { BaseModal } from '../uiElements/Modal';
 import { EnvelopeCreate } from './EnvelopeCreate';
 import { setModal, dismissModal } from '@/renderer/store/actions/AppState';
 import { Modal } from '@/renderer/store/reducers/AppState';
+import { Currency } from '@/util/Currency';
 
 export interface EnvelopesPageProps {
     // mapped from state
@@ -57,7 +58,9 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
 
     renderEnvelope(envelope: Account) {
         return <Box key={envelope._id} heading={envelope.name}>
-            <p><Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text></p>
+            <p className={envelope.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
+                <Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text>
+            </p>
             <p>
                 <IconButton iconProps={({ iconName: 'CalculatorAddition' })} title="Add" onClick={() => this.showAddMoneyModal(envelope)} />
                 <IconButton iconProps={({ iconName: 'CalculatorSubtract' })} title="Remove" onClick={() => this.showRemoveMoneyModal(envelope)} />
