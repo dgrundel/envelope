@@ -73,10 +73,6 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
     const description = `Transfer from "${fromAccount.name}" to "${toAccount.name}"`;
     
     const inverseAmount = amount.getInverse();
-    const fromFlags = unionFlags(
-        TransactionFlag.Transfer, 
-        getAmountTransactionFlag(fromAccount, inverseAmount)
-    );
 
     const fromTransaction: Transaction = {
         _id: getIdentifier(),
@@ -85,16 +81,15 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
         description,
         amount: inverseAmount,
         linkedTransactionIds: [],
-        flags: fromFlags,
+        flags: unionFlags(
+            TransactionFlag.Transfer,
+            TransactionFlag.Reconciled,
+            getAmountTransactionFlag(fromAccount, inverseAmount),
+        ),
     };
 
     Log.debug('addTransaction (fromTransaction)', fromTransaction);
     dispatch(addTransaction(fromTransaction));
-
-    const toFlags = unionFlags(
-        TransactionFlag.Transfer, 
-        getAmountTransactionFlag(toAccount, amount)
-    );
 
     const toTransaction: Transaction = {
         _id: getIdentifier(),
@@ -103,7 +98,11 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
         description,
         amount,
         linkedTransactionIds: [fromTransaction._id],
-        flags: toFlags,
+        flags: unionFlags(
+            TransactionFlag.Transfer,
+            TransactionFlag.Reconciled,
+            getAmountTransactionFlag(toAccount, amount),
+        ),
     };
 
     dispatch(addTransaction(toTransaction, fromTransaction));

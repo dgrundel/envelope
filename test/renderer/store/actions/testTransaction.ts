@@ -79,6 +79,7 @@ describe('Transaction actions', function () {
         // transaction applied to source account
         assert.equal(storeActions[0].type, TransactionAction.Add);
         assert.equal(storeActions[0].transaction.accountId, fromAccount._id);
+        assert.ok(hasFlag(TransactionFlag.Reconciled, storeActions[0].transaction.flags), 'Must have reconciled flag');
         assert.deepEqual(storeActions[0].transaction.amount, transferAmount.getInverse());
 
         // balance update applied to source account
@@ -89,6 +90,7 @@ describe('Transaction actions', function () {
         // transaction applied to destination account
         assert.equal(storeActions[2].type, TransactionAction.Add);
         assert.equal(storeActions[2].transaction.accountId, toAccount._id);
+        assert.ok(hasFlag(TransactionFlag.Reconciled, storeActions[2].transaction.flags), 'Must have reconciled flag');
         assert.deepEqual(storeActions[2].transaction.amount, transferAmount);
 
         // balance update applied to destination account
