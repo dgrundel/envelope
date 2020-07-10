@@ -1,17 +1,17 @@
+import { dismissModal, setModal } from '@/renderer/store/actions/AppState';
+import { Modal } from '@/renderer/store/reducers/AppState';
 import { CombinedState } from '@/renderer/store/store';
+import { Currency } from '@/util/Currency';
 import { filterOnlyAccountType } from '@/util/Filters';
 import { IconButton, Text } from '@fluentui/react';
 import { Account, AccountType } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { MoveMoney } from '../transaction/MoveMoney';
-import { Box } from '../uiElements/Box';
+import { Card } from '../uiElements/Card';
 import { Layout } from '../uiElements/Layout';
 import { BaseModal } from '../uiElements/Modal';
 import { EnvelopeCreate } from './EnvelopeCreate';
-import { setModal, dismissModal } from '@/renderer/store/actions/AppState';
-import { Modal } from '@/renderer/store/reducers/AppState';
-import { Currency } from '@/util/Currency';
 
 export interface EnvelopesPageProps {
     // mapped from state
@@ -39,29 +39,30 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
         const unallocatedAccount = (this.props.unallocatedAccount!);
 
         return <>
-            <Box heading="Available">
-                <Layout cols={2}>
-                    <p className={unallocatedAccount.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
-                        <Text variant={'xxLarge'}>{unallocatedAccount.balance.toFormattedString()}</Text>
-                    </p>
+            <Layout>
+                <Card heading="Available">
+                    <Layout split={2} noMargin>
+                        <p className={unallocatedAccount.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
+                            <Text variant={'xxLarge'}>{unallocatedAccount.balance.toFormattedString()}</Text>
+                        </p>
 
-                    <MoveMoney fromId={unallocatedAccount._id} showFrom={false}/>
-                </Layout>
-            </Box>
+                        <MoveMoney fromId={unallocatedAccount._id} showFrom={false}/>
+                    </Layout>
+                </Card>
+            </Layout>
             
-            <Layout cols={3}>
-                <Box heading="Create an Envelope">
+            <Layout split={3}>
+                <Card heading="Create an Envelope">
                     <EnvelopeCreate/>
-                </Box>
+                </Card>
                 {this.props.creditCardEnvelopes!.map(e => this.renderEnvelope(e))}
                 {this.props.userEnvelopes!.map(e => this.renderEnvelope(e))}
             </Layout>
-            
         </>;
     }
 
     renderEnvelope(envelope: Account) {
-        return <Box key={envelope._id} heading={envelope.name}>
+        return <Card key={envelope._id} heading={envelope.name}>
             <p className={envelope.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
                 <Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text>
             </p>
@@ -69,7 +70,7 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
                 <IconButton iconProps={({ iconName: 'CalculatorAddition' })} title="Add" onClick={() => this.showAddMoneyModal(envelope)} />
                 <IconButton iconProps={({ iconName: 'CalculatorSubtract' })} title="Remove" onClick={() => this.showRemoveMoneyModal(envelope)} />
             </p>
-        </Box>;
+        </Card>;
     }
 
     showRemoveMoneyModal(envelope: Account) {

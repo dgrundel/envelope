@@ -1,21 +1,33 @@
+import { mergeStyles } from '@fluentui/react';
 import * as React from "react";
-
-import '@public/components/Layout.scss';
+import { Spacing } from './styleConstants';
 
 export interface LayoutProps {
-    cols?: number;
+    split?: number;
+    gridTemplateColumns?: string;
+    noMargin?: boolean;
+    noGap?: boolean;
     children: any;
 }
 
-export class Layout extends React.Component<LayoutProps, {}> {
-    render() {
-        const cols = this.props.cols || 1;
-        const style: React.CSSProperties = {
-            gridTemplateColumns: new Array(cols + 1).join(' 1fr')
-        };
-
-        return <div className="layout-component" style={style}>
-            {this.props.children}
-        </div>;
+const getGridTemplateColumns = (props: LayoutProps) => {
+    let gridTemplateColumns = props.gridTemplateColumns;
+    if (!gridTemplateColumns) {
+        const cols = props.split || 1;
+        gridTemplateColumns = new Array(cols + 1).join(' 1fr');
     }
+    return gridTemplateColumns;
 }
+
+export const Layout = (props: LayoutProps) => {
+    const style: React.CSSProperties = {
+        display: 'grid',
+        gridTemplateColumns: getGridTemplateColumns(props),
+        gridGap: props.noGap ? 0 : Spacing.FatMargin,
+        margin: props.noMargin ? 0 : Spacing.FatMargin,
+    };
+
+    return <div style={style}>
+        {props.children}
+    </div>;
+};

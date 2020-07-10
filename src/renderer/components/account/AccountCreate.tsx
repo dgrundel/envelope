@@ -7,6 +7,7 @@ import memoizeOne from 'memoize-one';
 import * as React from "react";
 import { connect } from "react-redux";
 import { createBankAccount } from "../../store/actions/Account";
+import { Layout } from '../uiElements/Layout';
 
 export interface AccountCreateProps {
     // mapped from state
@@ -52,30 +53,35 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
     render() {
         return <form onSubmit={e => this.onSubmit(e)}>
             {this.state.messages}
-            <TextField
-                label="Name"
-                value={this.state.name}
-                onGetErrorMessage={this.getNameErrorGenerator(this.props.existingAccountNames)}
-                onChange={(e, name?) => this.setState({ name })}
-                validateOnLoad={false}
-            />
-            <ChoiceGroup 
-                name="type"
-                label="Account Type" 
-                selectedKey={this.state.accountType} 
-                options={ALLOWED_ACCOUNT_TYPES.map(key => ({
-                    key,
-                    text: getAccountTypeLabel(key)
-                }))}
-                onChange={(e, option) => this.setState({ accountType: option?.key as AccountType })}
-            />
-            <TextField
-                label="Current Balance"
-                value={this.state.balance}
-                onGetErrorMessage={getRequiredCurrencyError}
-                onChange={(e, balance?) => this.setState({ balance })}
-                validateOnLoad={false}
-            />
+            <Layout split={2} noMargin>
+                <ChoiceGroup 
+                    name="type"
+                    label="Account Type" 
+                    selectedKey={this.state.accountType} 
+                    options={ALLOWED_ACCOUNT_TYPES.map(key => ({
+                        key,
+                        text: getAccountTypeLabel(key)
+                    }))}
+                    onChange={(e, option) => this.setState({ accountType: option?.key as AccountType })}
+                />
+                <div>
+                    <TextField
+                        label="Name"
+                        value={this.state.name}
+                        onGetErrorMessage={this.getNameErrorGenerator(this.props.existingAccountNames)}
+                        onChange={(e, name?) => this.setState({ name })}
+                        validateOnLoad={false}
+                    />
+                    
+                    <TextField
+                        label="Current Balance"
+                        value={this.state.balance}
+                        onGetErrorMessage={getRequiredCurrencyError}
+                        onChange={(e, balance?) => this.setState({ balance })}
+                        validateOnLoad={false}
+                    />
+                </div>
+            </Layout>
             <p style={({ textAlign: 'right' })}>
                 <PrimaryButton type="submit" text="Save" />
             </p>

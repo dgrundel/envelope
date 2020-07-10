@@ -65,7 +65,7 @@ export const uniqueStringErrorGenerator: ErrorGeneratorFactory = (existingValues
     };
 };
 
-export const requiredAccountTypeErrorGenerator: ErrorGeneratorFactory = (allowedTypes: AccountType[], errorMessage: string) => (value?: string) => {
+export const requiredAccountTypeErrorGenerator: ErrorGeneratorFactory = (allowedTypes: AccountType[], errorMessage?: string) => (value?: string) => {
     const valid = value && allowedTypes.includes(value as AccountType);
-    return valid ? '' : errorMessage;
+    return valid ? '' : (errorMessage || 'Please select an account type.');
 };

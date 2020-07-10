@@ -1,15 +1,17 @@
+import { dismissModal, setModal } from '@/renderer/store/actions/AppState';
+import { Modal } from '@/renderer/store/reducers/AppState';
 import { CombinedState } from '@/renderer/store/store';
 import { filterOnlyBankAccounts } from '@/util/Filters';
-import { IconButton, mergeStyles } from '@fluentui/react';
-import { Account, AccountType, getAccountTypeLabel } from '@models/Account';
+import { IconButton, mergeStyles, Text, FontIcon } from '@fluentui/react';
+import { Account, AccountType, getAccountTypeLabel, getAccountTypeIcon } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { AdjustBalance } from '../transaction/AdjustBalance';
-import { Box } from "../uiElements/Box";
+import { Card } from '../uiElements/Card';
 import { BaseModal } from '../uiElements/Modal';
 import { AccountCreate } from './AccountCreate';
-import { setModal, dismissModal } from '@/renderer/store/actions/AppState';
-import { Modal } from '@/renderer/store/reducers/AppState';
+import { Layout } from '../uiElements/Layout';
+import { Currency } from '@/util/Currency';
 
 export interface AccountsPageProps {
     // mapped from state
@@ -25,11 +27,6 @@ export interface AccountsPageState {
     newAccountType?: AccountType;
 }
 
-const actionCellStyle = mergeStyles({
-    textAlign: 'right',
-    padding: '0',
-});
-
 class Component extends React.Component<AccountsPageProps, AccountsPageState> {
 
     constructor(props: AccountsPageProps) {
@@ -40,41 +37,36 @@ class Component extends React.Component<AccountsPageProps, AccountsPageState> {
 
     render() {
         return <>
-            <Box heading="Accounts">
-                {this.renderList()}
-            </Box>
-            <Box heading="Add an Account">
-                <AccountCreate/>
-            </Box>
+            <Layout>
+                <Card heading="Add an Account">
+                    <AccountCreate/>
+                </Card>
+            </Layout>
+
+            <Layout split={2}>
+                {this.props.accounts!.map(account => this.renderAccountCard(account))}
+            </Layout>
         </>;
     }
 
-    renderList() {
-        const accounts = this.props.accounts || [];
-        if (accounts.length > 0) {
-            return <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Balance</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {accounts.map(account => <tr key={account._id}>
-                        <td>{account.name}</td>
-                        <td>{getAccountTypeLabel(account.type)}</td>
-                        <td>{account.balance.toFormattedString()}</td>
-                        <td className={actionCellStyle}>
-                            <IconButton iconProps={({ iconName: 'Edit' })} title="Adjust Balance" onClick={() => this.showAdjustBalanceModal(account)} />
-                        </td>
-                    </tr>)}
-                </tbody>
-            </table>;
-        }
+    renderAccountCard(account: Account) {
+        const typeLabel = getAccountTypeLabel(account.type);
+        const heading = <>
+            <FontIcon iconName={getAccountTypeIcon(account.type)} title={typeLabel} style={{ float: 'right' }} />
+            {account.name}
+        </>;
 
-        return 'No accounts yet!';
+        return <Card key={account._id} heading={heading}>
+            <p>
+                <Text variant={'xxLarge'}>{account.balance.toFormattedString()}</Text>
+            </p>
+            <div style={{ float: 'right' }}>
+                <IconButton iconProps={({ iconName: 'Edit' })} title="Adjust Balance" onClick={() => this.showAdjustBalanceModal(account)} />
+            </div>
+            <p>
+                <Text variant={'smallPlus'}>{typeLabel}</Text>
+            </p>
+        </Card>
     }
 
     showAdjustBalanceModal(account: Account) {

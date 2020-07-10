@@ -1,4 +1,6 @@
 import { Transaction, TransactionFlag } from '@/models/Transaction';
+import { setModal } from '@/renderer/store/actions/AppState';
+import { Modal } from '@/renderer/store/reducers/AppState';
 import { CombinedState } from '@/renderer/store/store';
 import { Currency } from '@/util/Currency';
 import { filterOnlyImportedTransactions } from '@/util/Filters';
@@ -7,10 +9,9 @@ import { DetailsList, DetailsListLayoutMode, FontIcon, IColumn, SelectionMode } 
 import { Account } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { Box } from "../uiElements/Box";
+import { Card } from '../uiElements/Card';
 import { TransactionModal } from './TransactionModal';
-import { setModal } from '@/renderer/store/actions/AppState';
-import { Modal } from '@/renderer/store/reducers/AppState';
+import { Layout } from '../uiElements/Layout';
 
 export interface TransactionsPageProps {
     // mapped from state
@@ -40,9 +41,11 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
     }
 
     render() {
-        return <Box heading="Transactions">
-            {this.renderList()}
-        </Box>;
+        return <Layout>
+            <Card heading="Transactions">
+                {this.renderList()}
+            </Card>
+        </Layout>;
     }
 
     renderList() {
@@ -52,7 +55,7 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
         const setModal = (this.props.setModal!);
 
         if (sortedTransactions.length === 0) {
-            return 'No transactions yet.';
+            return <p>No transactions yet.</p>;
         }
 
         const items = sortedTransactions
