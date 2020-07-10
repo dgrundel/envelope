@@ -3,7 +3,7 @@ import { Modal } from '@/renderer/store/reducers/AppState';
 import { CombinedState } from '@/renderer/store/store';
 import { Currency } from '@/util/Currency';
 import { filterOnlyAccountType } from '@/util/Filters';
-import { IconButton, Text } from '@fluentui/react';
+import { IconButton, Text, Separator } from '@fluentui/react';
 import { Account, AccountType } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
@@ -44,6 +44,8 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
                     <Layout split={2} noMargin>
                         <p className={unallocatedAccount.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
                             <Text variant={'xxLarge'}>{unallocatedAccount.balance.toFormattedString()}</Text>
+
+                            {/* <IconButton iconProps={({ iconName: 'NewMail' })} title="Move Money to Envelope" onClick={() => this.showRemoveMoneyModal(unallocatedAccount)} /> */}
                         </p>
 
                         <MoveMoney fromId={unallocatedAccount._id} showFrom={false}/>
@@ -67,8 +69,8 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
                 <Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text>
             </p>
             <p>
-                <IconButton iconProps={({ iconName: 'CalculatorAddition' })} title="Add" onClick={() => this.showAddMoneyModal(envelope)} />
-                <IconButton iconProps={({ iconName: 'CalculatorSubtract' })} title="Remove" onClick={() => this.showRemoveMoneyModal(envelope)} />
+                <IconButton iconProps={({ iconName: 'CalculatorAddition' })} title="Add Money" onClick={() => this.showAddMoneyModal(envelope)} />
+                <IconButton iconProps={({ iconName: 'CalculatorSubtract' })} title="Remove Money" onClick={() => this.showRemoveMoneyModal(envelope)} />
             </p>
         </Card>;
     }

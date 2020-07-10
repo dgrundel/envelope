@@ -64,6 +64,7 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 onChange={(e, option?) => this.setState({ fromId: option?.key as string })}
                 placeholder="Take money from..."
                 filter={accountDropdownFilter}
+                showBalance
             />}
             {this.props.showTo !== false && <AccountDropdown
                 label="Move To"
@@ -71,6 +72,7 @@ class Component extends React.Component<MoveMoneyProps, State> {
                 onChange={(e, option?) => this.setState({ toId: option?.key as string })}
                 placeholder="Move money to..."
                 filter={accountDropdownFilter}
+                showBalance
             />}
             <TextField
                 label="Amount"

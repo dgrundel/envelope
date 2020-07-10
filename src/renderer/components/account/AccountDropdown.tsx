@@ -1,9 +1,10 @@
 import { Account, AccountType, getAccountTypeIcon, getAccountTypeLabel } from '@/models/Account';
-import { Dropdown, DropdownMenuItemType, Icon, IDropdownOption, mergeStyles } from '@fluentui/react';
+import { Dropdown, DropdownMenuItemType, Icon, IDropdownOption, mergeStyles, Text } from '@fluentui/react';
 import memoizeOne from 'memoize-one';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { CombinedState } from '../../store/store';
+import { Currency } from '@/util/Currency';
 
 type GroupedAccounts = Record<AccountType, Account[]>;
 
@@ -14,6 +15,7 @@ export interface AccountDropdownProps {
     placeholder?: string;
     selectedKey?: string | number | string[] | number[];
     filter?: (account: Account) => boolean;
+    showBalance?: boolean;
 
     // mapped from store
     groupedAccounts?: GroupedAccounts;
@@ -30,9 +32,11 @@ const containerStyle = mergeStyles({
 
 const onRenderOption = (option: IDropdownOption): JSX.Element => {
     const icon = option.data && option.data.icon;
+    const balance = option.data && option.data.balance;
     return <div>
         {icon && <Icon iconName={icon} className={iconStyle} aria-hidden="true" title={icon} />}
         <span>{option.text}</span>
+        {balance && <Text variant={'small'}> {balance.toFormattedString()}</Text>}
     </div>;
 };
 
@@ -45,7 +49,7 @@ class Component extends React.Component<AccountDropdownProps, {}> {
     }
 
     render() {
-        const dropdownChoices = this.computeDropdownOptions(this.props.groupedAccounts!);
+        const dropdownChoices = this.computeDropdownOptions(this.props.groupedAccounts!, this.props.showBalance);
 
         let content;
         if (dropdownChoices.length === 0) {
@@ -66,13 +70,20 @@ class Component extends React.Component<AccountDropdownProps, {}> {
         </div>;
     }
 
-    computeDropdownOptions(groupedAccounts: GroupedAccounts): IDropdownOption[] {
+    computeDropdownOptions(groupedAccounts: GroupedAccounts, showBalance?: boolean): IDropdownOption[] {
         let dropdownOptions: IDropdownOption[] = [];
 
         const unallocatedAccount = groupedAccounts[AccountType.Unallocated] && groupedAccounts[AccountType.Unallocated][0];
         if (unallocatedAccount) {
             dropdownOptions = dropdownOptions.concat([
-                { key: unallocatedAccount._id, text: unallocatedAccount.name.trim(), data: { icon: 'Money' } },
+                { 
+                    key: unallocatedAccount._id, 
+                    text: unallocatedAccount.name.trim(), 
+                    data: { 
+                        icon: 'Money',
+                        balance: showBalance ? unallocatedAccount.balance : undefined,
+                    },
+                },
                 { key: 'divider_1', text: '-', itemType: DropdownMenuItemType.Divider },
             ]);
         }
@@ -96,7 +107,10 @@ class Component extends React.Component<AccountDropdownProps, {}> {
                     accounts.map(account => ({ 
                         key: account._id, 
                         text: account.name, 
-                        data: { icon: getAccountTypeIcon(account.type) } 
+                        data: { 
+                            icon: getAccountTypeIcon(account.type),
+                            balance: showBalance ? account.balance : undefined,
+                        }
                     }))
                 )
             }
