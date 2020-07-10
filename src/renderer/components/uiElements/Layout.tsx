@@ -1,6 +1,6 @@
 import { mergeStyles } from '@fluentui/react';
 import * as React from "react";
-import { Spacing } from './styleConstants';
+import { Spacing } from './styleValues';
 
 export interface LayoutProps {
     split?: number;

@@ -7,40 +7,45 @@ import { Card } from './uiElements/Card';
 import { Layout } from './uiElements/Layout';
 import { Account } from '@models/Account';
 import { Log } from '@/util/Logger';
-import { Colors } from './uiElements/styleConstants';
+import { Colors } from './uiElements/styleValues';
 import { Currency } from '@/util/Currency';
+import distinctColors from 'distinct-colors'
 
 export interface DashboardPageProps {
     envelopes?: Account[];
     bankAccounts?: Account[];
 }
 
+// https://medialab.github.io/iwanthue/
+const baseColorSettings = {
+    hueMin: 0,
+    hueMax: 300,
+    chromaMin: 35,
+    chromaMax: 100,
+    lightMin: 75,
+    lightMax: 100,
+};
+
 const graphColors = '#E2C36E,#C8C16C,#AFBD6E,#98B974,#83B37B,#71AC82,#64A489,#5C9B8E,#5B9191,#5E8790,#647D8C,#6B7285,#70677C,#745D70,#755363,#734B55,#6E4347,#663D3A,#5D382F'.split(',');
 const tooltipFormatter: TooltipFormatter = (_value, _name, entry: TooltipPayload) => entry.payload.tooltip;
 
 const Component = (props: DashboardPageProps) => {
-    const data = [
-        {name: 'Page A', uv: 4000, pv: 2400, amt: 2400},
-        {name: 'Page B', uv: 3000, pv: 1398, amt: 2210},
-        {name: 'Page C', uv: 2000, pv: 9800, amt: 2290},
-        {name: 'Page D', uv: 2780, pv: 3908, amt: 2000},
-        {name: 'Page E', uv: 1890, pv: 4800, amt: 2181},
-        {name: 'Page F', uv: 2390, pv: 3800, amt: 2500},
-        {name: 'Page G', uv: 3490, pv: 4300, amt: 2100},
-    ];
-
     const envelopeData = props.envelopes!.map(e => ({
         name: e.name,
         value: e.balance.toPrecisionInt(),
         tooltip: e.balance.toFormattedString(),
     }));
 
+    const envelopeColors = distinctColors({
+        ...baseColorSettings,
+        count: envelopeData.length,
+    }).map(color => color.hex());
+
     const bankAccountData = props.bankAccounts!.map(e => ({
         name: e.name,
         value: e.balance.toPrecisionInt(),
         tooltip: e.balance.toFormattedString(),
     }));
-
     
     return <>
         <Layout>
@@ -61,7 +66,7 @@ const Component = (props: DashboardPageProps) => {
                 <ResponsiveContainer height={350}>
                     <PieChart>
                         <Pie dataKey="value" data={envelopeData} label={props => props.name}>
-                            {envelopeData.map((_entry, index) => <Cell key={index} fill={graphColors[index % graphColors.length]}/>)}
+                            {envelopeData.map((_entry, index) => <Cell key={index} fill={envelopeColors[index % envelopeColors.length]}/>)}
                         </Pie>
                         <Tooltip formatter={tooltipFormatter} />
                     </PieChart>
@@ -77,7 +82,9 @@ const Component = (props: DashboardPageProps) => {
                         <Tooltip formatter={tooltipFormatter} />
                         <Legend />
                         <ReferenceLine y={0} stroke='#000'/>
-                        <Bar dataKey="value" fill="#82ca9d" />
+                        <Bar dataKey="value" fill="#82ca9d">
+                            {bankAccountData.map((_entry, index) => <Cell key={index} fill={_entry.value < 0 ? Colors.Error : Colors.Success}/>)}
+                        </Bar>
                     </BarChart>
                 </ResponsiveContainer>
             </Card>

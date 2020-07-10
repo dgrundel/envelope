@@ -1,8 +1,13 @@
 import { IStyle } from '@fluentui/react';
 
 export enum Colors {
-    White = '#ffffff',
+    // named colors
     LightGray = '#e5e5e5',
+    White = '#ffffff',
+
+    // semantic colors
+    Error = '#d54343',
+    Success = '#3ac47d',
 };
 
 export enum Spacing {

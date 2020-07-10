@@ -1,6 +1,6 @@
 import { mergeStyles } from '@fluentui/react';
 import * as React from "react";
-import { Colors, Mixins, Spacing } from './styleConstants';
+import { Colors, Mixins, Spacing } from './styleValues';
 
 export interface CardProps {
     heading?: any;
