@@ -10,7 +10,7 @@ import { CombinedState } from '../store/store';
 import { ImportDropTarget } from './import/ImportDropTarget';
 import { AppPage } from '../store/reducers/AppState';
 import { Account } from '@/models/Account';
-import { filterOnlyAssignableAccounts } from '@/util/Filters';
+import { filterOnlyAssignableAccounts, filterOnlyEnvelopeAccounts } from '@/util/Filters';
 import { Currency } from '@/util/Currency';
 
 export interface SidebarProps {
@@ -66,7 +66,7 @@ const getUnreconciledCount = memoizeOne((transactions: Record<string, Transactio
 
 const getNegativeEnvelopeCount = memoizeOne((accounts: Record<string, Account>): number => {
     return Object.values(accounts)
-        .filter(filterOnlyAssignableAccounts)
+        .filter(filterOnlyEnvelopeAccounts)
         .filter(account => account.balance.lt(Currency.ZERO))
         .length;
 });

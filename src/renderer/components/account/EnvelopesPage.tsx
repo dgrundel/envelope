@@ -36,12 +36,16 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
     }
     
     render() {
+        const unallocatedAccount = (this.props.unallocatedAccount!);
+
         return <>
             <Box heading="Available">
                 <Layout cols={2}>
-                    <p><Text variant={'xxLarge'}>{this.props.unallocatedAccount?.balance.toFormattedString()}</Text></p>
+                    <p className={unallocatedAccount.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
+                        <Text variant={'xxLarge'}>{unallocatedAccount.balance.toFormattedString()}</Text>
+                    </p>
 
-                    <MoveMoney fromId={this.props.unallocatedAccount?._id} showFrom={false}/>
+                    <MoveMoney fromId={unallocatedAccount._id} showFrom={false}/>
                 </Layout>
             </Box>
             
