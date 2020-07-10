@@ -1,18 +1,21 @@
-import { filterOnlyEnvelopeAccounts } from '@/util/Filters';
+import { filterOnlyEnvelopeAccounts, filterOnlyBankAccounts } from '@/util/Filters';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { CartesianGrid, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, TooltipFormatter, TooltipPayload, Cell } from 'recharts';
+import { CartesianGrid, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, TooltipFormatter, TooltipPayload, Cell, BarChart, YAxis, Legend, ReferenceLine, Bar } from 'recharts';
 import { CombinedState } from '../store/store';
 import { Card } from './uiElements/Card';
 import { Layout } from './uiElements/Layout';
 import { Account } from '@models/Account';
 import { Log } from '@/util/Logger';
 import { Colors } from './uiElements/styleConstants';
+import { Currency } from '@/util/Currency';
 
 export interface DashboardPageProps {
     envelopes?: Account[];
+    bankAccounts?: Account[];
 }
 
+const graphColors = '#E2C36E,#C8C16C,#AFBD6E,#98B974,#83B37B,#71AC82,#64A489,#5C9B8E,#5B9191,#5E8790,#647D8C,#6B7285,#70677C,#745D70,#755363,#734B55,#6E4347,#663D3A,#5D382F'.split(',');
 const tooltipFormatter: TooltipFormatter = (_value, _name, entry: TooltipPayload) => entry.payload.tooltip;
 
 const Component = (props: DashboardPageProps) => {
@@ -32,8 +35,13 @@ const Component = (props: DashboardPageProps) => {
         tooltip: e.balance.toFormattedString(),
     }));
 
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+    const bankAccountData = props.bankAccounts!.map(e => ({
+        name: e.name,
+        value: e.balance.toPrecisionInt(),
+        tooltip: e.balance.toFormattedString(),
+    }));
 
+    
     return <>
         <Layout>
             <Card heading="Getting Started">
@@ -53,22 +61,24 @@ const Component = (props: DashboardPageProps) => {
                 <ResponsiveContainer height={350}>
                     <PieChart>
                         <Pie dataKey="value" data={envelopeData} label={props => props.name}>
-                            {envelopeData.map((_entry, index) => <Cell key={index} fill={COLORS[index % COLORS.length]}/>)}
+                            {envelopeData.map((_entry, index) => <Cell key={index} fill={graphColors[index % graphColors.length]}/>)}
                         </Pie>
                         <Tooltip formatter={tooltipFormatter} />
                     </PieChart>
                 </ResponsiveContainer>
             </Card>
             
-            <Card heading="Sample Chart">
+            <Card heading="Account Balances">
                 <ResponsiveContainer height={350}>
-                    <LineChart data={data}>
-                        <XAxis dataKey="name" />
-                        <Tooltip />
-                        <CartesianGrid stroke="#f5f5f5" />
-                        <Line type="monotone" dataKey="uv" yAxisId={0} />
-                        <Line type="monotone" dataKey="pv" yAxisId={1} />
-                    </LineChart>
+                    <BarChart data={bankAccountData}>
+                        <CartesianGrid strokeDasharray="3 3"/>
+                        <XAxis dataKey="name"/>
+                        <YAxis tickFormatter={(n: number) => Currency.fromPrecisionInt(n).toFormattedString()} />
+                        <Tooltip formatter={tooltipFormatter} />
+                        <Legend />
+                        <ReferenceLine y={0} stroke='#000'/>
+                        <Bar dataKey="value" fill="#82ca9d" />
+                    </BarChart>
                 </ResponsiveContainer>
             </Card>
         </Layout>
@@ -76,9 +86,11 @@ const Component = (props: DashboardPageProps) => {
 }
 
 const mapStateToProps = (state: CombinedState, ownProps: DashboardPageProps): DashboardPageProps => {
+    const allAccounts = Object.values(state.accounts.accounts);
     return {
         ...ownProps,
-        envelopes: Object.values(state.accounts.accounts).filter(filterOnlyEnvelopeAccounts),
+        envelopes: allAccounts.filter(filterOnlyEnvelopeAccounts),
+        bankAccounts: allAccounts.filter(filterOnlyBankAccounts),
     };
 }
 
