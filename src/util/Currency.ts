@@ -103,14 +103,16 @@ export class Currency {
         return `${sign}${CURRENCY_SYMBOL}${formattedWhole}${DECIMAL_SEPARATOR}${formattedCents}`;
     }
 
-    toFixed(decimals: number = PRECISION_DIGITS) {
+    toFixed() {
+        // TODO implement the 'toFixed'-like behavior
+        
         const fracStr = Math.abs(this.fractionalAmount).toFixed(0);
-        const formattedFrac = leftPad(fracStr, decimals, '0');
+        const formattedFrac = leftPad(fracStr, PRECISION_DIGITS, '0');
         return `${this.wholeAmount}.${formattedFrac}`;
     }
 
     toInputString() {
-        return this.toFixed(2);
+        return this.toFixed();
     }
 
     toString() {
