@@ -5,7 +5,8 @@ import * as ElectronStore from 'electron-store';
 const BASE_STORE_CONFIG = {};
 
 export enum JsonStoreName {
-    EnvelopeUserData = 'envelope-user-data'
+    EnvelopeAppSettings = 'envelope-app-settings',
+    EnvelopeUserData = 'envelope-user-data',
 }
 
 enum JsonStoreEvent {
@@ -26,9 +27,9 @@ const getSerializableError = (err: Error) => Object.getOwnPropertyNames(err)
     }, {});
 
 abstract class BaseJsonStore {
-    protected readonly name: string;
+    protected readonly name: JsonStoreName;
 
-    constructor(name: string) {
+    constructor(name: JsonStoreName) {
         this.name = name;
     }
 
@@ -44,7 +45,7 @@ abstract class BaseJsonStore {
 export class JsonStoreHost extends BaseJsonStore {
     private readonly store: ElectronStore;
 
-    constructor(name: string) {
+    constructor(name: JsonStoreName) {
         super(name);
 
         Log.info(`Initializing JSON store '${name}'`);
