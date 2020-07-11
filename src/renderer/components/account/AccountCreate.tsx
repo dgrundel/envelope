@@ -46,10 +46,6 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
         );
     }
 
-    getBalanceErrorGenerator() {
-
-    }
-
     render() {
         return <form onSubmit={e => this.onSubmit(e)}>
             {this.state.messages}
