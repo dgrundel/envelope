@@ -80,4 +80,4 @@ const mapStateToProps = (state: CombinedState, ownProps: SidebarProps): SidebarP
     };
 };
 
-export const Sidebar = connect(mapStateToProps, { setPage, })(Component);
+export const AppSidebar = connect(mapStateToProps, { setPage, })(Component);

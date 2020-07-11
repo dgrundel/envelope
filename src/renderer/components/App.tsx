@@ -5,9 +5,10 @@ import { CombinedState } from '../store/store';
 import { AccountsPage } from "./account/AccountsPage";
 import { EnvelopesPage } from './account/EnvelopesPage';
 import { DashboardPage } from './DashboardPage';
-import { Sidebar } from './Sidebar';
+import { AppSidebar } from './AppSidebar';
 import { TransactionsPage } from './transaction/TransactionsPage';
 import { AppPage, Modal } from '../store/reducers/AppState';
+import { AppHeader } from './AppHeader';
 
 const envelopeIcon = require('@public/images/envelope-icon.svg');
 
@@ -21,11 +22,8 @@ class Component extends React.Component<AppProps> {
     
     render() {
         return <div id="app">
-            <div id="header">
-                <span className="envelope-icon" dangerouslySetInnerHTML={({__html: envelopeIcon})} />
-                <h1 className="header-text">Envelope</h1>
-            </div>
-            <Sidebar/>
+            <AppHeader/>
+            <AppSidebar/>
             <div id="main">
                 {this.renderPage()}
                 {this.props.activeModal}
