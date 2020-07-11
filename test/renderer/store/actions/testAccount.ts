@@ -96,8 +96,6 @@ describe('Account actions', function () {
         const storeActions = store.getActions();
         assert.equal(storeActions.length, 2);
 
-        console.log(JSON.stringify(storeActions, null, 4));
-        
         // create account action
         const action0 = storeActions[0];
         assert.equal(action0.type, AccountAction.Add);

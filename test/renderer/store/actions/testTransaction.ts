@@ -8,7 +8,7 @@ import { mockStore } from '../mockStore';
 import { unionFlags, hasFlag } from '@/util/Flags';
 
 describe('Transaction actions', function () {
-    it('addTransaction', () => {
+    it('should addTransaction', () => {
         const testAccount: Account = {
             _id: 'test-account-id',
             name: 'test',
@@ -47,7 +47,74 @@ describe('Transaction actions', function () {
         ]);
     });
 
-    it('transferFunds', () => {
+    it('should link new transaction directly to unallocated envelope if BankCredit', () => {
+        const testUnallocAccount: Account = {
+            _id: 'test-unalloc-account-id',
+            name: 'unalloc',
+            type: AccountType.Unallocated,
+            balance: Currency.ZERO,
+            linkedAccountIds: [],
+        };
+        const testBankAccount: Account = {
+            _id: 'test-bank-account-id',
+            name: 'test',
+            type: AccountType.Checking,
+            balance: Currency.ZERO,
+            linkedAccountIds: [],
+        }        
+        const store = mockStore([testUnallocAccount, testBankAccount], [], testUnallocAccount._id);
+
+        const transactionAmount = new Currency(17, 500);
+        const t: Transaction = {
+            _id: 'test-trans-id',
+            accountId: testBankAccount._id,
+            date: new Date(),
+            amount: transactionAmount,
+            description: 'test trans desc',
+            flags: TransactionFlag.BankCredit,
+            linkedTransactionIds: [],
+        };
+      
+        store.dispatch(addTransaction(t));
+
+        const storeActions = store.getActions();
+        assert.equal(storeActions.length, 5);
+
+        // adding the test transaction
+        const action0 = storeActions[0];
+        assert.equal(action0.type, TransactionAction.Add);
+        assert.equal(action0.transaction, t);
+
+        // update bank account balance
+        const action1 = storeActions[1];
+        assert.equal(action1.type, AccountAction.UpdateBalance);
+        assert.equal(action1.accountId, testBankAccount._id);
+        assert.deepEqual(action1.balance, transactionAmount);
+
+        // add a linked transaction to the unallocated envelope
+        const action2 = storeActions[2];
+        assert.equal(action2.type, TransactionAction.Add);
+        assert.equal(action2.linkTo, t);
+
+        const linkedTransaction = action2.transaction;
+        assert.equal(linkedTransaction.accountId, testUnallocAccount._id);
+        assert.deepEqual(linkedTransaction.amount, transactionAmount);
+        assert.ok(hasFlag(TransactionFlag.Reconciled, linkedTransaction.flags), 'Must have reconciled flag');
+
+        // update unallocated envelope balance
+        const action3 = storeActions[3];
+        assert.equal(action3.type, AccountAction.UpdateBalance);
+        assert.equal(action3.accountId, testUnallocAccount._id);
+        assert.deepEqual(action3.balance, transactionAmount);
+
+        // add reconciled flag to original transaction
+        const action4 = storeActions[4];
+        assert.equal(action4.type, TransactionAction.AddFlags);
+        assert.equal(action4.transaction, t);
+        assert.equal(action4.flags, TransactionFlag.Reconciled);
+    });
+
+    it('should transferFunds', () => {
         const fromAccount: Account = {
             _id: 'from-acct',
             name: 'from',

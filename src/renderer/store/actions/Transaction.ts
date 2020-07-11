@@ -1,5 +1,5 @@
 import { Currency } from '@/util/Currency';
-import { unionFlags } from '@/util/Flags';
+import { unionFlags, hasFlag } from '@/util/Flags';
 import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import { Account } from '@models/Account';
@@ -20,7 +20,7 @@ export interface AddTransactionAction {
     linkTo?: Transaction;
 }
 
-export const addTransaction = (transaction: Transaction, linkTo?: Transaction) => (dispatch: any) => {
+export const addTransaction = (transaction: Transaction, linkTo?: Transaction) => (dispatch: any, getState: () => CombinedState) => {
     const action: AddTransactionAction = {
         type: TransactionAction.Add,
         transaction,
@@ -29,6 +29,14 @@ export const addTransaction = (transaction: Transaction, linkTo?: Transaction) =
     
     dispatch(action);
     dispatch(applyTransactionToAccount(transaction));
+
+    // bank credits go directly into the unallocated envelope
+    if (hasFlag(TransactionFlag.BankCredit, transaction.flags)) {
+        const accounts = getState().accounts;
+        const unallocatedId = accounts.unallocatedId;
+        const unallocatedEnvelope = accounts.accounts[unallocatedId];
+        dispatch(addLinkedTransactionForBankDeposit(transaction, unallocatedEnvelope));
+    }
 };
 
 export interface AddManyTransactionAction {
@@ -71,7 +79,6 @@ export const linkExistingTransactions = (transactions: Transaction[]): LinkExist
 export const transferFunds = (amount: Currency, fromAccount: Account, toAccount: Account) => (dispatch: any) => {
     const date = new Date();
     const description = `Transfer from "${fromAccount.name}" to "${toAccount.name}"`;
-    
     const inverseAmount = amount.getInverse();
 
     const fromTransaction: Transaction = {
@@ -88,7 +95,6 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
         ),
     };
 
-    Log.debug('addTransaction (fromTransaction)', fromTransaction);
     dispatch(addTransaction(fromTransaction));
 
     const toTransaction: Transaction = {
