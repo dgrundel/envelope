@@ -9,6 +9,7 @@ import { CombinedState } from '../store/store';
 import { Card } from './uiElements/Card';
 import { Layout } from './uiElements/Layout';
 import { Colors } from './uiElements/styleValues';
+import * as ReactMarkdown from 'react-markdown';
 
 export interface DashboardPageProps {
     envelopes?: Account[];
@@ -85,17 +86,19 @@ const renderBankAccountBalanceChart = (bankAccounts: Account[]) => {
 };
 
 const Component = (props: DashboardPageProps) => {
+    const gettingStartedText = `
+Welcome to Envelope! Here are a few steps to get you going:
+
+- Click **Accounts** and add each of your bank and credit card accounts.
+- Click **Envelopes** and create a few envelopes for your budget.
+- Move some money from your **Available Funds Envelope** into your budget envelopes.
+- **Drag and Drop** a CSV file exported from your bank's website to import bank and credit card transactions.
+    `;
+    
     return <>
         <Layout>
             <Card heading="Getting Started">
-                <p>Welcome to Envelope! Here are a few steps to get you going:</p>
-
-                <ol>
-                    <li>Click <strong>Accounts</strong> and add each of your bank and credit card accounts.</li>
-                    <li>Click <strong>Envelopes</strong> and create a few envelopes for your budget.</li>
-                    <li>Move some money from your <strong>Available Funds Envelope</strong> into your budget envelopes.</li>
-                    <li><strong>Drag and Drop</strong> a CSV file exported from your bank's website to import bank and credit card transactions.</li>
-                </ol>
+                <ReactMarkdown source={gettingStartedText}/>
             </Card>
         </Layout>
 

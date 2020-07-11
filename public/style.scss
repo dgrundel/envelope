@@ -64,9 +64,17 @@ p, ul, ol {
   @include firstLastVerticalMargin();
 }
 
+ol, ul {
+  list-style-position: outside;
+  margin-left: 2em;
+}
+
 ol {
   list-style-type: decimal;
-  list-style-position: inside;
+}
+
+ul {
+  list-style-type: disc;
 }
 
 li {
