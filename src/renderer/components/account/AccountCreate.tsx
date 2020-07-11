@@ -24,6 +24,7 @@ export interface AccountCreateState {
     messages?: any;
 }
 
+const DEFAULT_BALANCE = Currency.ZERO.toInputString();
 const ALLOWED_ACCOUNT_TYPES = getBankAccountTypes();
 const accountTypeErrorGenerator = requiredAccountTypeErrorGenerator(ALLOWED_ACCOUNT_TYPES);
 
@@ -33,7 +34,7 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
         super(props);
 
         this.state = {
-            balance: Currency.ZERO.toInputString(),
+            balance: DEFAULT_BALANCE,
         };
 
         this.getNameErrorGenerator = memoizeOne(this.getNameErrorGenerator);
@@ -114,7 +115,7 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
         this.setState({
             name: '',
             accountType: undefined,
-            balance: '0.00',
+            balance: DEFAULT_BALANCE,
             messages: undefined,
         });
     }
