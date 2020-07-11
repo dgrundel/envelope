@@ -1,4 +1,4 @@
-import { Currency } from "@/util/Currency";
+import { Currency, CURRENCY_SYMBOL } from "@/util/Currency";
 import { chainErrorGenerators, getRequiredCurrencyError, requiredAccountTypeErrorGenerator, requiredStringErrorGenerator } from '@/util/ErrorGenerators';
 import { isNotBlank } from '@/util/Filters';
 import { ChoiceGroup, MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';
@@ -33,7 +33,7 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
         super(props);
 
         this.state = {
-            balance: '0.00',
+            balance: Currency.ZERO.toInputString(),
         };
 
         this.getNameErrorGenerator = memoizeOne(this.getNameErrorGenerator);
@@ -75,6 +75,7 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
                     
                     <TextField
                         label="Current Balance"
+                        prefix={CURRENCY_SYMBOL}
                         value={this.state.balance}
                         onGetErrorMessage={getRequiredCurrencyError}
                         onChange={(e, balance?) => this.setState({ balance })}

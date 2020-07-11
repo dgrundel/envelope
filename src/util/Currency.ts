@@ -103,10 +103,18 @@ export class Currency {
         return `${sign}${CURRENCY_SYMBOL}${formattedWhole}${DECIMAL_SEPARATOR}${formattedCents}`;
     }
 
-    toString() {
+    toFixed(decimals: number = PRECISION_DIGITS) {
         const fracStr = Math.abs(this.fractionalAmount).toFixed(0);
-        const formattedFrac = leftPad(fracStr, PRECISION_DIGITS, '0');        
+        const formattedFrac = leftPad(fracStr, decimals, '0');
         return `${this.wholeAmount}.${formattedFrac}`;
+    }
+
+    toInputString() {
+        return this.toFixed(2);
+    }
+
+    toString() {
+        return this.toFixed();
     }
 
     static fromPrecisionInt(n: number): Currency {

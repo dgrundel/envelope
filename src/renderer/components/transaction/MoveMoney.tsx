@@ -50,7 +50,7 @@ class Component extends React.Component<MoveMoneyProps, State> {
         this.state = {
             fromId: this.props.fromId,
             toId: this.props.toId,
-            amount: this.props.amount?.toString(),
+            amount: this.props.amount?.toInputString(),
             messages: undefined,
         };
     }

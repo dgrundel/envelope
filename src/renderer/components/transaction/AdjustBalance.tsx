@@ -30,7 +30,7 @@ class Component extends React.Component<AdjustBalanceProps, State> {
     constructor(props: AdjustBalanceProps) {
         super(props);
         this.state = {
-            newBalance: this.props.account.balance.toString()
+            newBalance: this.props.account.balance.toInputString()
         };
     }
     

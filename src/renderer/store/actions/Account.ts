@@ -70,7 +70,7 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
         throw new Error(`${type} is not a bank account type.`);
     }
     if (!balance.isValid()) {
-        throw new Error(`Balance is invalid: ${balance.toString()}`);
+        throw new Error(`Balance is invalid: ${balance.toInputString()}`);
     }
     
     const isCreditCard = isCreditCardAccountType(type);
@@ -128,7 +128,7 @@ export const applyTransactionToAccount = (transaction: Transaction) => (dispatch
         'applyTransactionsToAccount',
         'transaction:', transaction,
         'account:', account,
-        `updated balance: ${newBalance.toString()}`,
+        `updated balance: ${newBalance.toInputString()}`,
     );
 
     dispatch(updateAccountBalance(account._id, newBalance));
