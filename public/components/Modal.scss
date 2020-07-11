@@ -30,6 +30,13 @@ $modal-vertical-padding: 1rem;
   margin: 0 (-1 * $modal-horizontal-padding) $modal-vertical-padding;
   padding: 0 $modal-horizontal-padding $modal-vertical-padding;
   border-bottom: $border-width solid #e5e5e5;
+
+  &::after {
+    display: inline-block;
+    content: ' ';
+    width: 1px;
+    height: 1px;
+  }
 }
 
 .modal-close-icon {
@@ -48,6 +55,14 @@ $modal-vertical-padding: 1rem;
 .modal-body {
   max-height: 75vh;
   overflow-y: auto;
+
+  &::after {
+    content: ' ';
+    line-height: 0;
+    display: block;
+    width: 1px;
+    height: 1px;
+  }
 }
 
 .modal-footer {
