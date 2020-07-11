@@ -3,8 +3,10 @@ import { app, BrowserWindow } from 'electron';
 import * as windowStateKeeper from 'electron-window-state';
 import * as path from 'path';
 import * as url from 'url';
+import { Log } from '@/util/Logger';
 
 const jsonStoreHost = new JsonStoreHost(JsonStoreName.EnvelopeUserData);
+const appIcon = require('@public/images/envelope-icon-circle.png').default;
 
 function createWindow(): void {
     const mainWindowState = windowStateKeeper({
@@ -14,6 +16,7 @@ function createWindow(): void {
 
     // Create the browser window.
     const mainWindow = new BrowserWindow({
+        icon: appIcon,
         x: mainWindowState.x,
         y: mainWindowState.y,
         width: mainWindowState.width,
