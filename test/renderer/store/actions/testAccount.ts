@@ -61,7 +61,7 @@ describe('Account actions', function () {
     it('should create bank account', () => {
         const store = mockStoreWithUnalloc();
 
-        store.dispatch(createBankAccount('my checking', AccountType.Checking, new Currency(100, 0)));
+        store.dispatch(createBankAccount('my checking', AccountType.Checking));
 
         const storeActions = store.getActions();
         assert.ok(storeActions.length > 0);
@@ -74,61 +74,24 @@ describe('Account actions', function () {
         assert.equal(account.name, 'my checking');
         assert.equal(account.type, AccountType.Checking);
         assert.equal(account.linkedAccountIds.length, 0);
-        assert.deepEqual(account.balance, new Currency(100, 0));
+        assert.deepEqual(account.balance, Currency.ZERO);
     });
 
     it('should not create bank account w/ invalid account type', () => {
         const store = mockStoreWithUnalloc();
         
         try {
-            store.dispatch(createBankAccount('invalid account type', AccountType.UserEnvelope, new Currency(100, 0)));            
+            store.dispatch(createBankAccount('invalid account type', AccountType.UserEnvelope));            
             assert.fail('should throw an error');
         } catch (e) {
             assert.equal(e.message, 'user-envelope is not a bank account type.');
         }
     });
 
-    it('should put initial account balance into unallocated envelope when creating deposit account', () => {
+    it('should create a payment envelope when creating credit card account', () => {
         const store = mockStoreWithUnalloc();
         
-        store.dispatch(createBankAccount('my checking', AccountType.Checking, new Currency(100, 0)));
-
-        const storeActions = store.getActions();
-        assert.equal(storeActions.length, 3);
-
-        console.log(JSON.stringify(storeActions, null, 4));
-        
-        // create account action
-        const action0 = storeActions[0];
-        assert.equal(action0.type, AccountAction.Add);
-        
-        const account = action0.account;
-        assert.isNotEmpty(account._id);
-        assert.equal(account.name, 'my checking');
-        assert.equal(account.type, AccountType.Checking);
-        assert.equal(account.linkedAccountIds.length, 0);
-        assert.deepEqual(account.balance, new Currency(100, 0));
-
-        // transaction action to put money into unallocated
-        const action1 = storeActions[1];
-        assert.equal(action1.type, TransactionAction.Add);
-
-        const transaction = action1.transaction;
-        assert.equal(transaction.accountId, store.getState().accounts.unallocatedId);
-        assert.equal(transaction.flags, unionFlags(TransactionFlag.Adjustment, TransactionFlag.Reconciled));
-        assert.deepEqual(transaction.amount, new Currency(100, 0));
-
-        // update balance action to set balance of unallocated
-        const action2 = storeActions[2];
-        assert.equal(action2.type, AccountAction.UpdateBalance);
-        assert.equal(action2.accountId, store.getState().accounts.unallocatedId);
-        assert.deepEqual(action2.balance, new Currency(100, 0));
-    });
-
-    it('should create a payment envelope when creating credit card account and set balance to inverse', () => {
-        const store = mockStoreWithUnalloc();
-        
-        store.dispatch(createBankAccount('my credit card', AccountType.CreditCard, new Currency(100, 0)));
+        store.dispatch(createBankAccount('my credit card', AccountType.CreditCard));
 
         const storeActions = store.getActions();
         assert.equal(storeActions.length, 2);
@@ -144,7 +107,7 @@ describe('Account actions', function () {
         assert.equal(account.name, 'my credit card');
         assert.equal(account.type, AccountType.CreditCard);
         assert.equal(account.linkedAccountIds.length, 0);
-        assert.deepEqual(account.balance, new Currency(-100, 0));
+        assert.deepEqual(account.balance, Currency.ZERO);
 
         // create account action
         const action1 = storeActions[1];

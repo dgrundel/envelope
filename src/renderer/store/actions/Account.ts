@@ -62,33 +62,25 @@ export const createEnvelope = (name: string, linkedAccountIds: string[] = []): A
     return addAccount(account);
 };
 
-export const createBankAccount = (name: string, type: AccountType, balance: Currency) => (dispatch: any, getState: () => CombinedState) => {
+export const createBankAccount = (name: string, type: AccountType) => (dispatch: any, getState: () => CombinedState) => {
     if (isBlank(name)) {
         throw new Error('Name cannot be blank.');
     }
     if (!isBankAccountType(type)) {
         throw new Error(`${type} is not a bank account type.`);
     }
-    if (!balance.isValid()) {
-        throw new Error(`Balance is invalid: ${balance.toInputString()}`);
-    }
     
-    const isCreditCard = isCreditCardAccountType(type);
-
-    // for credit cards, the balance is inverted since it's actually a debt.
-    const appliedBalance = isCreditCard ? balance.getInverse() : balance;
-
     const account: Account = {
         _id: getIdentifier(),
         name,
         type,
-        balance: appliedBalance,
+        balance: Currency.ZERO,
         linkedAccountIds: [],
     };
     
     dispatch(addAccount(account));
 
-    if (isCreditCard) {
+    if (isCreditCardAccountType(type)) {
         const paymentEnvelope: Account = {
             _id: getIdentifier(),
             name: `Payment for "${name}"`,
@@ -97,24 +89,6 @@ export const createBankAccount = (name: string, type: AccountType, balance: Curr
             linkedAccountIds: [account._id as string],
         };
         dispatch(addAccount(paymentEnvelope));
-
-    } else if (isDepositAccountType(type)) {
-        const unallocatedId = getState().accounts.unallocatedId;
-        if (!unallocatedId) {
-            Log.error('No unallocated account exists');
-            return;
-        }
-        
-        const transaction: Transaction = {
-            _id: getIdentifier(),
-            flags: unionFlags(TransactionFlag.Adjustment, TransactionFlag.Reconciled),
-            accountId: unallocatedId!,
-            date: new Date(),
-            description: `Initial balance from account ${account._id} (${name})`,
-            amount: balance,
-            linkedTransactionIds: [],
-        };
-        dispatch(addTransaction(transaction));
     }
 }
 

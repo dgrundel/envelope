@@ -14,7 +14,7 @@ export interface AccountCreateProps {
     existingAccountNames?: string[];
 
     // mapped actions
-    createBankAccount?: (name: string, type: AccountType, balance: Currency) => void;
+    createBankAccount?: (name: string, type: AccountType) => void;
 }
 
 export interface AccountCreateState {
@@ -50,36 +50,23 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
     render() {
         return <form onSubmit={e => this.onSubmit(e)}>
             {this.state.messages}
-            <Layout split={2} noMargin>
-                <ChoiceGroup 
-                    name="type"
-                    label="Account Type" 
-                    selectedKey={this.state.accountType} 
-                    options={ALLOWED_ACCOUNT_TYPES.map(key => ({
-                        key,
-                        text: getAccountTypeLabel(key)
-                    }))}
-                    onChange={(e, option) => this.setState({ accountType: option?.key as AccountType })}
-                />
-                <div>
-                    <TextField
-                        label="Name"
-                        value={this.state.name}
-                        onGetErrorMessage={this.getNameErrorGenerator(this.props.existingAccountNames)}
-                        onChange={(e, name?) => this.setState({ name })}
-                        validateOnLoad={false}
-                    />
-                    
-                    <TextField
-                        label="Current Balance"
-                        prefix={CURRENCY_SYMBOL}
-                        value={this.state.balance}
-                        onGetErrorMessage={getRequiredCurrencyError}
-                        onChange={(e, balance?) => this.setState({ balance })}
-                        validateOnLoad={false}
-                    />
-                </div>
-            </Layout>
+            <TextField
+                label="Account Name"
+                value={this.state.name}
+                onGetErrorMessage={this.getNameErrorGenerator(this.props.existingAccountNames)}
+                onChange={(e, name?) => this.setState({ name })}
+                validateOnLoad={false}
+            />
+            <ChoiceGroup 
+                name="type"
+                label="Account Type" 
+                selectedKey={this.state.accountType} 
+                options={ALLOWED_ACCOUNT_TYPES.map(key => ({
+                    key,
+                    text: getAccountTypeLabel(key)
+                }))}
+                onChange={(e, option) => this.setState({ accountType: option?.key as AccountType })}
+            />
             <p style={({ textAlign: 'right' })}>
                 <PrimaryButton type="submit" text="Save" />
             </p>
@@ -92,7 +79,6 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
         const errors = [
             this.getNameErrorGenerator(this.props.existingAccountNames)(this.state.name),
             accountTypeErrorGenerator(this.state.accountType),
-            getRequiredCurrencyError(this.state.balance),
         ].filter(isNotBlank);
 
         if (errors.length > 0) {
@@ -107,9 +93,8 @@ class Component extends React.Component<AccountCreateProps, AccountCreateState> 
 
         const accountName = this.state.name!;
         const accountType = this.state.accountType!;
-        const balance = Currency.parse(this.state.balance!).or(Currency.ZERO);
         
-        this.props.createBankAccount!(accountName, accountType, balance);
+        this.props.createBankAccount!(accountName, accountType);
 
         // clear state
         this.setState({
