@@ -5,7 +5,6 @@ import * as ElectronStore from 'electron-store';
 const BASE_STORE_CONFIG = {};
 
 export enum JsonStoreName {
-    EnvelopeAppSettings = 'envelope-app-settings',
     EnvelopeUserData = 'envelope-user-data',
 }
 
