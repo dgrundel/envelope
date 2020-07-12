@@ -12,6 +12,7 @@ import { Card } from '../uiElements/Card';
 import { Layout } from '../uiElements/Layout';
 import { BaseModal } from '../uiElements/Modal';
 import { EnvelopeCreate } from './EnvelopeCreate';
+import { getUnallocatedAccount } from '@/renderer/store/transforms/Account';
 
 export interface EnvelopesPageProps {
     // mapped from state
@@ -101,12 +102,11 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
 
 const mapStateToProps = (state: CombinedState, ownProps: EnvelopesPageProps): EnvelopesPageProps => {
     const allAcounts = state.accounts.sortedIds.map(id => state.accounts.accounts[id]);
-    const unallocatedId = state.accounts.unallocatedId;
     return {
         ...ownProps,
         userEnvelopes: allAcounts.filter(filterOnlyAccountType(AccountType.UserEnvelope)),
         creditCardEnvelopes: allAcounts.filter(filterOnlyAccountType(AccountType.PaymentEnvelope)),
-        unallocatedAccount: unallocatedId ? state.accounts.accounts[unallocatedId] : undefined
+        unallocatedAccount: getUnallocatedAccount(state.accounts),
     };
 }
 

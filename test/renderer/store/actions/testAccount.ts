@@ -1,15 +1,16 @@
 import { Account, AccountType } from '@/models/Account';
 import { TransactionFlag } from '@/models/Transaction';
-import { AccountAction, createBankAccount, createEnvelope } from '@/renderer/store/actions/Account';
+import { AccountAction, createBankAccount, createEnvelope, adjustAccountBalance } from '@/renderer/store/actions/Account';
 import { TransactionAction } from '@/renderer/store/actions/Transaction';
 import { Currency } from '@/util/Currency';
 import { assert } from 'chai';
 import { mockStore } from '../mockStore';
-import { unionFlags } from '@/util/Flags';
+import { unionFlags, hasFlag } from '@/util/Flags';
+import { transactions } from '@/renderer/store/reducers/Transactions';
 
 
 describe('Account actions', function () {
-    const mockStoreWithUnalloc = () => {
+    const mockStoreWithUnalloc = (accounts: Account[] = []) => {
         const unallocated: Account = {
             _id: 'unalloc',
             name: 'ready to budget',
@@ -17,7 +18,10 @@ describe('Account actions', function () {
             type: AccountType.Unallocated,
             linkedAccountIds: [],
         };
-        const store = mockStore([unallocated], [], unallocated._id);
+        const store = mockStore([
+            ...accounts,
+            unallocated,
+        ], [], unallocated._id);
         return store;
     }
     
@@ -117,5 +121,63 @@ describe('Account actions', function () {
         assert.equal(paymentEnvelope.type, AccountType.PaymentEnvelope);
         assert.sameMembers(paymentEnvelope.linkedAccountIds, [account._id]);
         assert.deepEqual(paymentEnvelope.balance, Currency.ZERO);
+    });
+
+    it('should adjust account balances', () => {
+        const bankAccount: Account = {
+            _id: 'checking',
+            name: 'checking',
+            balance: new Currency(25, 0),
+            type: AccountType.Checking,
+            linkedAccountIds: [],
+        };
+        
+        const store = mockStoreWithUnalloc([
+            bankAccount,
+        ]);
+        const unallocatedId = store.getState().accounts.unallocatedId;
+
+        store.dispatch(adjustAccountBalance(bankAccount._id, new Currency(75, 0)));
+
+        const storeActions = store.getActions();
+        assert.equal(storeActions.length, 5);
+        
+        // add adjustment transaction
+        const action0 = storeActions[0];
+        assert.equal(action0.type, TransactionAction.Add);
+        
+        const transaction0 = action0.transaction;
+        assert.equal(transaction0.accountId, bankAccount._id);
+        assert.deepEqual(transaction0.amount, new Currency(50, 0));
+        assert.ok(hasFlag(TransactionFlag.Reconciled, transaction0.flags));
+        assert.ok(hasFlag(TransactionFlag.Adjustment, transaction0.flags));
+
+        // apply adjustment trans. to bank account
+        const action1 = storeActions[1];
+        assert.equal(action1.type, AccountAction.UpdateBalance);
+        assert.equal(action1.accountId, bankAccount._id);
+        assert.deepEqual(action1.balance, new Currency(75, 0));
+
+        // add linked transaction in unallocated envelope
+        // linked to adjustment transaction
+        const action2 = storeActions[2];
+        assert.equal(action2.type, TransactionAction.Add);
+        const transaction2 = action2.transaction;
+        assert.equal(transaction2.accountId, unallocatedId);
+        assert.deepEqual(transaction2.amount, new Currency(50, 0));
+        assert.ok(hasFlag(TransactionFlag.Reconciled, transaction2.flags));
+        assert.equal(action2.linkTo, transaction0);
+
+        // apply linked transaction to unallocated envelope
+        const action3 = storeActions[3];
+        assert.equal(action3.type, AccountAction.UpdateBalance);
+        assert.equal(action3.accountId, unallocatedId);
+        assert.deepEqual(action3.balance, new Currency(50, 0));
+
+        // apply reconciled flag to adjustment transaction
+        const action4 = storeActions[4];
+        assert.equal(action4.type, TransactionAction.AddFlags);
+        assert.equal(action4.transaction, transaction0);
+        assert.equal(action4.flags, TransactionFlag.Reconciled);
     });
 });

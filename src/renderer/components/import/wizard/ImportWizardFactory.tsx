@@ -16,6 +16,8 @@ import { DuplicatesSelect } from './steps/DuplicatesSelect';
 import { InvertAmountsSelect } from "./steps/InvertAmountsSelect";
 import { setPage, dismissModal } from '@/renderer/store/actions/AppState';
 import { AppPage, Modal } from '@/renderer/store/reducers/AppState';
+import { ReconcileBalance } from './steps/ReconcileBalance';
+import { adjustAccountBalance } from '@/renderer/store/actions/Account';
 
 
 export interface Row {
@@ -26,12 +28,12 @@ export interface ImportWizardState {
     rows: Row[];
     invertTransactions: boolean;
     
-    // indexes of the rows that will be imported
-    selectedForImport?: number[];
+    selectedForImport?: number[]; // indexes of the rows that will be imported
     accountId?: string;
     dateColumn?: string;
     amountColumn?: string;
     descriptionColumns?: string[];
+    updatedBalance?: string;
 }
 
 export type ImportWizardStepProps = ImportWizardState & WizardStepApi<ImportWizardState>;
@@ -99,6 +101,7 @@ export const createImportWizard = (rows: Row[]) => {
 
         // store actions
         addManyTransactions?: (transaction: Transaction[]) => void;
+        adjustAccountBalance?: (accountId: string, newBalance: Currency) => void;
         setPage?: (page: AppPage) => void;
         dismissModal?: () => void;
     }
@@ -128,6 +131,7 @@ export const createImportWizard = (rows: Row[]) => {
                     DescriptionFieldSelect,
                     InvertAmountsSelect,
                     DuplicatesSelect,
+                    ReconcileBalance,
                 ]
             );
         }
@@ -152,6 +156,11 @@ export const createImportWizard = (rows: Row[]) => {
 
             this.props.addManyTransactions!(rowsAsTransactions);
             
+            const newBalance = Currency.parse(state.updatedBalance!);
+            if (newBalance.isValid()) {
+                this.props.adjustAccountBalance!(state.accountId!, newBalance!);
+            }
+
             // dismiss import modal
             this.props.dismissModal!();
             this.props.setPage!(AppPage.Transactions);
@@ -171,6 +180,7 @@ export const createImportWizard = (rows: Row[]) => {
 
     const storeActions = {
         addManyTransactions,
+        adjustAccountBalance,
         setPage,
         dismissModal,
     };

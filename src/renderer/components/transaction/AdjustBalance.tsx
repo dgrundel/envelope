@@ -1,6 +1,6 @@
 import { Account } from '@/models/Account';
 import { getAmountTransactionFlag, Transaction, TransactionFlag } from '@/models/Transaction';
-import { addTransaction } from '@/renderer/store/actions/Transaction';
+import { adjustAccountBalance } from '@/renderer/store/actions/Account';
 import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
 import { getRequiredCurrencyError } from '@/util/ErrorGenerators';
 import { unionFlags } from '@/util/Flags';
@@ -15,7 +15,7 @@ export interface AdjustBalanceProps {
     onComplete?: () => void;
 
     // store actions
-    addTransaction?: (transaction: Transaction) => void;
+    adjustAccountBalance?: (accountId: string, newBalance: Currency) => void;
 }
 
 interface State {
@@ -78,33 +78,10 @@ class Component extends React.Component<AdjustBalanceProps, State> {
 
         const account = this.props.account;
         const newBalance = Currency.parse(this.state.newBalance!);
-        const amount = newBalance.sub(account.balance);
         
-        // do nothing if zero amount.
-        if (amount.isZero()) {
-            Log.debug(`No adjustment needed (${amount.toFormattedString()}) for account`, account);
-            this.props.onComplete && this.props.onComplete();
-            return;
-        }
-
-        Log.debug(`Adding adjustment transaction for ${amount.toFormattedString()} to account`, account);
-
-        const amountFlag = getAmountTransactionFlag(account, amount);
-
-        const transaction: Transaction = {
-            _id: getIdentifier(),
-            accountId: account._id,
-            date: new Date(),
-            amount: amount,
-            description: 'Manual balance adjustment',
-            linkedTransactionIds: [],
-            flags: unionFlags(amountFlag, TransactionFlag.Adjustment, TransactionFlag.Reconciled),
-        };
-
-        this.props.addTransaction!(transaction);
-        Log.debug('Added adjustment transaction.', transaction);
+        this.props.adjustAccountBalance!(account._id, newBalance);
         this.props.onComplete && this.props.onComplete();
     }
 }
 
-export const AdjustBalance = connect(null, { addTransaction })(Component);
+export const AdjustBalance = connect(null, { adjustAccountBalance })(Component);

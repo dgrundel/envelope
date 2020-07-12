@@ -1,9 +1,9 @@
 import { JsonStoreClient, JsonStoreName } from '@/dataStore/JSONStore';
-import { applyMiddleware, combineReducers, createStore } from "redux";
+import { applyMiddleware, combineReducers, createStore, AnyAction } from "redux";
 import { persistReducer, persistStore } from 'redux-persist';
-import thunk from 'redux-thunk';
-import { accountStatePreprocessor } from './preprocessors/Account';
-import { transactionStatePreprocessor } from './preprocessors/Transaction';
+import thunk, { ThunkDispatch } from 'redux-thunk';
+import { accountStatePreprocessor } from './transforms/Account';
+import { transactionStatePreprocessor } from './transforms/Transaction';
 import { accounts, AccountState } from './reducers/Accounts';
 import { appState, AppState } from './reducers/AppState';
 import { transactions, TransactionState } from './reducers/Transactions';
@@ -13,6 +13,9 @@ export interface CombinedState {
     accounts: AccountState,
     transactions: TransactionState,
 }
+
+export type StoreDispatch = ThunkDispatch<CombinedState, void, AnyAction>;
+
 
 const jsonClient = new JsonStoreClient(JsonStoreName.EnvelopeUserData);
 const basePersistConfig = {

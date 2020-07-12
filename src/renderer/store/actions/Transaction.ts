@@ -1,11 +1,12 @@
 import { Currency } from '@/util/Currency';
-import { unionFlags, hasFlag } from '@/util/Flags';
+import { unionFlags, hasFlag, doesNotHaveFlag } from '@/util/Flags';
 import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import { Account } from '@models/Account';
 import { getAmountTransactionFlag, Transaction, TransactionFlag } from '@models/Transaction';
-import { CombinedState } from '../store';
+import { CombinedState, StoreDispatch } from '../store';
 import { applyTransactionsToAccount, applyTransactionToAccount } from './Account';
+import { getUnallocatedAccount } from '../transforms/Account';
 
 export enum TransactionAction {
     Add = 'store:action:transaction:add',
@@ -20,7 +21,7 @@ export interface AddTransactionAction {
     linkTo?: Transaction;
 }
 
-export const addTransaction = (transaction: Transaction, linkTo?: Transaction) => (dispatch: any, getState: () => CombinedState) => {
+export const addTransaction = (transaction: Transaction, linkTo?: Transaction) => (dispatch: StoreDispatch, getState: () => CombinedState) => {
     const action: AddTransactionAction = {
         type: TransactionAction.Add,
         transaction,
@@ -30,11 +31,11 @@ export const addTransaction = (transaction: Transaction, linkTo?: Transaction) =
     dispatch(action);
     dispatch(applyTransactionToAccount(transaction));
 
+    const isBankCredit = hasFlag(TransactionFlag.BankCredit, transaction.flags);
+    const isNotAdjustment = doesNotHaveFlag(TransactionFlag.Adjustment, transaction.flags);
     // bank credits go directly into the unallocated envelope
-    if (hasFlag(TransactionFlag.BankCredit, transaction.flags)) {
-        const accounts = getState().accounts;
-        const unallocatedId = accounts.unallocatedId;
-        const unallocatedEnvelope = accounts.accounts[unallocatedId];
+    if (isBankCredit && isNotAdjustment) {
+        const unallocatedEnvelope = getUnallocatedAccount(getState().accounts);
         dispatch(addLinkedTransactionForBankDeposit(transaction, unallocatedEnvelope));
     }
 };
@@ -44,7 +45,7 @@ export interface AddManyTransactionAction {
     transactions: Transaction[];
 }
 
-export const addManyTransactions = (transactions: Transaction[]) => (dispatch: any) => {
+export const addManyTransactions = (transactions: Transaction[]) => (dispatch: StoreDispatch) => {
     const action: AddManyTransactionAction = {
         type: TransactionAction.AddMany,
         transactions
@@ -76,7 +77,7 @@ export const linkExistingTransactions = (transactions: Transaction[]): LinkExist
     transactions,
 });
 
-export const transferFunds = (amount: Currency, fromAccount: Account, toAccount: Account) => (dispatch: any) => {
+export const transferFunds = (amount: Currency, fromAccount: Account, toAccount: Account) => (dispatch: StoreDispatch) => {
     const date = new Date();
     const description = `Transfer from "${fromAccount.name}" to "${toAccount.name}"`;
     const inverseAmount = amount.getInverse();
@@ -114,7 +115,7 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
     dispatch(addTransaction(toTransaction, fromTransaction));
 };
 
-export const linkTransactionsAsTransfer = (transactions: Transaction[]) => (dispatch: any) => {
+export const linkTransactionsAsTransfer = (transactions: Transaction[]) => (dispatch: StoreDispatch) => {
     dispatch(linkExistingTransactions(transactions));
     const flags = unionFlags(
         TransactionFlag.Transfer,
@@ -125,7 +126,7 @@ export const linkTransactionsAsTransfer = (transactions: Transaction[]) => (disp
     })
 };
 
-export const addReconcileTransaction = (existingTransaction: Transaction, otherAccount: Account) => (dispatch: any, getState: () => CombinedState) => {
+export const addReconcileTransaction = (existingTransaction: Transaction, otherAccount: Account) => (dispatch: StoreDispatch) => {
     const linkedTransaction: Transaction = {
         _id: getIdentifier(),
         date: new Date(),
@@ -147,7 +148,7 @@ export const addReconcileTransaction = (existingTransaction: Transaction, otherA
  * @param fromTransaction - transaction with flag TransactionFlag.BankDebit
  * @param toTransaction - transaction with flag TransactionFlag.BankCredit
  */
-export const addLinkedTransactionForBankTransfer = (fromTransaction: Transaction, toTransaction: Transaction) => (dispatch: any, getState: () => CombinedState) => {
+export const addLinkedTransactionForBankTransfer = (fromTransaction: Transaction, toTransaction: Transaction) => (dispatch: StoreDispatch) => {
     dispatch(linkTransactionsAsTransfer([
         fromTransaction,
         toTransaction,
@@ -163,7 +164,7 @@ export const addLinkedTransactionForBankTransfer = (fromTransaction: Transaction
  *  in the bank account, has flag TransactionFlag.BankCredit
  * @param envelope - the envelope to which the transaction should be applied
  */
-export const addLinkedTransactionForBankDeposit = (transaction: Transaction, envelope: Account) => (dispatch: any, getState: () => CombinedState) => {
+export const addLinkedTransactionForBankDeposit = (transaction: Transaction, envelope: Account) => (dispatch: StoreDispatch) => {
     dispatch(addReconcileTransaction(transaction, envelope));
 };
 
@@ -175,7 +176,7 @@ export const addLinkedTransactionForBankDeposit = (transaction: Transaction, env
  *  bank account, has flag TransactionFlag.BankDebit
  * @param envelope - the envelope to which the transaction should be applied
  */
-export const addLinkedTransactionForBankDebit = (transaction: Transaction, envelope: Account) => (dispatch: any, getState: () => CombinedState) => {
+export const addLinkedTransactionForBankDebit = (transaction: Transaction, envelope: Account) => (dispatch: StoreDispatch) => {
     dispatch(addReconcileTransaction(transaction, envelope));
 };
 
@@ -190,7 +191,7 @@ export const addLinkedTransactionForBankDebit = (transaction: Transaction, envel
  * @param transaction - the transaction representing the credit
  *  to the credit card account, has flag TransactionFlag.CreditAccountCredit
  */
-export const reconcileTransactionForCreditCardPaymentFromBank = (transaction: Transaction) => (dispatch: any, getState: () => CombinedState) => {
+export const reconcileTransactionForCreditCardPaymentFromBank = (transaction: Transaction) => (dispatch: StoreDispatch) => {
     dispatch(addTransactionFlags!(transaction, unionFlags(
         TransactionFlag.Transfer,
         TransactionFlag.Reconciled,
@@ -204,7 +205,7 @@ export const reconcileTransactionForCreditCardPaymentFromBank = (transaction: Tr
  * @param transaction - transaction in credit card account, has flag TransactionFlag.CreditAccountCredit
  * @param envelope - the envelope to which the transaction should be applied
  */
-export const addLinkedTransactionForCreditCardRefund = (transaction: Transaction, envelope: Account) => (dispatch: any, getState: () => CombinedState) => {
+export const addLinkedTransactionForCreditCardRefund = (transaction: Transaction, envelope: Account) => (dispatch: StoreDispatch) => {
     dispatch(addReconcileTransaction(transaction, envelope));
 };
 
@@ -214,6 +215,6 @@ export const addLinkedTransactionForCreditCardRefund = (transaction: Transaction
  * @param transaction - transaction in credit card account, has flag TransactionFlag.CreditAccountDebit
  * @param envelope - the envelope to which the transaction should be applied
  */
-export const addLinkedTransactionForCreditCardPurchase = (transaction: Transaction, envelope: Account) => (dispatch: any, getState: () => CombinedState) => {
+export const addLinkedTransactionForCreditCardPurchase = (transaction: Transaction, envelope: Account) => (dispatch: StoreDispatch) => {
     dispatch(addReconcileTransaction(transaction, envelope));
 };

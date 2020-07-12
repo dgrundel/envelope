@@ -1,12 +1,13 @@
-import { Transaction, TransactionFlag } from '@/models/Transaction';
+import { Transaction, TransactionFlag, getAmountTransactionFlag } from '@/models/Transaction';
 import { Currency } from '@/util/Currency';
 import { isBlank } from '@/util/Filters';
 import { hasFlag, unionFlags } from '@/util/Flags';
 import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import { Account, AccountType, isBankAccountType, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
-import { CombinedState } from '../store';
-import { addTransaction } from './Transaction';
+import { CombinedState, StoreDispatch } from '../store';
+import { addTransaction, addReconcileTransaction } from './Transaction';
+import { getUnallocatedAccount, getAccountById } from '../transforms/Account';
 
 export enum AccountAction {
     Add = 'store:action:account-add',
@@ -62,7 +63,7 @@ export const createEnvelope = (name: string, linkedAccountIds: string[] = []): A
     return addAccount(account);
 };
 
-export const createBankAccount = (name: string, type: AccountType) => (dispatch: any, getState: () => CombinedState) => {
+export const createBankAccount = (name: string, type: AccountType) => (dispatch: StoreDispatch, getState: () => CombinedState) => {
     if (isBlank(name)) {
         throw new Error('Name cannot be blank.');
     }
@@ -92,7 +93,7 @@ export const createBankAccount = (name: string, type: AccountType) => (dispatch:
     }
 }
 
-export const applyTransactionToAccount = (transaction: Transaction) => (dispatch: any, getState: () => CombinedState) => {
+export const applyTransactionToAccount = (transaction: Transaction) => (dispatch: StoreDispatch, getState: () => CombinedState) => {
     const accountsState = getState().accounts;
     const account = accountsState.accounts[transaction.accountId];
     const transactionAmount = transaction.amount;
@@ -108,8 +109,51 @@ export const applyTransactionToAccount = (transaction: Transaction) => (dispatch
     dispatch(updateAccountBalance(account._id, newBalance));
 };
 
-export const applyTransactionsToAccount = (transactions: Transaction[]) => (dispatch: any) => {
+export const applyTransactionsToAccount = (transactions: Transaction[]) => (dispatch: StoreDispatch) => {
     transactions.forEach(transaction => {
         dispatch(applyTransactionToAccount(transaction));
     });
+};
+
+export const adjustAccountBalance = (accountId: string, newBalance: Currency) => (dispatch: StoreDispatch, getState: () => CombinedState) => {
+    if (!newBalance.isValid()) {
+        throw new Error('Invalid balance argument');
+    }
+    
+    const account = getAccountById(getState().accounts, accountId);
+    const currentBalance = account.balance;
+    const amount = newBalance.sub(currentBalance);
+
+    if (amount.isZero()) {
+        Log.debug(`No adjustment needed (${amount.toFormattedString()}) for account`, account);
+        return;
+    }
+
+    Log.debug(`Adding adjustment transaction for ${amount.toFormattedString()} to account`, account);
+    
+    const amountFlag = getAmountTransactionFlag(account, amount);
+
+    const transaction: Transaction = {
+        _id: getIdentifier(),
+        accountId: account._id,
+        date: new Date(),
+        amount: amount,
+        description: 'Balance adjustment',
+        linkedTransactionIds: [],
+        flags: unionFlags(
+            amountFlag, 
+            TransactionFlag.Adjustment, 
+            TransactionFlag.Reconciled
+        ),
+    };
+
+    // add adjustment transaction to account
+    dispatch(addTransaction(transaction));
+
+    // if account is a deposit account, also apply adjustment to the unallocated envelope
+    if (isDepositAccountType(account.type)) {
+        const unallocatedAccount = getUnallocatedAccount(getState().accounts);
+        // add reconcile transaction where otherAccount is the unalloc envelope
+        dispatch(addReconcileTransaction(transaction, unallocatedAccount));
+    }
 };

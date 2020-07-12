@@ -114,6 +114,54 @@ describe('Transaction actions', function () {
         assert.equal(action4.flags, TransactionFlag.Reconciled);
     });
 
+    it('should NOT link new transaction directly to unallocated envelope if Adjustment', () => {
+        const testUnallocAccount: Account = {
+            _id: 'test-unalloc-account-id',
+            name: 'unalloc',
+            type: AccountType.Unallocated,
+            balance: Currency.ZERO,
+            linkedAccountIds: [],
+        };
+        const testBankAccount: Account = {
+            _id: 'test-bank-account-id',
+            name: 'test',
+            type: AccountType.Checking,
+            balance: Currency.ZERO,
+            linkedAccountIds: [],
+        }        
+        const store = mockStore([testUnallocAccount, testBankAccount], [], testUnallocAccount._id);
+
+        const transactionAmount = new Currency(17, 500);
+        const t: Transaction = {
+            _id: 'test-trans-id',
+            accountId: testBankAccount._id,
+            date: new Date(),
+            amount: transactionAmount,
+            description: 'test trans desc',
+            flags: unionFlags(
+                TransactionFlag.BankCredit,
+                TransactionFlag.Adjustment,
+            ),
+            linkedTransactionIds: [],
+        };
+      
+        store.dispatch(addTransaction(t));
+
+        const storeActions = store.getActions();
+        assert.equal(storeActions.length, 2);
+
+        // adding the test transaction
+        const action0 = storeActions[0];
+        assert.equal(action0.type, TransactionAction.Add);
+        assert.equal(action0.transaction, t);
+
+        // update bank account balance
+        const action1 = storeActions[1];
+        assert.equal(action1.type, AccountAction.UpdateBalance);
+        assert.equal(action1.accountId, testBankAccount._id);
+        assert.deepEqual(action1.balance, transactionAmount);
+    });
+
     it('should transferFunds', () => {
         const fromAccount: Account = {
             _id: 'from-acct',
