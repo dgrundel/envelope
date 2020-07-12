@@ -14,7 +14,6 @@ import { setModal, dismissModal } from '@/renderer/store/actions/AppState';
 
 export interface AddLinkedTransactionsProps {
     transaction: Transaction;
-    unlinkedBalance: Currency;
 
     // mapped props from state
     accountMap?: Record<string, Account>;

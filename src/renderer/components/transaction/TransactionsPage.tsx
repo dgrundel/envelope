@@ -51,7 +51,6 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
     renderList() {
         const sortedTransactions = this.props.sortedTransactions!;
         const accounts = this.props.accounts!;
-        const transactionMap = this.props.transactions!;
         const setModal = (this.props.setModal!);
 
         if (sortedTransactions.length === 0) {
@@ -61,19 +60,10 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
         const items = sortedTransactions
             .map(t => {
                 const isReconciled = hasFlag(TransactionFlag.Reconciled, t.flags);
-                const existingLinks = t.linkedTransactionIds.map(id => transactionMap[id]) || [];
-                const balance = existingLinks.reduce(
-                    (bal: Currency, link: Transaction) => {
-                        // Log.debug('link', link);
-                        // subtract linked amounts to see if it zeros out
-                        return bal.sub(link.amount);
-                    },
-                    t.amount
-                );
                 
                 const onClick = (e: React.MouseEvent) => {
                     e.preventDefault();
-                    setModal(<TransactionModal transaction={t} unlinkedBalance={balance} />);
+                    setModal(<TransactionModal transaction={t} />);
                 };
 
                 return {
