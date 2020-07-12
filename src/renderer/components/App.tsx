@@ -24,7 +24,7 @@ class Component extends React.Component<AppProps> {
         return <div id="app">
             <AppHeader/>
             <AppSidebar/>
-            <div id="main">
+            <div id="main" data-is-scrollable="true">
                 {this.renderPage()}
                 {this.props.activeModal}
             </div>
