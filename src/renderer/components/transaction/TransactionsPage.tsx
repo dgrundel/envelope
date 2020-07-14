@@ -2,28 +2,25 @@ import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { setModal } from '@/renderer/store/actions/AppState';
 import { Modal } from '@/renderer/store/reducers/AppState';
 import { CombinedState } from '@/renderer/store/store';
-import { Currency } from '@/util/Currency';
 import { filterOnlyImportedTransactions } from '@/util/Filters';
-import { hasFlag } from '@/util/Flags';
-import { DetailsList, DetailsListLayoutMode, FontIcon, IColumn, SelectionMode } from '@fluentui/react';
+import { doesNotHaveFlag, hasFlag } from '@/util/Flags';
+import { Log } from '@/util/Logger';
+import { CommandBar, DetailsList, DetailsListLayoutMode, FontIcon, IColumn, ICommandBarItemProps, IObjectWithKey, Selection, SelectionMode } from '@fluentui/react';
 import { Account } from '@models/Account';
+import memoizeOne from 'memoize-one';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { Card } from '../uiElements/Card';
-import { TransactionModal } from './TransactionModal';
 import { Layout } from '../uiElements/Layout';
+import { TransactionModal } from './TransactionModal';
 
 export interface TransactionsPageProps {
     // mapped from state
     sortedTransactions?: Transaction[];
-    transactions?: Record<string, Transaction>;
     accounts?: Record<string, Account>;
 
     // store actions
     setModal?: (modal: Modal) => void;
-}
-
-export interface TransactionsPageState {
 }
 
 const columns: IColumn[] = [
@@ -34,10 +31,43 @@ const columns: IColumn[] = [
     { key: 'column5', name: 'reconciled', fieldName: 'reconciled', minWidth: 32, maxWidth: 48, isIconOnly: true, },
 ];
 
-class Component extends React.Component<TransactionsPageProps, TransactionsPageState> {
+interface DetailListItem extends IObjectWithKey {
+    date: string;
+    account: string;
+    description: string;
+    amount: string;
+    reconciled: any;
+}
+
+class Component extends React.Component<TransactionsPageProps> {
+    
     constructor(props: TransactionsPageProps) {
         super(props);
-        this.state = {};
+
+        this.computeItems = memoizeOne(this.computeItems.bind(this));
+    }
+
+    computeItems(transactions: Transaction[], accounts: Record<string, Account>): DetailListItem[] {        
+        return transactions
+            .map(t => {
+                const isReconciled = hasFlag(TransactionFlag.Reconciled, t.flags);
+
+                const onClick = (e: React.MouseEvent) => {
+                    e.preventDefault();
+                    this.props.setModal!(<TransactionModal transaction={t} />);
+                };
+
+                return {
+                    key: t._id,
+                    date: t.date.toLocaleDateString(),
+                    account: accounts[t.accountId].name,
+                    description: t.description,
+                    amount: t.amount.toFormattedString(),
+                    reconciled: <span onClick={onClick}>
+                        <FontIcon iconName={isReconciled ? 'CheckMark' : 'AlertSolid'} className={isReconciled ? 'color-success' : 'color-warn'} />
+                    </span>,
+                };
+            });
     }
 
     render() {
@@ -49,51 +79,30 @@ class Component extends React.Component<TransactionsPageProps, TransactionsPageS
     }
 
     renderList() {
-        const sortedTransactions = this.props.sortedTransactions!;
-        const accounts = this.props.accounts!;
-        const setModal = (this.props.setModal!);
+        const items = this.computeItems(
+            this.props.sortedTransactions!, 
+            this.props.accounts!,
+        );
 
-        if (sortedTransactions.length === 0) {
+        if (items.length === 0) {
             return <p>No transactions yet.</p>;
         }
 
-        const items = sortedTransactions
-            .map(t => {
-                const isReconciled = hasFlag(TransactionFlag.Reconciled, t.flags);
-                
-                const onClick = (e: React.MouseEvent) => {
-                    e.preventDefault();
-                    setModal(<TransactionModal transaction={t} />);
-                };
-
-                return {
-                    key: t._id,
-                    date: t.date.toLocaleDateString(),
-                    account: accounts[t.accountId].name,
-                    description: t.description,
-                    amount: t.amount.toFormattedString(),
-                    reconciled: <span onClick={onClick}>
-                        <FontIcon iconName={isReconciled ? 'CheckMark' : 'AlertSolid'} className={isReconciled ? 'color-success' : 'color-warn'} />
-                    </span>
-                }
-            });
-
-        return <DetailsList
-            items={items}
-            columns={columns}
-            layoutMode={DetailsListLayoutMode.justified}
-            selectionMode={SelectionMode.none}
-            // selectionMode={SelectionMode.single}
-            // selection={this.selection}
-            // selectionPreservedOnEmptyClick={true}
-        />;
+        return <>
+            <DetailsList
+                items={items}
+                columns={columns}
+                compact={true}
+                layoutMode={DetailsListLayoutMode.justified}
+                selectionMode={SelectionMode.none}
+            />
+        </>;
 
     }
 }
 
 const mapStateToProps = (state: CombinedState, ownProps: TransactionsPageProps): TransactionsPageProps => ({
     ...ownProps,
-    transactions: state.transactions.transactions,
     accounts: state.accounts.accounts,
     sortedTransactions: state.transactions.sortedIds
         .map(id => state.transactions.transactions[id])
