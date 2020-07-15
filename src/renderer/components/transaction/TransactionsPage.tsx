@@ -13,6 +13,7 @@ import { connect } from 'react-redux';
 import { Card } from '../uiElements/Card';
 import { Layout } from '../uiElements/Layout';
 import { TransactionModal } from './TransactionModal';
+import { Colors } from '../uiElements/styleValues';
 
 export interface TransactionsPageProps {
     // mapped from state
@@ -64,7 +65,7 @@ class Component extends React.Component<TransactionsPageProps> {
                     description: t.description,
                     amount: t.amount.toFormattedString(),
                     reconciled: <span onClick={onClick}>
-                        <FontIcon iconName={isReconciled ? 'CheckMark' : 'AlertSolid'} className={isReconciled ? 'color-success' : 'color-warn'} />
+                        <FontIcon iconName={isReconciled ? 'CheckMark' : 'AlertSolid'} style={{ color: isReconciled ? Colors.Success : Colors.Warning }} />
                     </span>,
                 };
             });

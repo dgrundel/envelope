@@ -1,9 +1,10 @@
 import { dismissModal, setModal } from '@/renderer/store/actions/AppState';
 import { Modal } from '@/renderer/store/reducers/AppState';
 import { CombinedState } from '@/renderer/store/store';
+import { getUnallocatedAccount } from '@/renderer/store/transforms/Account';
 import { Currency } from '@/util/Currency';
 import { filterOnlyAccountType } from '@/util/Filters';
-import { IconButton, Text, Separator } from '@fluentui/react';
+import { DetailsList, DetailsListLayoutMode, IColumn, IconButton, IObjectWithKey, SelectionMode, Text, CommandBar, ICommandBarItemProps } from '@fluentui/react';
 import { Account, AccountType } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
@@ -12,7 +13,7 @@ import { Card } from '../uiElements/Card';
 import { Layout } from '../uiElements/Layout';
 import { BaseModal } from '../uiElements/Modal';
 import { EnvelopeCreate } from './EnvelopeCreate';
-import { getUnallocatedAccount } from '@/renderer/store/transforms/Account';
+import { Colors } from '../uiElements/styleValues';
 
 export interface EnvelopesPageProps {
     // mapped from state
@@ -25,7 +26,25 @@ export interface EnvelopesPageProps {
     dismissModal?: () => void;
 }
 
-export interface EnvelopesPageState {
+enum ViewType {
+    Cards = 'cards',
+    List = 'list',
+}
+
+interface EnvelopesPageState {
+    viewType: ViewType,
+}
+
+const columns: IColumn[] = [
+    { key: 'column1', name: 'Envelope Name', fieldName: 'name', minWidth: 350, },
+    { key: 'column2', name: 'Balance', fieldName: 'balance', minWidth: 100, maxWidth: 200,  },
+    { key: 'column3', name: 'Actions', fieldName: 'actions', minWidth: 100, maxWidth: 120, isIconOnly: true, },
+];
+
+interface DetailListItem extends IObjectWithKey {
+    name: string;
+    balance: any;
+    actions: any;
 }
 
 class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> {
@@ -33,7 +52,11 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
     constructor(props: EnvelopesPageProps) {
         super(props);
 
-        this.state = {};
+        this.state = {
+            viewType: ViewType.Cards,
+        };
+
+        this.toListItem = this.toListItem.bind(this);
     }
     
     render() {
@@ -55,14 +78,86 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
                 </Card>
             </Layout>
             
+            {this.renderViewType()}
+        </>;
+    }
+
+    renderViewType() {
+        switch(this.state.viewType) {
+            case ViewType.List:
+                return this.renderList();
+            case ViewType.Cards:
+                return this.renderCards();
+        }
+    }
+
+    renderList() {
+        const items: DetailListItem[] = this.props.creditCardEnvelopes!.map(this.toListItem)
+            .concat(this.props.userEnvelopes!.map(this.toListItem))
+
+        return <Layout>
+            <Card>
+                {this.renderCommandBar()}
+                <DetailsList
+                    items={items}
+                    columns={columns}
+                    layoutMode={DetailsListLayoutMode.justified}
+                    selectionMode={SelectionMode.none}
+                />
+            </Card>
+        </Layout>;
+    }
+
+    renderCommandBar() {
+        const items: ICommandBarItemProps[] = [
+            {
+                key: 'listToggle',
+                text: this.state.viewType === ViewType.Cards ? 'Show as List' : 'Show as Cards',
+                iconProps: {
+                    iconName: this.state.viewType === ViewType.Cards ? 'List' : 'Favicon',
+                },
+                onClick: () => {
+                    this.setState(prev => ({
+                        viewType: prev.viewType === ViewType.Cards
+                            ? ViewType.List
+                            : ViewType.Cards
+                    }))
+                },
+            }
+        ];
+
+        return <CommandBar items={items}/>;
+    }
+
+    toListItem(envelope: Account): DetailListItem {
+        return {
+            key: envelope._id,
+            name: envelope.name,
+            balance: <span style={{ color: envelope.balance.isNegative() ? Colors.Error : Colors.Success }}>
+                {envelope.balance.toFormattedString()}
+            </span>,
+            actions: <>
+                <IconButton style={{ height: '1em', }} iconProps={({ iconName: 'CalculatorAddition' })} title="Add Money" onClick={() => this.showAddMoneyModal(envelope)} />
+                <IconButton style={{ height: '1em', }} iconProps={({ iconName: 'CalculatorSubtract' })} title="Remove Money" onClick={() => this.showRemoveMoneyModal(envelope)} />
+            </>,
+        };
+    }
+
+    renderCards() {
+        return <>
+            <Layout>
+                <Card>
+                    {this.renderCommandBar()}
+                </Card>
+            </Layout>
             <Layout split={3}>
-                {this.props.creditCardEnvelopes!.map(e => this.renderEnvelope(e))}
-                {this.props.userEnvelopes!.map(e => this.renderEnvelope(e))}
+                {this.props.creditCardEnvelopes!.map(e => this.renderEnvelopeCard(e))}
+                {this.props.userEnvelopes!.map(e => this.renderEnvelopeCard(e))}
             </Layout>
         </>;
     }
 
-    renderEnvelope(envelope: Account) {
+    renderEnvelopeCard(envelope: Account) {
         return <Card key={envelope._id} heading={envelope.name}>
             <p className={envelope.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
                 <Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text>

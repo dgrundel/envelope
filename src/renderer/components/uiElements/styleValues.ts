@@ -8,6 +8,7 @@ export enum Colors {
     // semantic colors
     Error = '#d54343',
     Success = '#3ac47d',
+    Warning = '#e9c525',
 };
 
 export enum Spacing {
