@@ -2,6 +2,7 @@ import { IStyle } from '@fluentui/react';
 
 export enum Colors {
     // named colors
+    Black = '#000000',
     LightGray = '#e5e5e5',
     White = '#ffffff',
 

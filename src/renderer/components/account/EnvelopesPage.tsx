@@ -14,12 +14,23 @@ import { Layout } from '../uiElements/Layout';
 import { BaseModal } from '../uiElements/Modal';
 import { EnvelopeCreate } from './EnvelopeCreate';
 import { Colors } from '../uiElements/styleValues';
+import * as moment from 'moment';
+import { Transaction } from '@models/Transaction';
+import memoizeOne from 'memoize-one';
+import { Log } from '@/util/Logger';
+
+type CreditDebitMap = Record<string, {
+    credits: Currency;
+    debits: Currency;
+}>;
 
 export interface EnvelopesPageProps {
     // mapped from state
     userEnvelopes?: Account[];
     creditCardEnvelopes?: Account[];
     unallocatedAccount?: Account;
+    lastMonthCreditsDebits?: CreditDebitMap;
+    thisMonthCreditsDebits?: CreditDebitMap;
 
     //store actions
     setModal?: (modal: Modal) => void;
@@ -38,12 +49,20 @@ interface EnvelopesPageState {
 const columns: IColumn[] = [
     { key: 'column1', name: 'Envelope Name', fieldName: 'name', minWidth: 350, },
     { key: 'column2', name: 'Balance', fieldName: 'balance', minWidth: 100, maxWidth: 200,  },
-    { key: 'column3', name: 'Actions', fieldName: 'actions', minWidth: 100, maxWidth: 120, isIconOnly: true, },
+    { key: 'column3', name: '+ Last Month', fieldName: 'lastMonthCredits', minWidth: 100, maxWidth: 200,  },
+    { key: 'column4', name: '- Last Month', fieldName: 'lastMonthDebits', minWidth: 100, maxWidth: 200,  },
+    { key: 'column5', name: '+ This Month', fieldName: 'thisMonthCredits', minWidth: 100, maxWidth: 200,  },
+    { key: 'column6', name: '- This Month', fieldName: 'thisMonthDebits', minWidth: 100, maxWidth: 200,  },
+    { key: 'column7', name: 'Actions', fieldName: 'actions', minWidth: 100, maxWidth: 120, isIconOnly: true, },
 ];
 
 interface DetailListItem extends IObjectWithKey {
     name: string;
     balance: any;
+    lastMonthCredits: any;
+    lastMonthDebits: any;
+    thisMonthCredits: any;
+    thisMonthDebits: any;
     actions: any;
 }
 
@@ -55,6 +74,8 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
         this.state = {
             viewType: ViewType.Cards,
         };
+
+        Log.debug(props.lastMonthCreditsDebits);
 
         this.toListItem = this.toListItem.bind(this);
     }
@@ -130,12 +151,19 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
     }
 
     toListItem(envelope: Account): DetailListItem {
+        const thisMonthCreditsDebits = this.props.thisMonthCreditsDebits![envelope._id];
+        const lastMonthCreditsDebits = this.props.lastMonthCreditsDebits![envelope._id];
+
         return {
             key: envelope._id,
             name: envelope.name,
             balance: <span style={{ color: envelope.balance.isNegative() ? Colors.Error : Colors.Success }}>
                 {envelope.balance.toFormattedString()}
             </span>,
+            lastMonthCredits: <span style={{ color: Colors.Success }}>{lastMonthCreditsDebits.credits.toFormattedString()}</span>,
+            lastMonthDebits: <span style={{ color: Colors.Error }}>{lastMonthCreditsDebits.debits.toFormattedString()}</span>,
+            thisMonthCredits: <span style={{ color: Colors.Success }}>{thisMonthCreditsDebits.credits.toFormattedString()}</span>,
+            thisMonthDebits: <span style={{ color: Colors.Error }}>{thisMonthCreditsDebits.debits.toFormattedString()}</span>,
             actions: <>
                 <IconButton style={{ height: '1em', }} iconProps={({ iconName: 'CalculatorAddition' })} title="Add Money" onClick={() => this.showAddMoneyModal(envelope)} />
                 <IconButton style={{ height: '1em', }} iconProps={({ iconName: 'CalculatorSubtract' })} title="Remove Money" onClick={() => this.showRemoveMoneyModal(envelope)} />
@@ -158,14 +186,31 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
     }
 
     renderEnvelopeCard(envelope: Account) {
+        const thisMonthCreditsDebits = this.props.thisMonthCreditsDebits![envelope._id];
+        const lastMonthCreditsDebits = this.props.lastMonthCreditsDebits![envelope._id];
+        
         return <Card key={envelope._id} heading={envelope.name}>
-            <p className={envelope.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
-                <Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text>
-            </p>
-            <p>
-                <IconButton iconProps={({ iconName: 'CalculatorAddition' })} title="Add Money" onClick={() => this.showAddMoneyModal(envelope)} />
-                <IconButton iconProps={({ iconName: 'CalculatorSubtract' })} title="Remove Money" onClick={() => this.showRemoveMoneyModal(envelope)} />
-            </p>
+            <Layout split={3} noMargin>
+                <div>
+                    <p className={envelope.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
+                        <Text variant={'xxLarge'}>{envelope.balance.toFormattedString()}</Text>
+                    </p>
+                    <p>
+                        <IconButton iconProps={({ iconName: 'CalculatorAddition' })} title="Add Money" onClick={() => this.showAddMoneyModal(envelope)} />
+                        <IconButton iconProps={({ iconName: 'CalculatorSubtract' })} title="Remove Money" onClick={() => this.showRemoveMoneyModal(envelope)} />
+                    </p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                    <Text variant={'xSmall'}>This Month</Text>
+                    <div style={{ color: Colors.Success }}>+{thisMonthCreditsDebits.credits.toFormattedString()}</div>
+                    <div style={{ color: Colors.Error }}>-{thisMonthCreditsDebits.debits.toFormattedString()}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                    <Text variant={'xSmall'}>Last Month</Text>
+                    <div style={{ color: Colors.Success }}>+{lastMonthCreditsDebits.credits.toFormattedString()}</div>
+                    <div style={{ color: Colors.Error }}>-{lastMonthCreditsDebits.debits.toFormattedString()}</div>
+                </div>
+            </Layout>
         </Card>;
     }
 
@@ -195,13 +240,59 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
     }
 }
 
+const getCreditDebitMap = (transactions: Record<string, Transaction>, forAccounts: Account[], startDate: moment.Moment, endDate: moment.Moment): CreditDebitMap => {
+    const map: CreditDebitMap = forAccounts.reduce((map: CreditDebitMap, account: Account) => {
+        map[account._id] = {
+            credits: Currency.ZERO,
+            debits: Currency.ZERO,
+        };
+        return map;
+    }, {});
+
+    Object.values(transactions)
+        .filter(transaction => map.hasOwnProperty(transaction.accountId)
+            && moment(transaction.date).isBetween(startDate, endDate))
+        .forEach((transaction: Transaction) => {
+            if (transaction.amount.isPositive()) {
+                map[transaction.accountId].credits = map[transaction.accountId].credits.add(transaction.amount)
+            } else {
+                map[transaction.accountId].debits = map[transaction.accountId].debits.sub(transaction.amount)
+            }
+        });
+    return map;
+};
+
+const getThisMonthCreditsDebits = memoizeOne((transactions: Record<string, Transaction>, forAccounts: Account[]): CreditDebitMap => {
+    const startOfMonth = moment().startOf('month');
+    const endOfMonth = moment().endOf('month');
+
+    return getCreditDebitMap(transactions, forAccounts, startOfMonth, endOfMonth);
+});
+
+const getLastMonthCreditsDebits = memoizeOne((transactions: Record<string, Transaction>, forAccounts: Account[]): CreditDebitMap => {
+    const lastMonth = moment().subtract(1, 'month');
+    const startOfMonth = lastMonth.startOf('month');
+    const endOfMonth = lastMonth.endOf('month');
+
+    return getCreditDebitMap(transactions, forAccounts, startOfMonth, endOfMonth);
+});
+
 const mapStateToProps = (state: CombinedState, ownProps: EnvelopesPageProps): EnvelopesPageProps => {
     const allAcounts = state.accounts.sortedIds.map(id => state.accounts.accounts[id]);
+    const userEnvelopes = allAcounts.filter(filterOnlyAccountType(AccountType.UserEnvelope));
+    const creditCardEnvelopes = allAcounts.filter(filterOnlyAccountType(AccountType.PaymentEnvelope));
+    
+    const allEnvelopes = userEnvelopes.concat(creditCardEnvelopes);
+    const lastMonthCreditsDebits = getLastMonthCreditsDebits(state.transactions.transactions, allEnvelopes);
+    const thisMonthCreditsDebits = getThisMonthCreditsDebits(state.transactions.transactions, allEnvelopes);
+
     return {
         ...ownProps,
-        userEnvelopes: allAcounts.filter(filterOnlyAccountType(AccountType.UserEnvelope)),
-        creditCardEnvelopes: allAcounts.filter(filterOnlyAccountType(AccountType.PaymentEnvelope)),
+        userEnvelopes,
+        creditCardEnvelopes,
         unallocatedAccount: getUnallocatedAccount(state.accounts),
+        lastMonthCreditsDebits,
+        thisMonthCreditsDebits,
     };
 }
 
