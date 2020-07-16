@@ -1,7 +1,7 @@
 import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { AddManyTransactionAction, AddTransactionAction, addTransactionFlags, linkExistingTransactions, TransactionAction } from '@/renderer/store/actions/Transaction';
 import { transactions } from '@/renderer/store/reducers/Transactions';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { unionFlags } from '@/util/Flags';
 import { assert } from 'chai';
 

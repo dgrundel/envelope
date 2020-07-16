@@ -2,7 +2,7 @@ import { Account } from "@/models/Account";
 import { getAmountTransactionFlag, Transaction } from "@/models/Transaction";
 import { addManyTransactions } from "@/renderer/store/actions/Transaction";
 import { CombinedState } from "@/renderer/store/store";
-import { Currency } from "@/util/Currency";
+import { Currency } from "@/models/Currency";
 import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import * as React from "react";

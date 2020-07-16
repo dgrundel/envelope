@@ -4,7 +4,7 @@ import memoizeOne from 'memoize-one';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { CombinedState } from '../../store/store';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 
 type GroupedAccounts = Record<AccountType, Account[]>;
 

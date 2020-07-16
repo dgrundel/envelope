@@ -2,7 +2,7 @@ import { dismissModal, setModal } from '@/renderer/store/actions/AppState';
 import { Modal } from '@/renderer/store/reducers/AppState';
 import { CombinedState } from '@/renderer/store/store';
 import { getUnallocatedAccount } from '@/renderer/store/transforms/Account';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { filterOnlyAccountType } from '@/util/Filters';
 import { DetailsList, DetailsListLayoutMode, IColumn, IconButton, IObjectWithKey, SelectionMode, Text, CommandBar, ICommandBarItemProps } from '@fluentui/react';
 import { Account, AccountType } from '@models/Account';

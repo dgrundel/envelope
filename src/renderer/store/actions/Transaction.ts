@@ -1,4 +1,4 @@
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { unionFlags, hasFlag, doesNotHaveFlag } from '@/util/Flags';
 import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';

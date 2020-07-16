@@ -1,5 +1,5 @@
 import { findAmountTransactionFlag, Transaction, TransactionFlag } from '@/models/Transaction';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { unionFlags } from '@/util/Flags';
 import { assert } from 'chai';
 

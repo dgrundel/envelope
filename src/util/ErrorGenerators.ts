@@ -1,5 +1,5 @@
 import { isValidCurrencyString, isBlank, isNotBlank, filterOnlyAccountTypeIn } from './Filters';
-import { Currency } from './Currency';
+import { Currency } from '../models/Currency';
 import { AccountType } from '@/models/Account';
 
 export type ErrorGenerator = (value?: string) => string;

@@ -1,5 +1,5 @@
 import { Transaction, TransactionFlag, getAmountTransactionFlag } from '@/models/Transaction';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { isBlank } from '@/util/Filters';
 import { hasFlag, unionFlags } from '@/util/Flags';
 import { getIdentifier } from '@/util/Identifier';

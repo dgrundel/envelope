@@ -1,4 +1,4 @@
-import { Currency, CURRENCY_SYMBOL } from "@/util/Currency";
+import { Currency, CURRENCY_SYMBOL } from "@/models/Currency";
 import { chainErrorGenerators, getRequiredCurrencyError, requiredAccountTypeErrorGenerator, requiredStringErrorGenerator } from '@/util/ErrorGenerators';
 import { isNotBlank } from '@/util/Filters';
 import { ChoiceGroup, MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';

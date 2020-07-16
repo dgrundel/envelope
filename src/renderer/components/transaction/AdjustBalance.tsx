@@ -1,7 +1,7 @@
 import { Account } from '@/models/Account';
 import { getAmountTransactionFlag, Transaction, TransactionFlag } from '@/models/Transaction';
 import { adjustAccountBalance } from '@/renderer/store/actions/Account';
-import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
+import { Currency, CURRENCY_SYMBOL } from '@/models/Currency';
 import { getRequiredCurrencyError } from '@/util/ErrorGenerators';
 import { unionFlags } from '@/util/Flags';
 import { getIdentifier } from '@/util/Identifier';

@@ -5,7 +5,7 @@ import * as React from "react";
 import { connect } from 'react-redux';
 import { ImportWizardStepProps, rowsToTransactions } from "../ImportWizardFactory";
 import { TextField } from '@fluentui/react';
-import { CURRENCY_SYMBOL, Currency } from '@/util/Currency';
+import { CURRENCY_SYMBOL, Currency } from '@/models/Currency';
 import { getRequiredCurrencyError } from '@/util/ErrorGenerators';
 import { Transaction } from '@/models/Transaction';
 

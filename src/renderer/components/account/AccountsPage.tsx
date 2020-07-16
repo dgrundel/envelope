@@ -11,7 +11,7 @@ import { Card } from '../uiElements/Card';
 import { BaseModal } from '../uiElements/Modal';
 import { AccountCreate } from './AccountCreate';
 import { Layout } from '../uiElements/Layout';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 
 export interface AccountsPageProps {
     // mapped from state

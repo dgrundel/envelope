@@ -1,7 +1,7 @@
 import { Account, AccountType } from '@/models/Account';
 import { addAccount, updateAccount, updateAccountBalance } from '@/renderer/store/actions/Account';
 import { accounts } from '@/renderer/store/reducers/Accounts';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { getIdentifier } from '@/util/Identifier';
 import { assert } from 'chai';
 

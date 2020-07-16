@@ -1,4 +1,4 @@
-import { leftPad } from './Formatters';
+import { leftPad } from '../util/Formatters';
 
 const PRECISION_DIGITS = 3; // thousandths
 const PRECISION = Math.pow(10, PRECISION_DIGITS);

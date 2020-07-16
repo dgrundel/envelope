@@ -2,7 +2,7 @@ import { Account, AccountType } from '@/models/Account';
 import { TransactionFlag } from '@/models/Transaction';
 import { AccountAction, createBankAccount, createEnvelope, adjustAccountBalance } from '@/renderer/store/actions/Account';
 import { TransactionAction } from '@/renderer/store/actions/Transaction';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { assert } from 'chai';
 import { mockStore } from '../mockStore';
 import { unionFlags, hasFlag } from '@/util/Flags';

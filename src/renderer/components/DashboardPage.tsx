@@ -1,4 +1,4 @@
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { filterOnlyBankAccounts, filterOnlyEnvelopeAccounts } from '@/util/Filters';
 import { Account } from '@models/Account';
 import distinctColors from 'distinct-colors';

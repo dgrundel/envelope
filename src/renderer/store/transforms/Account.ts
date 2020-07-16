@@ -1,4 +1,4 @@
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { Account } from '@models/Account';
 import { AccountState } from '../reducers/Accounts';
 import { stat } from 'fs';

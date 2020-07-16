@@ -1,5 +1,5 @@
 import { TransactionState } from '../reducers/Transactions';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { Transaction } from '@/models/Transaction';
 
 export const transactionStatePreprocessor = (state: TransactionState): TransactionState => {

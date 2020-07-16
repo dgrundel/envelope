@@ -1,6 +1,6 @@
 import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { Modal } from '@/renderer/store/reducers/AppState';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { hasFlag } from '@/util/Flags';
 import { MessageBar, MessageBarButton, MessageBarType } from '@fluentui/react';
 import { Account } from '@models/Account';

@@ -1,4 +1,4 @@
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { Account, isCreditCardAccountType, isDepositAccountType } from '@models/Account';
 import { intersectFlags, unionFlags } from '@/util/Flags';
 

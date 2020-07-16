@@ -11,7 +11,7 @@ import { ImportDropTarget } from './import/ImportDropTarget';
 import { AppPage } from '../store/reducers/AppState';
 import { Account } from '@/models/Account';
 import { filterOnlyAssignableAccounts, filterOnlyEnvelopeAccounts } from '@/util/Filters';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 
 export interface SidebarProps {
     // mapped from state

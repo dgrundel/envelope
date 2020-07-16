@@ -1,4 +1,4 @@
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 
 export enum AccountType {
     Checking = 'bank-account-checking' ,

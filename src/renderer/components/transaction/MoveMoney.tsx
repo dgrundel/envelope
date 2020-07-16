@@ -1,5 +1,5 @@
 import { Account, AccountType } from '@/models/Account';
-import { Currency, CURRENCY_SYMBOL } from '@/util/Currency';
+import { Currency, CURRENCY_SYMBOL } from '@/models/Currency';
 import { filterOnlyAccountType, isValidCurrencyString, filterOnlyAccountTypeIn } from '@/util/Filters';
 import { Log } from "@/util/Logger";
 import { Dropdown, DropdownMenuItemType, Icon, IDropdownOption, mergeStyles, MessageBar, MessageBarType, PrimaryButton, Text, TextField } from '@fluentui/react';

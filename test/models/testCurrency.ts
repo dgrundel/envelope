@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 
 describe('Currency', function() {
     describe('parse()', function() {

@@ -1,4 +1,4 @@
-import { Currency } from '@/util/Currency';
+import { Currency } from '@/models/Currency';
 import { isBlank } from '@/util/Filters';
 import { Log } from '@/util/Logger';
 import { DetailsList, DetailsListLayoutMode, IColumn, IObjectWithKey, Selection, SelectionMode } from '@fluentui/react';
