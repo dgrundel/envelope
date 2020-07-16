@@ -88,7 +88,6 @@ class Component extends React.Component<EnvelopesPageProps, EnvelopesPageState> 
                 <Card heading="Available">
                     <p className={unallocatedAccount.balance.lt(Currency.ZERO) ? 'color-error' : ''}>
                         <Text variant={'xxLarge'}>{unallocatedAccount.balance.toFormattedString()}</Text>
-
                         {/* <IconButton iconProps={({ iconName: 'NewMail' })} title="Move Money to Envelope" onClick={() => this.showRemoveMoneyModal(unallocatedAccount)} /> */}
                     </p>
 

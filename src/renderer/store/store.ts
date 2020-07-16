@@ -16,7 +16,6 @@ export interface CombinedState {
 
 export type StoreDispatch = ThunkDispatch<CombinedState, void, AnyAction>;
 
-
 const jsonClient = new JsonStoreClient(JsonStoreName.EnvelopeUserData);
 const basePersistConfig = {
     version: 0,
