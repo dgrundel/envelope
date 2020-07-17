@@ -11,7 +11,7 @@ export interface DropTargetState {
     active: boolean;
 }
 
-export class DropTarget extends React.Component<DropTargetProps, DropTargetState> {
+export class FileDropTarget extends React.Component<DropTargetProps, DropTargetState> {
 
     constructor(props: DropTargetProps) {
         super(props);

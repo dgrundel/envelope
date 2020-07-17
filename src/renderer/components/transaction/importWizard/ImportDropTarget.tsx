@@ -3,7 +3,7 @@ import { FontIcon } from '@fluentui/react';
 import '@public/components/import/ImportDropTarget.scss';
 import * as csv from 'neat-csv';
 import * as React from "react";
-import { DropTarget } from "../../uiElements/DropTarget";
+import { FileDropTarget } from "../../uiElements/FileDropTarget";
 import { connect } from 'react-redux';
 import { setModal } from '@/renderer/store/actions/AppState';
 import { Modal } from '@/renderer/store/reducers/AppState';
@@ -23,12 +23,12 @@ class Component extends React.Component<ImportProps, {}> {
     }
 
     render() {
-        return <DropTarget handler={this.dropHandler}>
+        return <FileDropTarget handler={this.dropHandler}>
             <p className="import-drop-target-content">
                 <FontIcon iconName="BulkUpload" className="import-drop-target-icon" />
                 Drop CSV files here to import transactions.
             </p>
-        </DropTarget>;
+        </FileDropTarget>;
     }
 
     dropHandler(result: Promise<DataTransferItemList>) {
