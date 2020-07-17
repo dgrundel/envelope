@@ -39,11 +39,11 @@
    inkscape:window-x="-11"
    inkscape:window-y="-11"
    inkscape:window-maximized="1"
-   inkscape:current-layer="g4589" />
+   inkscape:current-layer="svg1567" />
   
   
   <circle
-   style="opacity:1;fill:#65dfb0;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+   style="opacity:1;fill:#27ba77;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
    id="path4591"
    cx="128"
    cy="128"
@@ -57,10 +57,10 @@
      style="fill:#ffffff;fill-opacity:1;stroke-width:0.16002083" /><polygon
      transform="translate(0,224)"
      id="polygon4575"
-     points="7.1,12 7.9,14.9 8.9,14.6 8,11.8 "
-     style="stroke-width:0.16002083;fill:#ffffff;fill-opacity:1" /><polygon
+     points="8.9,14.6 8,11.8 7.1,12 7.9,14.9 "
+     style="fill:#ffffff;fill-opacity:1;stroke-width:0.16002083" /><polygon
      transform="translate(0,224)"
      id="polygon4577"
-     points="16.7,9.3 17.5,12.2 18.5,11.9 17.7,9 "
-     style="stroke-width:0.16002083;fill:#ffffff;fill-opacity:1" /></g>
+     points="18.5,11.9 17.7,9 16.7,9.3 17.5,12.2 "
+     style="fill:#ffffff;fill-opacity:1;stroke-width:0.16002083" /></g>
 </svg>
