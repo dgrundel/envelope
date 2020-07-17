@@ -1,23 +1,23 @@
 import { Account } from "@/models/Account";
-import { getAmountTransactionFlag, Transaction } from "@/models/Transaction";
-import { addManyTransactions } from "@/renderer/store/actions/Transaction";
-import { CombinedState } from "@/renderer/store/store";
 import { Currency } from "@/models/Currency";
+import { getAmountTransactionFlag, Transaction } from "@/models/Transaction";
+import { adjustAccountBalance } from '@/renderer/store/actions/Account';
+import { dismissModal, setPage } from '@/renderer/store/actions/AppState';
+import { addManyTransactions } from "@/renderer/store/actions/Transaction";
+import { AppPage } from '@/renderer/store/reducers/AppState';
+import { CombinedState } from "@/renderer/store/store";
 import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
 import * as React from "react";
 import { connect } from "react-redux";
-import { createWizard, WizardStepApi } from "../../uiElements/WizardFactory";
 import { AccountSelect } from './steps/AccountSelect';
 import { AmountFieldSelect } from "./steps/AmountFieldSelect";
 import { DateFieldSelect } from './steps/DateFieldSelect';
 import { DescriptionFieldSelect } from "./steps/DescriptionFieldSelect";
 import { DuplicatesSelect } from './steps/DuplicatesSelect';
 import { InvertAmountsSelect } from "./steps/InvertAmountsSelect";
-import { setPage, dismissModal } from '@/renderer/store/actions/AppState';
-import { AppPage, Modal } from '@/renderer/store/reducers/AppState';
 import { ReconcileBalance } from './steps/ReconcileBalance';
-import { adjustAccountBalance } from '@/renderer/store/actions/Account';
+import { WizardStepApi, createWizard } from '../../uiElements/WizardFactory';
 
 
 export interface Row {

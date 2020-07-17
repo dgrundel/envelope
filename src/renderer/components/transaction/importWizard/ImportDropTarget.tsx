@@ -3,11 +3,11 @@ import { FontIcon } from '@fluentui/react';
 import '@public/components/import/ImportDropTarget.scss';
 import * as csv from 'neat-csv';
 import * as React from "react";
-import { DropTarget } from "../uiElements/DropTarget";
-import { createImportWizard } from './wizard/ImportWizardFactory';
+import { DropTarget } from "../../uiElements/DropTarget";
 import { connect } from 'react-redux';
 import { setModal } from '@/renderer/store/actions/AppState';
 import { Modal } from '@/renderer/store/reducers/AppState';
+import { createImportWizard } from './ImportWizardFactory';
 
 export interface ImportProps {
     // store actions

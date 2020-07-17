@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { setPage } from '../store/actions/AppState';
 import { AppPage } from '../store/reducers/AppState';
 import { CombinedState } from '../store/store';
-import { ImportDropTarget } from './import/ImportDropTarget';
+import { ImportDropTarget } from './transaction/importWizard/ImportDropTarget';
 import { SVG } from './uiElements/SVG';
 
 export interface SidebarProps {

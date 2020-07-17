@@ -1,7 +1,6 @@
 import { findAmountTransactionFlag, Transaction, TransactionFlag } from '@/models/Transaction';
-import { addLinkedTransactionForBankTransfer, addReconcileTransaction, addTransactionFlags, addLinkedTransactionForBankDeposit, addLinkedTransactionForBankDebit, reconcileTransactionForCreditCardPaymentFromBank, addLinkedTransactionForCreditCardRefund, addLinkedTransactionForCreditCardPurchase } from '@/renderer/store/actions/Transaction';
+import { addLinkedTransactionForBankDebit, addLinkedTransactionForBankDeposit, addLinkedTransactionForBankTransfer, addLinkedTransactionForCreditCardPurchase, addLinkedTransactionForCreditCardRefund, reconcileTransactionForCreditCardPaymentFromBank } from '@/renderer/store/actions/Transaction';
 import { CombinedState } from "@/renderer/store/store";
-import { unionFlags } from '@/util/Flags';
 import { Log } from '@/util/Logger';
 import { Account } from '@models/Account';
 import * as React from "react";
