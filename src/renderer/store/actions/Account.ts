@@ -71,26 +71,36 @@ export const createBankAccount = (name: string, type: AccountType) => (dispatch:
         throw new Error(`${type} is not a bank account type.`);
     }
     
-    const account: Account = {
-        _id: getIdentifier(),
-        name,
-        type,
-        balance: Currency.ZERO,
-        linkedAccountIds: [],
-    };
+    // generate an id for the new bank account
+    const newBankAccountId = getIdentifier();
+    const bankAccountLinkedAccountIds = [];
     
-    dispatch(addAccount(account));
-
+    // for credit accounts, we'll also create a payment 
+    // envelope and cross-link it with the new account
     if (isCreditCardAccountType(type)) {
+        const paymentEnvelopeId = getIdentifier();
         const paymentEnvelope: Account = {
-            _id: getIdentifier(),
+            _id: paymentEnvelopeId,
             name: `Payment for "${name}"`,
             type: AccountType.PaymentEnvelope,
             balance: Currency.ZERO,
-            linkedAccountIds: [account._id as string],
+            linkedAccountIds: [newBankAccountId],
         };
         dispatch(addAccount(paymentEnvelope));
+
+        // link the payment envelope to the new bank account
+        bankAccountLinkedAccountIds.push(paymentEnvelopeId);
     }
+
+    const account: Account = {
+        _id: newBankAccountId,
+        name,
+        type,
+        balance: Currency.ZERO,
+        linkedAccountIds: bankAccountLinkedAccountIds,
+    };
+    
+    dispatch(addAccount(account));
 }
 
 export const applyTransactionToAccount = (transaction: Transaction) => (dispatch: StoreDispatch, getState: () => CombinedState) => {

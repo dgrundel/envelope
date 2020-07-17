@@ -2,11 +2,13 @@ import { Currency } from '@/models/Currency';
 import { unionFlags, hasFlag, doesNotHaveFlag } from '@/util/Flags';
 import { getIdentifier } from '@/util/Identifier';
 import { Log } from '@/util/Logger';
-import { Account } from '@models/Account';
+import { Account, AccountType } from '@models/Account';
 import { getAmountTransactionFlag, Transaction, TransactionFlag } from '@models/Transaction';
 import { CombinedState, StoreDispatch } from '../store';
 import { applyTransactionsToAccount, applyTransactionToAccount } from './Account';
-import { getUnallocatedAccount } from '../transforms/Account';
+import { getUnallocatedAccount, getAccountById } from '../transforms/Account';
+import { transactions } from '../reducers/Transactions';
+import { filterOnlyAccountType } from '@/util/Filters';
 
 export enum TransactionAction {
     Add = 'store:action:transaction:add',
@@ -113,6 +115,11 @@ export const transferFunds = (amount: Currency, fromAccount: Account, toAccount:
     };
 
     dispatch(addTransaction(toTransaction, fromTransaction));
+
+    return Promise.resolve([
+        fromTransaction,
+        toTransaction
+    ]);
 };
 
 export const linkTransactionsAsTransfer = (transactions: Transaction[]) => (dispatch: StoreDispatch) => {
@@ -212,9 +219,35 @@ export const addLinkedTransactionForCreditCardRefund = (transaction: Transaction
 /**
  * Link and reconcile a transaction that represents a credit card purchase.
  * 
- * @param transaction - transaction in credit card account, has flag TransactionFlag.CreditAccountDebit
+ * @param purchaseTransaction - transaction in credit card account, has flag TransactionFlag.CreditAccountDebit
  * @param envelope - the envelope to which the transaction should be applied
  */
-export const addLinkedTransactionForCreditCardPurchase = (transaction: Transaction, envelope: Account) => (dispatch: StoreDispatch) => {
-    dispatch(addReconcileTransaction(transaction, envelope));
+export const addLinkedTransactionForCreditCardPurchase = (purchaseTransaction: Transaction, envelope: Account) => (dispatch: StoreDispatch, getState: () => CombinedState) => {
+    // find the payment envelope for the credit card
+    const accounts = getState().accounts;
+    const creditCardAccount = getAccountById(accounts, purchaseTransaction.accountId);
+    const paymentEnvelope = creditCardAccount.linkedAccountIds
+        .map(id => getAccountById(accounts, id))
+        .find(filterOnlyAccountType(AccountType.PaymentEnvelope));
+
+    if (!paymentEnvelope) {
+        Log.andThrow(`No payment envelope for account ${creditCardAccount.name} (${creditCardAccount._id})`);
+    }
+    
+    // transfer funds from the envelope to the payment envelope
+    const absAmount = purchaseTransaction.amount.getAbsolute();
+    return dispatch(transferFunds(absAmount, envelope, paymentEnvelope!)).then((created: [Transaction, Transaction]) => {
+        const fromTransaction = created[0];
+        const toTransaction = created[1];
+
+        // link all three transactions to each other
+        dispatch(linkExistingTransactions([
+            fromTransaction,
+            toTransaction,
+            purchaseTransaction,
+        ]));
+
+        // mark the credit card purchase as reconciled
+        dispatch(addTransactionFlags(purchaseTransaction, TransactionFlag.Reconciled));
+    });
 };

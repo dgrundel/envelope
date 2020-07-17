@@ -100,27 +100,29 @@ describe('Account actions', function () {
         const storeActions = store.getActions();
         assert.equal(storeActions.length, 2);
 
-        // create account action
+        // create account action for payment envelope
         const action0 = storeActions[0];
         assert.equal(action0.type, AccountAction.Add);
         
-        const account = action0.account;
-        assert.isNotEmpty(account._id);
-        assert.equal(account.name, 'my credit card');
-        assert.equal(account.type, AccountType.CreditCard);
-        assert.equal(account.linkedAccountIds.length, 0);
-        assert.deepEqual(account.balance, Currency.ZERO);
-
-        // create account action
-        const action1 = storeActions[1];
-        assert.equal(action1.type, AccountAction.Add);
-        
-        const paymentEnvelope = action1.account;
+        const paymentEnvelope = action0.account;
         assert.isNotEmpty(paymentEnvelope._id);
         assert.isNotEmpty(paymentEnvelope.name);
         assert.equal(paymentEnvelope.type, AccountType.PaymentEnvelope);
-        assert.sameMembers(paymentEnvelope.linkedAccountIds, [account._id]);
         assert.deepEqual(paymentEnvelope.balance, Currency.ZERO);
+
+        // create account action for credit card bank account
+        const action1 = storeActions[1];
+        assert.equal(action1.type, AccountAction.Add);
+
+        const creditCardAccount = action1.account;
+        assert.isNotEmpty(creditCardAccount._id);
+        assert.equal(creditCardAccount.name, 'my credit card');
+        assert.equal(creditCardAccount.type, AccountType.CreditCard);
+        assert.deepEqual(creditCardAccount.balance, Currency.ZERO);
+
+        // assert accounts are cross-linked
+        assert.sameMembers(paymentEnvelope.linkedAccountIds, [creditCardAccount._id]);
+        assert.sameMembers(creditCardAccount.linkedAccountIds, [paymentEnvelope._id]);
     });
 
     it('should adjust account balances', () => {
