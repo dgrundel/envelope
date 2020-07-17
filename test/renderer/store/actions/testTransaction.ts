@@ -1,7 +1,7 @@
 import { Account, AccountType } from '@/models/Account';
 import { Transaction, TransactionFlag } from '@/models/Transaction';
 import { AccountAction } from '@/renderer/store/actions/Account';
-import { addTransaction, TransactionAction, transferFunds, linkTransactionsAsTransfer, addReconcileTransaction } from '@/renderer/store/actions/Transaction';
+import { addTransaction, TransactionAction, transferFunds, linkTransactionsAsTransfer, addReconcileTransaction, addLinkedTransactionForCreditCardPurchase } from '@/renderer/store/actions/Transaction';
 import { Currency } from '@/models/Currency';
 import { assert } from 'chai';
 import { mockStore } from '../mockStore';
@@ -390,5 +390,72 @@ describe('Transaction actions', function () {
         assert.equal(action2.type, TransactionAction.AddFlags);
         assert.deepEqual(action2.transaction, t1);
         assert.ok(hasFlag(action2.flags, TransactionFlag.Reconciled), 'Action must have reconciled flag');
+    });
+
+    it('should addLinkedTransactionForCreditCardPurchase', () => {
+        const creditCardAccount: Account = {
+            _id: 'cc',
+            name: 'cc',
+            type: AccountType.CreditCard,
+            balance: Currency.ZERO,
+            linkedAccountIds: ['payment'],
+        };
+        const userEnvelope: Account = {
+            _id: 'env',
+            name: 'my envelope',
+            type: AccountType.UserEnvelope,
+            balance: new Currency(100, 0),
+            linkedAccountIds: [],
+        };
+        const paymentEnvelope: Account = {
+            _id: 'payment',
+            name: 'payment for cc',
+            type: AccountType.PaymentEnvelope,
+            balance: Currency.ZERO,
+            linkedAccountIds: ['cc'],
+        };
+        
+        const t1Amount = new Currency(5, 0);
+        const t1: Transaction = {
+            _id: 't1',
+            accountId: creditCardAccount._id,
+            date: new Date(),
+            amount: t1Amount,
+            description: 't1',
+            flags: TransactionFlag.CreditAccountDebit,
+            linkedTransactionIds: [],
+        };
+
+        const store = mockStore([creditCardAccount, userEnvelope, paymentEnvelope], [t1]);
+        store.dispatch(addLinkedTransactionForCreditCardPurchase(t1, userEnvelope));
+
+        const storeActions = store.getActions();
+        assert.equal(storeActions.length, 4);
+
+        // transaction to remove money from user envelope
+        const action0 = storeActions[0];
+        assert.equal(action0.type, TransactionAction.Add);
+        const transaction0 = action0.transaction;
+        assert.equal(transaction0.accountId, userEnvelope._id);
+        assert.deepEqual(transaction0.amount, t1Amount.getInverse());
+
+        // update user envelope balance
+        const action1 = storeActions[1];
+        assert.equal(action1.type, AccountAction.UpdateBalance);
+        assert.equal(action1.accountId, userEnvelope._id);
+        assert.deepEqual(action1.balance, new Currency(95, 0));
+        
+        // transaction to add money to the payment envelope
+        const action2 = storeActions[2];
+        assert.equal(action2.type, TransactionAction.Add);
+        const transaction2 = action2.transaction;
+        assert.equal(transaction2.accountId, paymentEnvelope._id);
+        assert.deepEqual(transaction2.amount, t1Amount);
+
+        // update payment envelope balance
+        const action3 = storeActions[3];
+        assert.equal(action3.type, AccountAction.UpdateBalance);
+        assert.equal(action3.accountId, paymentEnvelope._id);
+        assert.deepEqual(action3.balance, t1Amount);
     });
 });
