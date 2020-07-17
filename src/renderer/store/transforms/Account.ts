@@ -29,3 +29,9 @@ export const getUnallocatedAccount = (state: AccountState): Account => {
     return getAccountById(state, id);
 }
 
+export const getAccounts = (state: AccountState, filter?: (account: Account) => boolean): Account[] => {
+    const accounts = state.sortedIds.map(id => getAccountById(state, id));
+    return filter
+        ? accounts.filter(filter)
+        : accounts;
+}
