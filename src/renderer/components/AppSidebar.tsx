@@ -1,4 +1,7 @@
+import { Account } from '@/models/Account';
+import { Currency } from '@/models/Currency';
 import { Transaction, TransactionFlag } from '@/models/Transaction';
+import { filterOnlyEnvelopeAccounts } from '@/util/Filters';
 import { doesNotHaveFlag } from '@/util/Flags';
 import { FontIcon } from '@fluentui/react/lib/Icon';
 import '@public/components/Sidebar.scss';
@@ -6,12 +9,10 @@ import memoizeOne from 'memoize-one';
 import * as React from "react";
 import { connect } from 'react-redux';
 import { setPage } from '../store/actions/AppState';
+import { AppPage } from '../store/reducers/AppState';
 import { CombinedState } from '../store/store';
 import { ImportDropTarget } from './import/ImportDropTarget';
-import { AppPage } from '../store/reducers/AppState';
-import { Account } from '@/models/Account';
-import { filterOnlyAssignableAccounts, filterOnlyEnvelopeAccounts } from '@/util/Filters';
-import { Currency } from '@/models/Currency';
+import { SVG } from './uiElements/SVG';
 
 export interface SidebarProps {
     // mapped from state
@@ -26,7 +27,9 @@ export interface SidebarProps {
 class Component extends React.Component<SidebarProps, {}> {
     render() {
         return <div id="sidebar">
-            <h4 className="sidebar-nav-header">Navigation Header</h4>
+            <SVG html={require('@public/images/envelope-icon.svg')} className="app-icon" />
+
+            {/* <h4 className="sidebar-nav-header">Navigation Header</h4> */}
             <ul className="sidebar-nav">
                 {this.renderNavLink(AppPage.Dashboard, 'Dashboard')}
                 {this.renderNavLink(AppPage.Accounts, 'Accounts')}

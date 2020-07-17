@@ -1,16 +1,13 @@
-import '@public/components/App.scss';
 import * as React from "react";
 import { connect } from 'react-redux';
+import { AppPage, Modal } from '../store/reducers/AppState';
 import { CombinedState } from '../store/store';
 import { AccountsPage } from "./account/AccountsPage";
 import { EnvelopesPage } from './account/EnvelopesPage';
-import { DashboardPage } from './DashboardPage';
 import { AppSidebar } from './AppSidebar';
+import { DashboardPage } from './DashboardPage';
 import { TransactionsPage } from './transaction/TransactionsPage';
-import { AppPage, Modal } from '../store/reducers/AppState';
-import { AppHeader } from './AppHeader';
-
-const envelopeIcon = require('@public/images/envelope-icon.svg');
+import { mergeStyles } from '@fluentui/react';
 
 export interface AppProps {
     // mapped state
@@ -18,13 +15,31 @@ export interface AppProps {
     activeModal?: Modal;
 }
 
+const envelopeIcon = require('@public/images/envelope-icon.svg');
+
+
+const appStyle = mergeStyles({
+    position: 'fixed',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    display: 'grid',
+    gridTemplateRows: '1fr',
+    gridTemplateColumns: '220px 1fr',
+});
+
+const mainStyle = mergeStyles({
+    overflowY: 'auto',
+    overflowX: 'hidden',
+});
+
 class Component extends React.Component<AppProps> {
     
     render() {
-        return <div id="app">
-            <AppHeader/>
+        return <div className={appStyle}>
             <AppSidebar/>
-            <div id="main" data-is-scrollable="true">
+            <div data-is-scrollable="true" className={mainStyle}>
                 {this.renderPage()}
                 {this.props.activeModal}
             </div>

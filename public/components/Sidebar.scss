@@ -2,8 +2,32 @@
 @import '../config.scss';
 
 #sidebar {
+    $h-pad: .75rem;
+    $v-margin: 1rem;
+
     background-image: $sidebar-bg-image;
     padding: 1rem;
+
+    .app-icon {
+        $icon-size: 2.5rem;
+
+        position: relative;
+        display: block;
+        min-width: $icon-size;
+        height: $icon-size;
+        padding: 0 $h-pad;
+        margin: $v-margin 0;
+        
+        svg {
+            display: inline-block;
+            width: $icon-size;
+            height: $icon-size;
+    
+            * {
+                fill: $color-white;
+            }
+        }
+    }
 
     .sidebar-nav-header {
         font-weight: 500;
@@ -15,14 +39,14 @@
 
     .sidebar-nav {
         list-style-type: none;
-        margin: 0 0 1rem 0;
+        margin: 0 0 $v-margin 0;
         padding: 0;
         user-select: none;
 
         li {
             display: block;
             line-height: 2rem;
-            padding: 0 .75rem;
+            padding: 0 $h-pad;
             margin-bottom: .25rem;
             font-size: 0.9em;
             color: $sidebar-text-color;
