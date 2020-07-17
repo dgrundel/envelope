@@ -4,14 +4,14 @@ import { Separator, Selection, IObjectWithKey, IColumn, DetailsList, DetailsList
 import * as React from "react";
 import { connect } from 'react-redux';
 import { TransactionCard } from '../../TransactionCard';
-import { LinkWizardStepProps } from '../LinkWizardFactory';
-import { LinkWizardStepFrame } from '../LinkWizardStepFrame';
+import { SingleLinkWizardStepProps } from '../SingleLinkWizardFactory';
+import { SingleLinkWizardStepFrame } from '../SingleLinkWizardStepFrame';
 import { Log } from '@/util/Logger';
 import { isBlank } from '@/util/Filters';
 import { unionFlags, intersectFlags } from '@/util/Flags';
 import { Account } from '@/models/Account';
 
-export interface LinkedTransactionSelectProps extends LinkWizardStepProps {
+export interface LinkedTransactionSelectProps extends SingleLinkWizardStepProps {
     linkableTransactions?: Transaction[];
     selectedAccount?: Account;
 }
@@ -73,14 +73,14 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
         }
     }
 
-    validateState(state: LinkWizardStepProps) {
+    validateState(state: SingleLinkWizardStepProps) {
         if (!state.relatedTransaction) {
             return 'Please select a transaction.';
         }
     }
     
     render() {
-        return <LinkWizardStepFrame transaction={this.props.transaction}>
+        return <SingleLinkWizardStepFrame transaction={this.props.transaction}>
             <p>Select the related transaction from <strong>{this.props.selectedAccount!.name}</strong></p>
 
             <DetailsList
@@ -91,7 +91,7 @@ class Component extends React.Component<LinkedTransactionSelectProps> {
                 selection={this.selection}
                 selectionPreservedOnEmptyClick={true}
             />
-        </LinkWizardStepFrame>;
+        </SingleLinkWizardStepFrame>;
     }
 }
 

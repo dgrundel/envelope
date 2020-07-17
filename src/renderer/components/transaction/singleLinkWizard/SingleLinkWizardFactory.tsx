@@ -10,7 +10,7 @@ import { LinkedAccountSelect } from './steps/LinkedAccountSelect';
 import { RelatedTransactionSelect } from './steps/RelatedTransactionSelect';
 import { TransactionFlagSelect } from './steps/TransactionFlagSelect';
 
-export interface LinkWizardState {
+export interface SingleLinkWizardState {
     transaction: Transaction;
     amountTypeFlag: TransactionFlag;
 
@@ -19,9 +19,9 @@ export interface LinkWizardState {
     relatedTransaction?: Transaction;
 }
 
-export type LinkWizardStepProps = LinkWizardState & WizardStepApi<LinkWizardState>;
+export type SingleLinkWizardStepProps = SingleLinkWizardState & WizardStepApi<SingleLinkWizardState>;
 
-export const createLinkWizard = (transaction: Transaction) => {
+export const createSingleLinkWizard = (transaction: Transaction) => {
 
     interface Props {
         // mapped from store
@@ -59,7 +59,7 @@ export const createLinkWizard = (transaction: Transaction) => {
             );
         }
 
-        onFinish(state: LinkWizardState) {
+        onFinish(state: SingleLinkWizardState) {
             Log.debug('Link Wizard Finish', state);
 
             if (state.amountTypeFlag === TransactionFlag.BankCredit) {

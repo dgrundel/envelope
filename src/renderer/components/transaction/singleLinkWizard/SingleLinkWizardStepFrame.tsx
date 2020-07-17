@@ -3,12 +3,12 @@ import { Separator } from "@fluentui/react";
 import * as React from "react";
 import { TransactionCard } from "../TransactionCard";
 
-export interface LinkWizardStepFrameProps {
+export interface SingleLinkWizardStepFrameProps {
     transaction: Transaction;
     children: any;
 }
 
-class Component extends React.Component<LinkWizardStepFrameProps> {
+class Component extends React.Component<SingleLinkWizardStepFrameProps> {
     render() {
         return <>
             <TransactionCard transaction={this.props.transaction}/>
@@ -18,4 +18,4 @@ class Component extends React.Component<LinkWizardStepFrameProps> {
     }
 }
 
-export const LinkWizardStepFrame = Component;
+export const SingleLinkWizardStepFrame = Component;

@@ -4,14 +4,14 @@ import { AccountDropdown } from '@/renderer/components/account/AccountDropdown';
 import { filterOnlyEnvelopeAccounts, filterOnlyDepositAccounts, isBlank } from '@/util/Filters';
 import { IDropdownOption, MessageBar, MessageBarType } from '@fluentui/react';
 import * as React from "react";
-import { LinkWizardStepProps } from '../LinkWizardFactory';
-import { LinkWizardStepFrame } from '../LinkWizardStepFrame';
+import { SingleLinkWizardStepProps } from '../SingleLinkWizardFactory';
+import { SingleLinkWizardStepFrame } from '../SingleLinkWizardStepFrame';
 
-class Component extends React.Component<LinkWizardStepProps> {
+class Component extends React.Component<SingleLinkWizardStepProps> {
     private readonly accountFilter: (account: Account) => boolean;
     private readonly inputLabel: string;
 
-    constructor(props: LinkWizardStepProps) {
+    constructor(props: SingleLinkWizardStepProps) {
         super(props);
 
         if (props.selectedTransactionFlag === TransactionFlag.Transfer) {
@@ -45,7 +45,7 @@ class Component extends React.Component<LinkWizardStepProps> {
         props.setStepValidator(this.validateState);
     }
 
-    validateState(state: LinkWizardStepProps) {
+    validateState(state: SingleLinkWizardStepProps) {
         if (isBlank(state.relatedAccountId)) {
             return state.selectedTransactionFlag === TransactionFlag.Transfer
                 ? 'Please select an account.'
@@ -71,14 +71,14 @@ class Component extends React.Component<LinkWizardStepProps> {
             });
         };
 
-        return <LinkWizardStepFrame transaction={this.props.transaction}>
+        return <SingleLinkWizardStepFrame transaction={this.props.transaction}>
             <AccountDropdown
                 label={this.inputLabel}
                 onChange={onChange}
                 onRenderEmptyList={() => this.getNoAccountsError()}
                 filter={this.accountFilter}
             />
-        </LinkWizardStepFrame>;
+        </SingleLinkWizardStepFrame>;
     }
 }
 

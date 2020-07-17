@@ -8,7 +8,7 @@ import * as React from "react";
 import { connect } from 'react-redux';
 import { CombinedState } from '../../store/store';
 import { BaseModal } from '../uiElements/Modal';
-import { createLinkWizard } from './linkWizard/LinkWizardFactory';
+import { createSingleLinkWizard } from './singleLinkWizard/SingleLinkWizardFactory';
 import { TransactionCard } from './TransactionCard';
 import { setModal, dismissModal } from '@/renderer/store/actions/AppState';
 
@@ -44,7 +44,7 @@ class Component extends React.Component<AddLinkedTransactionsProps, {}> implemen
         }
 
         const onClick = () => {
-            const WizardComponent = createLinkWizard(this.props.transaction);
+            const WizardComponent = createSingleLinkWizard(this.props.transaction);
             setModal(<WizardComponent/>);
         };
         

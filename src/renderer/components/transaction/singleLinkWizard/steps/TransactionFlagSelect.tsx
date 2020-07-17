@@ -4,17 +4,17 @@ import { ChoiceGroup, IChoiceGroupOption, Separator } from '@fluentui/react';
 import { Account } from '@models/Account';
 import * as React from "react";
 import { connect } from 'react-redux';
-import { LinkWizardStepProps } from '../LinkWizardFactory';
+import { SingleLinkWizardStepProps } from '../SingleLinkWizardFactory';
 import { TransactionFlag } from '@/models/Transaction';
 import { TransactionCard } from '../../TransactionCard';
-import { LinkWizardStepFrame } from '../LinkWizardStepFrame';
+import { SingleLinkWizardStepFrame } from '../SingleLinkWizardStepFrame';
 
 type TransactionFlagChoiceOption = IChoiceGroupOption & { flag: TransactionFlag };
 
-class Component extends React.Component<LinkWizardStepProps> {
+class Component extends React.Component<SingleLinkWizardStepProps> {
     private readonly options: TransactionFlagChoiceOption[];
 
-    constructor(props: LinkWizardStepProps) {
+    constructor(props: SingleLinkWizardStepProps) {
         super(props);
 
         switch(props.amountTypeFlag) {
@@ -66,14 +66,14 @@ class Component extends React.Component<LinkWizardStepProps> {
         }
     }
 
-    validateState(state: LinkWizardStepProps) {
+    validateState(state: SingleLinkWizardStepProps) {
         if (typeof state.selectedTransactionFlag === 'undefined') {
             return 'Please select an option.';
         }
     }
     
     render() {
-        return <LinkWizardStepFrame transaction={this.props.transaction}>
+        return <SingleLinkWizardStepFrame transaction={this.props.transaction}>
             <ChoiceGroup 
                 label="What kind of transaction is this?" 
                 selectedKey={this.props.selectedTransactionFlag?.toString()}
@@ -82,7 +82,7 @@ class Component extends React.Component<LinkWizardStepProps> {
                     selectedTransactionFlag: option.flag
                 })}
             />
-        </LinkWizardStepFrame>;
+        </SingleLinkWizardStepFrame>;
     }
 }
 
