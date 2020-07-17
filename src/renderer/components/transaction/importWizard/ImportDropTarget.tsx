@@ -43,23 +43,23 @@ class Component extends React.Component<ImportProps, {}> {
                 if (items[i].kind === 'file') {
                     const file = items[i].getAsFile();
                     if (file) {
-                        files.push(file);
+                        resolve(file);
+                        return;
                     }
                 }
             }
-            files.length ? resolve(files) : reject('No files were found.');
+
+            reject('No files were found.');
         }))
-        // next, get contents of all files as strings
-        .then((files: File[]) => Promise.all(files.map(file => file.text())))
-        // pass strings to CSV parser
-        .then(fileContents => Promise.all(fileContents.map(text => csv(text))))
+        // next, get contents of file as string
+        .then((file: File) => file.text())
+        // pass string to CSV parser
+        .then(text => csv(text))
         // now each file is an array of CSV rows
-        .then(csvFiles => {
-            csvFiles.forEach(csvRows => {
-                Log.debug('csvRows', csvRows);
-                const Component = createImportWizard(csvRows);
-                setModal(<Component/>);
-            });
+        .then((csvRows: csv.Row[]) => {
+            Log.debug('csvRows', csvRows);
+            const Component = createImportWizard(csvRows);
+            setModal(<Component/>);
         })
         // if we got an error along the way, handle it.
         .catch((reason) => {
