@@ -1,5 +1,7 @@
 # Envelope
 
+[![Build Status](https://travis-ci.org/dgrundel/envelope.svg?branch=master)](https://travis-ci.org/dgrundel/envelope)
+
 _Please note:_ This is still experimental software. It is not complete nor in any way suitable for use.
 
 Budget your money using the envelope method.
