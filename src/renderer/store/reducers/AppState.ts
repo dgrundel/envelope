@@ -5,7 +5,6 @@ export enum AppPage {
     Accounts,
     Envelopes,
     Transactions,
-    QuickLink,
 }
 
 export interface Modal {
