@@ -1,30 +1,19 @@
 import * as React from "react";
-import { PLAIN_TEXT_MIME_TYPE, JSON_MIME_TYPE } from './Draggable';
-import { debounce } from 'lodash';
+import { JSON_MIME_TYPE, PLAIN_TEXT_MIME_TYPE } from './Draggable';
 
 export interface DraggableDropTargetProps {
     onDrop: (data: string | Record<string, string>) => void;
     onHoverStateChange?: (isHover: boolean) => void;
     dropEffect?: 'none' | 'copy' | 'move' | 'link';
+    className?: string;
+    style?: React.CSSProperties;
     children: any;
 }
 
-const DEBOUNCE_INTERVAL = 50;
-const DEBOUNCE_OPTS = {
-    leading: true,
-    trailing: true,
-};
+const noOp = () => {};
 
 export const DraggableDropTarget = (props: DraggableDropTargetProps) => {
-    let hoverState = false;
-    const hoverChange = debounce((isHover: boolean) => {
-        if (hoverState !== isHover) {
-            hoverState = isHover;
-            if (props.onHoverStateChange) {
-                props.onHoverStateChange(isHover);
-            }
-        }
-    }, DEBOUNCE_INTERVAL, DEBOUNCE_OPTS);
+    const hoverChange = props.onHoverStateChange || noOp;
 
     const dragOver = (e: React.DragEvent) => {
         e.stopPropagation();
@@ -41,7 +30,11 @@ export const DraggableDropTarget = (props: DraggableDropTargetProps) => {
         hoverChange(true);
     }
 
-    const dragLeave = (e: React.DragEvent) => {
+    const dragLeave = () => {
+        hoverChange(false);
+    }
+
+    const mouseLeave = () => {
         hoverChange(false);
     }
 
@@ -58,7 +51,15 @@ export const DraggableDropTarget = (props: DraggableDropTargetProps) => {
         hoverChange(false);
     }
 
-    return <div onDragOver={dragOver} onDragEnter={dragEnter} onDragLeave={dragLeave} onDrop={drop}>
+    return <div 
+        onDragOver={dragOver} 
+        onDragEnter={dragEnter} 
+        onDragLeave={dragLeave} 
+        onMouseLeave={mouseLeave}
+        onDrop={drop} 
+        className={props.className} 
+        style={props.style}
+    >
         {props.children}
     </div>;
 };

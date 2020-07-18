@@ -6,10 +6,17 @@ export enum Colors {
     LightGray = '#e5e5e5',
     White = '#ffffff',
 
+    // feature colors
+    BorderColor = '#d3d3d3',
+    LightBorderColor = '#efefef',
+
     // semantic colors
     Error = '#d54343',
     Success = '#3ac47d',
     Warning = '#e9c525',
+
+    HighlightForeground = '#2b53ba',
+    HighlightBackground = '#e0f3ff',
 };
 
 export enum Spacing {
