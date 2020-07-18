@@ -9,21 +9,28 @@ export interface DraggableDropTargetProps {
     children: any;
 }
 
-const DEBOUNCE_INTERVAL = 300;
+const DEBOUNCE_INTERVAL = 50;
 const DEBOUNCE_OPTS = {
     leading: true,
     trailing: true,
 };
 
 export const DraggableDropTarget = (props: DraggableDropTargetProps) => {
-
-    const hoverChange = props.onHoverStateChange && debounce(props.onHoverStateChange, DEBOUNCE_INTERVAL, DEBOUNCE_OPTS);
+    let hoverState = false;
+    const hoverChange = debounce((isHover: boolean) => {
+        if (hoverState !== isHover) {
+            hoverState = isHover;
+            if (props.onHoverStateChange) {
+                props.onHoverStateChange(isHover);
+            }
+        }
+    }, DEBOUNCE_INTERVAL, DEBOUNCE_OPTS);
 
     const dragOver = (e: React.DragEvent) => {
         e.stopPropagation();
         e.preventDefault();
 
-        hoverChange && hoverChange(true);
+        hoverChange(true);
         e.dataTransfer.dropEffect = props.dropEffect || 'move';
     }
 
@@ -31,11 +38,11 @@ export const DraggableDropTarget = (props: DraggableDropTargetProps) => {
         e.stopPropagation();
         e.preventDefault();
 
-        hoverChange && hoverChange(true);
+        hoverChange(true);
     }
 
     const dragLeave = (e: React.DragEvent) => {
-        hoverChange && hoverChange(false);
+        hoverChange(false);
     }
 
     const drop = (e: React.DragEvent) => {
@@ -48,9 +55,9 @@ export const DraggableDropTarget = (props: DraggableDropTargetProps) => {
         } else if (json) {
             props.onDrop(JSON.parse(json));
         }
-        hoverChange && hoverChange(false);
+        hoverChange(false);
     }
-    
+
     return <div onDragOver={dragOver} onDragEnter={dragEnter} onDragLeave={dragLeave} onDrop={drop}>
         {props.children}
     </div>;

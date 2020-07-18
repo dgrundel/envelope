@@ -8,6 +8,7 @@ import { AppSidebar } from './AppSidebar';
 import { DashboardPage } from './DashboardPage';
 import { TransactionsPage } from './transaction/TransactionsPage';
 import { mergeStyles } from '@fluentui/react';
+import { QuickLink } from './transaction/QuickLinkPage';
 
 export interface AppProps {
     // mapped state
@@ -54,6 +55,8 @@ class Component extends React.Component<AppProps> {
                 return <EnvelopesPage/>;
             case AppPage.Transactions:
                 return <TransactionsPage/>;
+            case AppPage.QuickLink:
+                return <QuickLink/>;
             case AppPage.Dashboard:
             default:
                 return <DashboardPage/>;

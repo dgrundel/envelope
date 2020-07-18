@@ -41,6 +41,7 @@ class Component extends React.Component<SidebarProps, {}> {
                     Transactions
                     {this.renderAlert(this.props.unreconciledTransactionCount!)}
                 </>)}
+                {this.renderNavLink(AppPage.QuickLink, 'QuickLink')}
             </ul>
             <ImportDropTarget/>
         </div>;

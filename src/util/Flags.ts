@@ -1,7 +1,7 @@
 
-export const hasFlag = (needle: number, haystack?: number): boolean => (typeof haystack === 'number') && ((haystack & needle) === needle);
+export const hasFlag = (needle: number, haystack: number | undefined): boolean => (typeof haystack === 'number') && ((haystack & needle) === needle);
 
-export const doesNotHaveFlag = (needle: number, haystack?: number): boolean => (typeof haystack === 'number') && ((haystack & needle) === 0);
+export const doesNotHaveFlag = (needle: number, haystack: number | undefined): boolean => (typeof haystack === 'number') && ((haystack & needle) === 0);
 
 export const hasAnyFlag = () => {};
 

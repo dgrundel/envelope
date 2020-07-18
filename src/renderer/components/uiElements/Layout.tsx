@@ -7,6 +7,7 @@ export interface LayoutProps {
     gridTemplateColumns?: string;
     noMargin?: boolean;
     noGap?: boolean;
+    alignContent?: string;
     children: any;
 }
 
@@ -25,6 +26,7 @@ export const Layout = (props: LayoutProps) => {
         gridTemplateColumns: getGridTemplateColumns(props),
         gridGap: props.noGap ? 0 : Spacing.FatMargin,
         margin: props.noMargin ? 0 : Spacing.FatMargin,
+        alignContent: props.alignContent,
     };
 
     return <div style={style}>

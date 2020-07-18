@@ -14,6 +14,7 @@ import { Card } from '../uiElements/Card';
 import { Layout } from '../uiElements/Layout';
 import { TransactionModal } from './TransactionModal';
 import { Colors } from '../uiElements/styleValues';
+import { QuickLink as QuickLinkPage } from './QuickLinkPage';
 
 export interface TransactionsPageProps {
     // mapped from state
