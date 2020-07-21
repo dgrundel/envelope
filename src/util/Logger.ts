@@ -1,6 +1,8 @@
+import { isDevelopment } from './Environment';
+
 export class Logger {
     debug(...args: any[]) {
-        if (process.env.NODE_ENV !== 'production') {
+        if (isDevelopment()) {
             console.log('DEBUG', ...args);
         }
     }

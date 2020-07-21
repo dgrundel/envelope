@@ -1,6 +1,7 @@
 import { Log } from '@/util/Logger';
 import { ipcMain, ipcRenderer } from 'electron';
 import * as ElectronStore from 'electron-store';
+import { isProduction } from '@/util/Environment';
 
 const BASE_STORE_CONFIG = {};
 
@@ -26,13 +27,17 @@ const getSerializableError = (err: Error) => Object.getOwnPropertyNames(err)
     }, {});
 
 abstract class BaseJsonStore {
-    protected readonly name: JsonStoreName;
+    protected readonly name: string;
 
     constructor(name: JsonStoreName) {
-        this.name = name;
+        this.name = this.getStoreName(name);
     }
 
-    protected eventNameFor(event: JsonStoreEvent) {
+    protected getStoreName(name: JsonStoreName) {
+        return isProduction() ? name : `${name}.development`;
+    }
+
+    protected getEventName(event: JsonStoreEvent) {
         return `${event}:${this.name}`;
     }
 
@@ -47,11 +52,11 @@ export class JsonStoreHost extends BaseJsonStore {
     constructor(name: JsonStoreName) {
         super(name);
 
-        Log.info(`Initializing JSON store '${name}'`);
+        Log.info(`Initializing JSON store '${this.name}'`);
 
         this.store = new ElectronStore({
             ...BASE_STORE_CONFIG,
-            name,
+            name: this.name,
         });
 
         this.handle(JsonStoreEvent.GetItem, (_event, key: string) => this.getItem(key));
@@ -60,7 +65,7 @@ export class JsonStoreHost extends BaseJsonStore {
     }
 
     private handle(event: JsonStoreEvent, callback: (...args: any) => Promise<any>) {
-        const channel = this.eventNameFor(event);
+        const channel = this.getEventName(event);
         ipcMain.handle(channel, (...args: any) => new Promise((resolve) => {
             callback(...args)
                 .then(result => resolve({
@@ -101,7 +106,7 @@ export class JsonStoreHost extends BaseJsonStore {
 
 export class JsonStoreClient extends BaseJsonStore {
     private invoke(event: JsonStoreEvent, ...args: any) {
-        return ipcRenderer.invoke(this.eventNameFor(event), ...args)
+        return ipcRenderer.invoke(this.getEventName(event), ...args)
             .then((result: IPCResult) => result.success ? Promise.resolve(result.data) : Promise.reject(result.data));
     }
 

@@ -1,4 +1,5 @@
 import { JsonStoreHost, JsonStoreName } from '@/dataStore/JSONStore';
+import { isDevelopment } from '@/util/Environment';
 import { app, BrowserWindow } from 'electron';
 import * as windowStateKeeper from 'electron-window-state';
 import * as path from 'path';
@@ -37,7 +38,7 @@ function createWindow(): void {
     );
 
     // Open the DevTools.
-    if (process.env.NODE_ENV !== 'production') {
+    if (isDevelopment()) {
       mainWindow.webContents.openDevTools();
     }
 
