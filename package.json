@@ -68,7 +68,7 @@
   "devDependencies": {
     "@types/lodash": "^4.14.157",
     "acorn": "^6.4.1",
-    "ajv": "^6.10.2",
+    "ajv": "^6.12.3",
     "chai": "^4.2.0",
     "copy-pkg-json-webpack-plugin": "0.0.39",
     "cross-env": "^5.2.1",
